@@ -1,10 +1,14 @@
 <script>
 import NavigationBar from "@/components/NavigationBar.vue";
+import FooterComp from "@/components/FooterComp.vue";
+// import ChatBot from "@/components/ChatBot.vue";
 
 export default {
   name: "App",
   components: {
     NavigationBar,
+    FooterComp,
+    // ChatBot,
   },
 };
 
@@ -18,19 +22,21 @@ document.documentElement.setAttribute("data-theme", theme);
 <template>
   <NavigationBar />
   <router-view />
+  <!-- <ChatBot /> -->
+  <FooterComp />
 </template>
 
 <style>
 @import url("https://cdn.jsdelivr.net/npm/remixicon@4.6.0/fonts/remixicon.css");
 @import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Cal+Sans&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
 
 #app {
   font-family: "Inter", sans-serif;
   color: var(--text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-
-  background: var(--background-radial);
 }
 
 /* resets */
@@ -39,7 +45,6 @@ document.documentElement.setAttribute("data-theme", theme);
 html,
 body {
   width: 100%;
-  height: 100%;
   scroll-behavior: smooth;
   overflow-x: hidden;
 }
@@ -50,6 +55,16 @@ body {
   align-items: center;
 }
 
+html {
+  overflow: -moz-scrollbars-none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+body {
+  background: var(--background-radial);
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -57,6 +72,8 @@ body {
   line-height: 1;
   text-decoration: none;
   transition: all 0.3s ease-in-out;
+  font-family: "Inter", sans-serif;
+  font-weight: 500;
 }
 
 ul {
@@ -78,13 +95,15 @@ button {
 /* global */
 .container {
   display: flex;
-  align-items: center;
-  justify-content: center;
   width: 100%;
   max-width: 1200px;
 }
 
 .hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   height: 100vh;
 }
 </style>
@@ -92,19 +111,19 @@ button {
 <style>
 /* main colors */
 :root[data-theme="light"] {
-  --text: #05070a;
-  --background: #f0f4fa;
-  --primary: #356bd0;
+  --text: rgb(5, 7, 10);
+  --background: rgb(240, 244, 250);
+  --primary: rgb(53, 107, 208);
   --secondary: #80a5ea;
-  --accent: #5c90f0;
+  --accent: #55b4dd;
 }
 
 :root[data-theme="dark"] {
   --text: #f4f6fa;
-  --background: #05090f;
-  --primary: #2f66ca;
+  --background: rgb(5, 9, 15);
+  --primary: rgb(47, 102, 202);
   --secondary: #153a7f;
-  --accent: #0f43a3;
+  --accent: rgb(94, 201, 255);
 }
 
 /* shades */
@@ -260,7 +279,7 @@ button {
   );
 }
 
-/* ui elements */
+/* ui colors */
 :root[data-theme="light"] {
   --block-background: rgba(0, 0, 0, 0.05);
   --block-border: rgba(0, 0, 0, 0.2);
@@ -270,13 +289,59 @@ button {
 }
 
 :root[data-theme="dark"] {
-  --block-background: rgba(255, 255, 255, 0.05);
+  --block-background: #ffffff0d;
   --block-border: rgba(255, 255, 255, 0.2);
   --block-shadow: 0px 5px 5px rgba(var(--text), 0.1);
 
   --button-hover-bg: rgba(255, 255, 255, 0.2);
 }
 
+/* Animations */
+
+.slide-in {
+  animation: slideIn 1s ease-in-out forwards;
+}
+
+@keyframes slideIn {
+  from {
+    /* transform: translateY(100px); */
+    opacity: 0;
+    scale: 0.9;
+    filter: blur(10px);
+  }
+  to {
+    /* transform: translateY(0); */
+    opacity: 1;
+    scale: 1;
+    filter: blur(0);
+  }
+}
+
+/* Decorations */
+
+.blur {
+  position: absolute;
+  padding: 200px;
+  border-radius: 100%;
+
+  z-index: -1;
+  filter: blur(100px);
+  pointer-events: none;
+}
+
+.blur-color1 {
+  background: radial-gradient(circle, rgba(114, 119, 255), rgba(5, 9, 15, 0));
+}
+
+.blur-color2 {
+  background: radial-gradient(circle, rgb(0, 89, 255), rgba(5, 9, 15, 0));
+}
+
+.blur-color3 {
+  background: radial-gradient(circle, rgb(70, 227, 255), rgba(5, 9, 15, 0));
+}
+
+/* ui elements */
 .block {
   gap: 5px;
   padding: 5px;
@@ -284,6 +349,7 @@ button {
   box-shadow: var(--block-shadow);
   background-color: var(--block-background);
   outline: 0.5px solid var(--block-border);
+  backdrop-filter: blur(10px);
 }
 
 .block-btn {
@@ -293,6 +359,11 @@ button {
 
   &:hover {
     background-color: var(--button-hover-bg);
+  }
+
+  &:active {
+    transition: transform 0.1s ease-in-out;
+    transform: scale(0.95);
   }
 }
 </style>

@@ -75,27 +75,21 @@ Cal.ns["30min"]("ui", {
 </script>
 
 <template>
-  <nav class="container">
+  <nav class="slide-in">
     <router-link to="/" class="logo">
       <!-- <div class="img-container">
         <img src="@/assets/logo_white.png" alt="Logo" v-if="theme === 'dark'" />
         <img src="@/assets/logo_black.png" alt="Logo" v-else />
       </div> -->
-      <span class="logo-text">timlacault.dev</span>
+      <span class="logo-text">Tim</span>
     </router-link>
 
-    <ul class="nav-links block">
-      <li class="block-btn"><router-link to="/">Home</router-link></li>
-      <li class="block-btn">
-        <router-link to="/project">Projects</router-link>
-      </li>
-      <li class="block-btn">
-        <router-link to="/freelance">Freelance</router-link>
-      </li>
-      <li class="block-btn">
-        <router-link to="/contact">Contact</router-link>
-      </li>
-    </ul>
+    <div class="nav-links block">
+      <router-link class="block-btn" to="/">Home</router-link>
+      <router-link class="block-btn" to="/project">Projects</router-link>
+      <router-link class="block-btn" to="/freelance">Freelance</router-link>
+      <router-link class="block-btn" to="/contact">Contact</router-link>
+    </div>
 
     <div class="nav-right">
       <div class="call block">
@@ -119,13 +113,15 @@ Cal.ns["30min"]("ui", {
 
 <style scoped>
 nav {
-  /* outline: 1px solid violet; */
   position: absolute;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  width: 100%;
-  padding: 20px;
+  width: 90vw;
+  margin-top: 40px;
+
+  opacity: 0;
+  animation-delay: 0.5s;
 }
 
 .logo {
@@ -133,7 +129,7 @@ nav {
   align-items: center;
   gap: 10px;
 
-  & .img-container {
+  /* & .img-container {
     width: 30px;
     aspect-ratio: 1;
     overflow: hidden;
@@ -143,23 +139,36 @@ nav {
       height: 100%;
       object-fit: contain;
     }
-  }
+  } */
 
   & .logo-text {
-    font-size: 1.2rem;
-    font-weight: 600;
+    font-family: "Cal Sans", sans-serif;
+    font-size: 2rem;
+    letter-spacing: 1px;
+    margin-top: 1px;
 
-    border-radius: 5px;
-    background: linear-gradient(40deg, var(--primary), var(--text));
+    /* border-radius: 5px; */
+    /* background: linear-gradient(40deg, var(--primary), var(--text));
     background-clip: text;
     -webkit-background-clip: text;
+    color: transparent;
 
-    -webkit-text-fill-color: transparent;
+    transition: all 0.3s ease-in-out;
+    &:hover {
+      text-shadow: -2px 0px 5px var(--primary), 2px 0px 5px var(--text);
+    } */
   }
 }
 
 .nav-links {
+  position: absolute;
   display: flex;
+  left: 50%;
+  transform: translateX(-50%);
+
+  & a.router-link-exact-active {
+    background-color: var(--primary);
+  }
 }
 
 .nav-right {
