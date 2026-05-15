@@ -1,0 +1,44 @@
+<svg width="680" height="280" viewBox="0 0 680 280" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="680" y2="280" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0b1428"/>
+      <stop offset="1" stop-color="#060c1a"/>
+    </linearGradient>
+    <pattern id="grid" x="0" y="0" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M40 0H0V40" stroke="rgba(94,201,255,0.045)" stroke-width="0.5"/>
+    </pattern>
+  </defs>
+
+  <rect width="680" height="280" fill="url(#bg)"/>
+  <rect width="680" height="280" fill="url(#grid)"/>
+
+  <!-- Browser chrome frame -->
+  <rect x="40" y="32" width="600" height="216" rx="10" fill="rgba(255,255,255,0.025)" stroke="rgba(255,255,255,0.07)" stroke-width="1"/>
+
+  <!-- Title bar -->
+  <rect x="40" y="32" width="600" height="30" rx="10" fill="rgba(255,255,255,0.04)"/>
+  <rect x="40" y="52" width="600" height="10" fill="rgba(255,255,255,0.04)"/>
+
+  <!-- Traffic lights -->
+  <circle cx="62" cy="47" r="5" fill="#FF5F57" fill-opacity="0.7"/>
+  <circle cx="80" cy="47" r="5" fill="#FEBC2E" fill-opacity="0.7"/>
+  <circle cx="98" cy="47" r="5" fill="#28C840" fill-opacity="0.7"/>
+
+  <!-- Address bar -->
+  <rect x="180" y="38" width="320" height="18" rx="4" fill="rgba(255,255,255,0.04)" stroke="rgba(255,255,255,0.06)" stroke-width="0.5"/>
+
+  <!-- Content skeleton lines -->
+  <rect x="60" y="90" width="260" height="10" rx="5" fill="rgba(255,255,255,0.1)"/>
+  <rect x="60" y="112" width="380" height="8" rx="4" fill="rgba(255,255,255,0.055)"/>
+  <rect x="60" y="130" width="320" height="8" rx="4" fill="rgba(255,255,255,0.055)"/>
+  <rect x="60" y="148" width="290" height="8" rx="4" fill="rgba(255,255,255,0.04)"/>
+
+  <!-- Code blocks -->
+  <rect x="60" y="176" width="560" height="52" rx="6" fill="rgba(94,201,255,0.04)" stroke="rgba(94,201,255,0.07)" stroke-width="0.5"/>
+  <rect x="76" y="188" width="120" height="6" rx="3" fill="rgba(94,201,255,0.2)"/>
+  <rect x="76" y="202" width="200" height="6" rx="3" fill="rgba(255,255,255,0.08)"/>
+  <rect x="76" y="214" width="160" height="6" rx="3" fill="rgba(255,255,255,0.05)"/>
+
+  <!-- Glow accent -->
+  <ellipse cx="340" cy="140" rx="200" ry="80" fill="rgba(47,102,202,0.06)"/>
+</svg>

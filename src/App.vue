@@ -1,22 +1,34 @@
 <script>
+import Lenis from "lenis";
 import NavigationBar from "@/components/NavigationBar.vue";
 import FooterComp from "@/components/FooterComp.vue";
-// import ChatBot from "@/components/ChatBot.vue";
+
+document.title = "Tim Lacault - Portfolio";
+const theme = localStorage.getItem("theme") || "dark";
+document.documentElement.setAttribute("data-theme", theme);
 
 export default {
   name: "App",
-  components: {
-    NavigationBar,
-    FooterComp,
-    // ChatBot,
+  components: { NavigationBar, FooterComp },
+  mounted() {
+    this.lenis = new Lenis({
+      duration: 1.15,
+      easing: (t) => (t === 1 ? 1 : 1 - Math.pow(2, -10 * t)),
+      smoothWheel: true,
+      syncTouch: false,
+    });
+    window.__lenis = this.lenis;
+    const raf = (time) => {
+      this.lenis.raf(time);
+      this._rafId = requestAnimationFrame(raf);
+    };
+    this._rafId = requestAnimationFrame(raf);
+  },
+  beforeUnmount() {
+    cancelAnimationFrame(this._rafId);
+    this.lenis?.destroy();
   },
 };
-
-document.title = "Tim Lacault - Portfolio";
-
-// theme switch
-const theme = localStorage.getItem("theme") || "dark";
-document.documentElement.setAttribute("data-theme", theme);
 </script>
 
 <template>
@@ -99,12 +111,9 @@ button {
   max-width: 1200px;
 }
 
-.hero {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100vh;
+/* section spacing */
+section + section {
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
 </style>
 
@@ -116,6 +125,9 @@ button {
   --primary: rgb(53, 107, 208);
   --secondary: #80a5ea;
   --accent: #55b4dd;
+  --text-muted: rgba(5, 7, 10, 0.55);
+  --text-subtle: rgba(5, 7, 10, 0.35);
+  --text-faint: rgba(5, 7, 10, 0.22);
 }
 
 :root[data-theme="dark"] {
@@ -124,6 +136,9 @@ button {
   --primary: rgb(47, 102, 202);
   --secondary: #153a7f;
   --accent: rgb(94, 201, 255);
+  --text-muted: rgba(244, 246, 250, 0.55);
+  --text-subtle: rgba(244, 246, 250, 0.35);
+  --text-faint: rgba(244, 246, 250, 0.22);
 }
 
 /* shades */
@@ -265,35 +280,46 @@ button {
 /* backgrounds */
 :root[data-theme="light"] {
   --background-radial: radial-gradient(
-    circle at top right,
-    rgb(197, 220, 255),
-    rgb(153, 180, 232)
+    ellipse at 70% 0%,
+    rgb(215, 228, 255) 0%,
+    rgb(235, 241, 252) 50%,
+    rgb(245, 248, 255) 100%
   );
 }
 
 :root[data-theme="dark"] {
   --background-radial: radial-gradient(
-    circle at top right,
-    rgb(17, 23, 36),
-    rgb(13, 16, 21)
+    ellipse at 70% 0%,
+    rgb(12, 18, 35) 0%,
+    rgb(5, 9, 15) 55%,
+    rgb(3, 5, 10) 100%
   );
 }
 
 /* ui colors */
 :root[data-theme="light"] {
-  --block-background: rgba(0, 0, 0, 0.05);
-  --block-border: rgba(0, 0, 0, 0.2);
-  --block-shadow: 0px 5px 50px rgba(var(--text), 1);
-
-  --button-hover-bg: rgba(0, 0, 0, 0.1);
+  --block-background: rgba(255, 255, 255, 0.65);
+  --block-border: rgba(53, 107, 208, 0.18);
+  --block-shadow: 0 4px 24px rgba(53, 107, 208, 0.1),
+    0 1px 0 rgba(255, 255, 255, 0.8) inset;
+  --button-hover-bg: rgba(53, 107, 208, 0.08);
+  --glow-card-bg: rgba(255, 255, 255, 0.82);
+  --glow-card-border: rgba(53, 107, 208, 0.15);
+  --glow-card-hover-border: rgba(53, 107, 208, 0.35);
+  --glow-card-hover-shadow: 0 8px 40px rgba(53, 107, 208, 0.15);
 }
 
 :root[data-theme="dark"] {
-  --block-background: #ffffff0d;
-  --block-border: rgba(255, 255, 255, 0.2);
-  --block-shadow: 0px 5px 5px rgba(var(--text), 0.1);
-
-  --button-hover-bg: rgba(255, 255, 255, 0.2);
+  --block-background: rgba(255, 255, 255, 0.06);
+  --block-border: rgba(255, 255, 255, 0.18);
+  --block-shadow: 0 4px 20px rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(94, 201, 255, 0.06) inset;
+  --button-hover-bg: rgba(255, 255, 255, 0.12);
+  --glow-card-bg: rgba(255, 255, 255, 0.03);
+  --glow-card-border: rgba(255, 255, 255, 0.07);
+  --glow-card-hover-border: rgba(94, 201, 255, 0.25);
+  --glow-card-hover-shadow: 0 12px 50px rgba(47, 102, 202, 0.25),
+    0 0 30px rgba(94, 201, 255, 0.08);
 }
 
 /* Animations */
