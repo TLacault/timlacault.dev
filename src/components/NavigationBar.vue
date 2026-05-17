@@ -46,6 +46,24 @@ export default {
         document.documentElement.setAttribute("data-theme", next);
       }
     },
+    toggleLocale() {
+      const next = this.$locale.locale === "en" ? "fr" : "en";
+      const appEl = document.getElementById("app");
+      if (appEl) {
+        appEl.style.transition = "opacity 0.15s ease";
+        appEl.style.opacity = "0";
+      }
+      setTimeout(() => {
+        this.$setLocale(next);
+        if (appEl) {
+          appEl.style.opacity = "1";
+          setTimeout(() => {
+            appEl.style.transition = "";
+            appEl.style.opacity = "";
+          }, 200);
+        }
+      }, 160);
+    },
     toggleMenu() {
       this.menuOpen = !this.menuOpen;
     },
@@ -111,10 +129,16 @@ Cal.ns["30min"]("ui", {
 
     <!-- Desktop nav links -->
     <div class="nav-links">
-      <router-link class="block-btn" to="/">Home</router-link>
-      <router-link class="block-btn" to="/project">Projects</router-link>
-      <router-link class="block-btn" to="/freelance">Freelance</router-link>
-      <router-link class="block-btn" to="/contact">Contact</router-link>
+      <router-link class="block-btn" to="/">{{ $t("nav.home") }}</router-link>
+      <router-link class="block-btn" to="/project">{{
+        $t("nav.projects")
+      }}</router-link>
+      <router-link class="block-btn" to="/freelance">{{
+        $t("nav.freelance")
+      }}</router-link>
+      <router-link class="block-btn" to="/contact">{{
+        $t("nav.contact")
+      }}</router-link>
     </div>
 
     <!-- Desktop right -->
@@ -125,14 +149,25 @@ Cal.ns["30min"]("ui", {
         data-cal-namespace="30min"
         data-cal-config='{"layout":"month_view","theme":"auto"}'
       >
-        <span>Book a Call</span>
+        <span>{{ $t("nav.bookCall") }}</span>
         <i class="ri-calendar-event-line"></i>
       </div>
+      <button
+        class="lang-toggle block-btn"
+        @click="toggleLocale"
+        :aria-label="
+          $locale.locale === 'en' ? $t('nav.switchToFr') : $t('nav.switchToEn')
+        "
+      >
+        <span class="lang-label">{{
+          $locale.locale === "en" ? "FR" : "EN"
+        }}</span>
+      </button>
       <button
         class="theme-toggle block-btn"
         @click="toggleTheme"
         :aria-label="
-          theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'
+          theme === 'dark' ? $t('nav.switchToLight') : $t('nav.switchToDark')
         "
       >
         <i v-if="theme === 'dark'" class="ri-moon-clear-fill"></i>
@@ -140,13 +175,24 @@ Cal.ns["30min"]("ui", {
       </button>
     </div>
 
-    <!-- Mobile right: theme + burger -->
+    <!-- Mobile right: lang + theme + burger -->
     <div class="mobile-right">
+      <button
+        class="lang-toggle block-btn"
+        @click="toggleLocale"
+        :aria-label="
+          $locale.locale === 'en' ? $t('nav.switchToFr') : $t('nav.switchToEn')
+        "
+      >
+        <span class="lang-label">{{
+          $locale.locale === "en" ? "FR" : "EN"
+        }}</span>
+      </button>
       <button
         class="theme-toggle block-btn"
         @click="toggleTheme"
         :aria-label="
-          theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'
+          theme === 'dark' ? $t('nav.switchToLight') : $t('nav.switchToDark')
         "
       >
         <i v-if="theme === 'dark'" class="ri-moon-clear-fill"></i>
@@ -171,19 +217,19 @@ Cal.ns["30min"]("ui", {
       <div class="mobile-menu-inner">
         <router-link class="mobile-link" to="/" @click="closeMenu">
           <i class="ri-home-4-line"></i>
-          <span>Home</span>
+          <span>{{ $t("nav.home") }}</span>
         </router-link>
         <router-link class="mobile-link" to="/project" @click="closeMenu">
           <i class="ri-folder-line"></i>
-          <span>Projects</span>
+          <span>{{ $t("nav.projects") }}</span>
         </router-link>
         <router-link class="mobile-link" to="/freelance" @click="closeMenu">
           <i class="ri-briefcase-line"></i>
-          <span>Freelance</span>
+          <span>{{ $t("nav.freelance") }}</span>
         </router-link>
         <router-link class="mobile-link" to="/contact" @click="closeMenu">
           <i class="ri-mail-line"></i>
-          <span>Contact</span>
+          <span>{{ $t("nav.contact") }}</span>
         </router-link>
         <div class="mobile-menu-footer">
           <div
@@ -194,7 +240,7 @@ Cal.ns["30min"]("ui", {
             @click="closeMenu"
           >
             <i class="ri-calendar-event-line"></i>
-            <span>Book a Call</span>
+            <span>{{ $t("nav.bookCall") }}</span>
           </div>
         </div>
       </div>
@@ -309,7 +355,8 @@ nav.scrolled {
 .call-btn i {
   font-size: 0.95rem;
 }
-.theme-toggle {
+.theme-toggle,
+.lang-toggle {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -317,9 +364,17 @@ nav.scrolled {
   color: var(--text);
   opacity: 0.55;
 }
-.theme-toggle:hover {
+.theme-toggle:hover,
+.lang-toggle:hover {
   opacity: 1;
   color: var(--accent);
+}
+
+.lang-label {
+  font-family: "Poppins", sans-serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
 }
 
 /* Burger button */

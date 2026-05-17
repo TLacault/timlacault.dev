@@ -38,9 +38,7 @@ export default {
       <div class="footer-top">
         <div class="footer-brand">
           <router-link to="/" class="footer-logo">Tim</router-link>
-          <p class="footer-tagline">
-            Building things for the web, one line at a time.
-          </p>
+          <p class="footer-tagline">{{ $t("footer.tagline") }}</p>
         </div>
 
         <nav class="footer-nav" aria-label="Footer navigation">
@@ -49,7 +47,7 @@ export default {
             :key="link.label"
             :to="link.to"
             class="footer-link"
-            >{{ link.label }}</router-link
+            >{{ $t(`nav.${link.label.toLowerCase()}`) }}</router-link
           >
         </nav>
 
@@ -73,9 +71,9 @@ export default {
         <div class="footer-meta">
           <span>© {{ year }} Tim Lacault</span>
           <span class="footer-sep">·</span>
-          <span>Made with Vue 3</span>
+          <span>{{ $t("footer.madeWith") }}</span>
           <span class="footer-sep">·</span>
-          <span>Bordeaux, France</span>
+          <span>{{ $t("footer.location") }}</span>
         </div>
       </div>
     </div>

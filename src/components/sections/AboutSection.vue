@@ -30,8 +30,8 @@ export default {
   <section class="about-section">
     <div class="about-container">
       <div class="section-header" v-reveal>
-        <p class="section-label">About me</p>
-        <h2 class="section-title">The person behind the code</h2>
+        <p class="section-label">{{ $t("about.label") }}</p>
+        <h2 class="section-title">{{ $t("about.title") }}</h2>
       </div>
 
       <div class="bento">
@@ -43,13 +43,11 @@ export default {
               <div class="avatar-placeholder">TL</div>
             </div>
             <div class="bio-text">
-              <h3>Hey, I'm Tim</h3>
+              <h3>{{ $t("about.bioGreeting") }}</h3>
               <p>
-                Undergraduate software engineer based in
-                <strong>Bordeaux, France</strong>. I love crafting slick,
-                performant web experiences — from polished UIs to solid backend
-                systems. Currently studying at Enseirb and building things in my
-                spare time.
+                {{ $t("about.bioPart1") }}
+                <strong>{{ $t("about.bioLocation") }}</strong
+                >{{ $t("about.bioPart2") }}
               </p>
             </div>
           </div>
@@ -62,7 +60,9 @@ export default {
           style="--reveal-delay: 80ms"
         >
           <div class="card-glow"></div>
-          <p class="card-label"><i class="ri-code-box-line"></i> Stack</p>
+          <p class="card-label">
+            <i class="ri-code-box-line"></i> {{ $t("about.stackLabel") }}
+          </p>
           <div class="stack-grid">
             <div v-for="tech in stack" :key="tech.name" class="stack-chip">
               <i :class="tech.icon"></i>
@@ -78,7 +78,9 @@ export default {
           style="--reveal-delay: 160ms"
         >
           <div class="card-glow"></div>
-          <p class="card-label"><i class="ri-map-pin-line"></i> Location</p>
+          <p class="card-label">
+            <i class="ri-map-pin-line"></i> {{ $t("about.locationLabel") }}
+          </p>
           <div class="location-inner">
             <div class="location-map-dot"></div>
             <div>
@@ -95,13 +97,15 @@ export default {
           style="--reveal-delay: 240ms"
         >
           <div class="card-glow avail-glow"></div>
-          <p class="card-label"><i class="ri-flashlight-line"></i> Status</p>
+          <p class="card-label">
+            <i class="ri-flashlight-line"></i> {{ $t("about.statusLabel") }}
+          </p>
           <div class="avail-inner">
             <div class="avail-badge">
               <span class="avail-dot"></span>
-              <span>Available</span>
+              <span>{{ $t("about.available") }}</span>
             </div>
-            <p class="avail-sub">Open to internships &amp; freelance</p>
+            <p class="avail-sub">{{ $t("about.availSub") }}</p>
             <GlowButton
               tag="a"
               href="https://cal.com/tim-lacault/30min"
@@ -109,7 +113,8 @@ export default {
               variant="primary"
               size="sm"
             >
-              Let's talk <i class="ri-arrow-right-up-line"></i>
+              {{ $t("about.letsTalk") }}
+              <i class="ri-arrow-right-up-line"></i>
             </GlowButton>
           </div>
         </div>
@@ -122,9 +127,9 @@ export default {
         >
           <div class="card-glow"></div>
           <div class="stats-row">
-            <div v-for="stat in stats" :key="stat.label" class="stat">
+            <div v-for="(stat, i) in stats" :key="stat.value" class="stat">
               <span class="stat-value">{{ stat.value }}</span>
-              <span class="stat-label">{{ stat.label }}</span>
+              <span class="stat-label">{{ $t(`about.stat${i}`) }}</span>
             </div>
           </div>
         </div>

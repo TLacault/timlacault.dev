@@ -772,7 +772,7 @@ export default {
 .terminal-window {
   width: 100%;
   max-width: 880px;
-  max-height: 84vh;
+  max-height: 84dvh;
   display: flex;
   flex-direction: column;
   background: #f8fafc;
@@ -1065,7 +1065,7 @@ export default {
     opacity: 1;
   }
   .terminal-window {
-    max-height: 92vh;
+    max-height: 92dvh;
   }
 }
 </style>

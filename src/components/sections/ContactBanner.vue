@@ -15,12 +15,13 @@ export default {
 
       <div class="banner-body" v-reveal style="--reveal-delay: 60ms">
         <div class="banner-text">
-          <span class="banner-eyebrow">What's next</span>
-          <h2 class="banner-title">Have an idea?<br />Let's make it real.</h2>
-          <p class="banner-sub">
-            Whether it's a full product, a single feature, or just a
-            conversation — I'm always open to something interesting.
-          </p>
+          <span class="banner-eyebrow">{{ $t("contactBanner.eyebrow") }}</span>
+          <h2 class="banner-title">
+            {{ $t("contactBanner.titleLine1") }}<br />{{
+              $t("contactBanner.titleLine2")
+            }}
+          </h2>
+          <p class="banner-sub">{{ $t("contactBanner.sub") }}</p>
         </div>
 
         <div class="banner-cta">
@@ -30,12 +31,12 @@ export default {
             variant="primary"
             size="lg"
           >
-            Let's talk
+            {{ $t("contactBanner.cta") }}
             <i class="ri-arrow-right-up-line"></i>
           </GlowButton>
           <span class="banner-avail">
             <span class="avail-dot"></span>
-            Available for new projects
+            {{ $t("contactBanner.avail") }}
           </span>
         </div>
       </div>

@@ -8,8 +8,8 @@ export default {
   <section class="tease-section">
     <div class="tease-container">
       <div class="tease-header" v-reveal>
-        <p class="section-label">What I build</p>
-        <h2 class="section-title">Curious where this goes?</h2>
+        <p class="section-label">{{ $t("tease.label") }}</p>
+        <h2 class="section-title">{{ $t("tease.title") }}</h2>
       </div>
 
       <div class="tease-grid">
@@ -24,15 +24,12 @@ export default {
             <span v-for="n in 9" :key="n" class="grid-cell"></span>
           </div>
           <div class="card-content">
-            <span class="card-kicker">Selected work</span>
-            <h3 class="card-title">Projects</h3>
-            <p class="card-desc">
-              Side projects, school work, and things I built for fun. Each one a
-              different problem, a different stack.
-            </p>
+            <span class="card-kicker">{{ $t("tease.projectsKicker") }}</span>
+            <h3 class="card-title">{{ $t("tease.projectsTitle") }}</h3>
+            <p class="card-desc">{{ $t("tease.projectsDesc") }}</p>
           </div>
           <div class="card-cta">
-            <span>Explore</span>
+            <span>{{ $t("tease.projectsCta") }}</span>
             <i class="ri-arrow-right-line"></i>
           </div>
           <div class="card-glow-overlay"></div>
@@ -46,19 +43,16 @@ export default {
           style="--reveal-delay: 140ms"
         >
           <div class="card-content">
-            <span class="card-kicker">Available now</span>
-            <h3 class="card-title">Freelance</h3>
-            <p class="card-desc">
-              Need a website, a feature, or a full-stack solution? I take on
-              select projects with people who care about craft.
-            </p>
+            <span class="card-kicker">{{ $t("tease.freelanceKicker") }}</span>
+            <h3 class="card-title">{{ $t("tease.freelanceTitle") }}</h3>
+            <p class="card-desc">{{ $t("tease.freelanceDesc") }}</p>
           </div>
           <div class="card-cta">
-            <span>Work with me</span>
+            <span>{{ $t("tease.freelanceCta") }}</span>
             <i class="ri-arrow-right-line"></i>
           </div>
           <div class="avail-pill">
-            <span class="avail-dot"></span>Open to projects
+            <span class="avail-dot"></span>{{ $t("tease.freelanceAvail") }}
           </div>
           <div class="card-glow-overlay freelance-glow"></div>
         </router-link>

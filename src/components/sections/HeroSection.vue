@@ -42,11 +42,11 @@ export default {
     <div class="hero-inner">
       <div class="badge slide-up" style="--delay: 0s">
         <span class="badge__dot"></span>
-        <span>Open to work &amp; projects</span>
+        <span>{{ $t("hero.badge") }}</span>
       </div>
 
       <div class="title slide-up" style="--delay: 0.1s">
-        <h2>Hey, I'm</h2>
+        <h2>{{ $t("hero.greeting") }}</h2>
         <h1>
           <span
             v-for="(l, i) in first"
@@ -64,8 +64,11 @@ export default {
           >
         </h1>
         <h3>
-          Undergraduate <span>Software Engineer</span> and
-          <span>Web Freelance</span> based in Bordeaux 🍇
+          {{ $t("hero.subtitlePre") }}
+          <span>{{ $t("hero.subtitleSoftware") }}</span>
+          {{ $t("hero.subtitleMid") }}
+          <span>{{ $t("hero.subtitleFreelance") }}</span>
+          {{ $t("hero.subtitlePost") }}
         </h3>
       </div>
 
@@ -76,7 +79,7 @@ export default {
           variant="primary"
           size="lg"
         >
-          View Projects
+          {{ $t("hero.viewProjects") }}
           <i class="ri-arrow-right-line"></i>
         </GlowButton>
         <GlowButton
@@ -86,7 +89,7 @@ export default {
           variant="ghost"
           size="lg"
         >
-          Book a Call
+          {{ $t("hero.bookCall") }}
           <i class="ri-calendar-event-line"></i>
         </GlowButton>
       </div>
@@ -121,7 +124,7 @@ export default {
     </div>
 
     <div class="scroll-cue slide-up" style="--delay: 0.7s" aria-hidden="true">
-      <span class="scroll-label">scroll</span>
+      <span class="scroll-label">{{ $t("hero.scroll") }}</span>
       <div class="scroll-mouse">
         <span class="scroll-wheel"></span>
       </div>
@@ -262,7 +265,7 @@ h1 {
   align-items: center;
   justify-content: center;
   font-family: "Cal Sans", sans-serif;
-  font-size: clamp(4.5rem, 11vw, 8.5rem);
+  font-size: clamp(3rem, 11vw, 8.5rem);
   line-height: 1;
   user-select: none;
 }
@@ -517,8 +520,8 @@ h1 {
 /* Responsive */
 @media (max-width: 480px) {
   .hero-inner {
-    padding: 0 1.5rem;
-    gap: 1.75rem;
+    padding: 5rem 1.5rem 3rem;
+    gap: 1.5rem;
   }
   .cta-row {
     flex-direction: column;

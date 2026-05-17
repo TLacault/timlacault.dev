@@ -20,29 +20,29 @@ export default {
         message: "",
       },
       status: "idle", // idle | loading | success | error
-      errorMsg: "",
+      errorKey: "",
       channels: [
         {
           icon: "ri-mail-send-line",
-          label: "Email",
+          labelKey: "contact.emailLabel",
           value: "lacault.tim@gmail.com",
           href: "mailto:lacault.tim@gmail.com",
         },
         {
           icon: "ri-linkedin-box-line",
-          label: "LinkedIn",
+          labelKey: "contact.linkedinLabel",
           value: "tim-lacault",
           href: "https://www.linkedin.com/in/tim-lacault",
         },
         {
           icon: "ri-github-line",
-          label: "GitHub",
+          labelKey: "contact.githubLabel",
           value: "TLacault",
           href: "https://github.com/TLacault",
         },
         {
           icon: "ri-calendar-event-line",
-          label: "Book a Call",
+          labelKey: "contact.bookCallLabel",
           value: "cal.com/tim-lacault",
           href: "https://cal.com/tim-lacault/30min",
           cal: true,
@@ -54,7 +54,7 @@ export default {
     async submit() {
       if (this.status === "loading") return;
       this.status = "loading";
-      this.errorMsg = "";
+      this.errorKey = "";
       try {
         await emailjs.send(
           EMAILJS_SERVICE_ID,
@@ -67,13 +67,12 @@ export default {
         this.form = { from_name: "", reply_to: "", subject: "", message: "" };
       } catch {
         this.status = "error";
-        this.errorMsg =
-          "Something went wrong. Try emailing me directly at lacault.tim@gmail.com";
+        this.errorKey = "contact.errorDefault";
       }
     },
     reset() {
       this.status = "idle";
-      this.errorMsg = "";
+      this.errorKey = "";
     },
   },
 };
@@ -86,12 +85,9 @@ export default {
     <div class="contact-container">
       <!-- Header -->
       <div class="contact-header" v-reveal>
-        <p class="section-label">Contact</p>
-        <h1 class="contact-title">Let's work together</h1>
-        <p class="contact-sub">
-          Have a project in mind, a question, or just want to say hi ? <br />
-          I'm always open to a good conversation.
-        </p>
+        <p class="section-label">{{ $t("contact.label") }}</p>
+        <h1 class="contact-title">{{ $t("contact.title") }}</h1>
+        <p class="contact-sub">{{ $t("contact.sub") }}</p>
       </div>
 
       <!-- Resume download banner -->
@@ -105,14 +101,14 @@ export default {
         <div class="resume-banner-left">
           <i class="ri-file-pdf-2-line"></i>
           <div class="resume-banner-text">
-            <span class="resume-banner-title">Curriculum Vitae</span>
-            <span class="resume-banner-sub"
-              >Download my full resume as PDF</span
-            >
+            <span class="resume-banner-title">{{
+              $t("contact.resumeTitle")
+            }}</span>
+            <span class="resume-banner-sub">{{ $t("contact.resumeSub") }}</span>
           </div>
         </div>
         <div class="resume-banner-right">
-          <span>Download PDF</span>
+          <span>{{ $t("contact.resumeDownload") }}</span>
           <i class="ri-download-2-line"></i>
         </div>
       </a>
@@ -140,7 +136,7 @@ export default {
                 <i :class="ch.icon"></i>
               </span>
               <span class="channel-info">
-                <span class="channel-label">{{ ch.label }}</span>
+                <span class="channel-label">{{ $t(ch.labelKey) }}</span>
                 <span class="channel-value">{{ ch.value }}</span>
               </span>
               <i class="ri-arrow-right-up-line channel-arrow"></i>
@@ -149,7 +145,7 @@ export default {
 
           <div class="availability-note">
             <span class="avail-dot"></span>
-            <span>Currently available for new projects</span>
+            <span>{{ $t("contact.avail") }}</span>
           </div>
         </aside>
 
@@ -161,10 +157,10 @@ export default {
               <div class="feedback-icon">
                 <i class="ri-check-line"></i>
               </div>
-              <h3>Message sent!</h3>
-              <p>I'll get back to you as soon as possible.</p>
+              <h3>{{ $t("contact.successTitle") }}</h3>
+              <p>{{ $t("contact.successSub") }}</p>
               <GlowButton variant="ghost" size="sm" @click="reset">
-                Send another
+                {{ $t("contact.successAnother") }}
               </GlowButton>
             </div>
 
@@ -176,19 +172,19 @@ export default {
             >
               <div class="form-row">
                 <div class="field">
-                  <label for="from_name">Name</label>
+                  <label for="from_name">{{ $t("contact.nameLabel") }}</label>
                   <input
                     id="from_name"
                     v-model="form.from_name"
                     type="text"
                     name="from_name"
-                    placeholder="Your name"
+                    :placeholder="$t('contact.namePlaceholder')"
                     required
                     autocomplete="name"
                   />
                 </div>
                 <div class="field">
-                  <label for="reply_to">Email</label>
+                  <label for="reply_to">{{ $t("contact.emailLabel") }}</label>
                   <input
                     id="reply_to"
                     v-model="form.reply_to"
@@ -202,32 +198,32 @@ export default {
               </div>
 
               <div class="field">
-                <label for="subject">Subject</label>
+                <label for="subject">{{ $t("contact.subjectLabel") }}</label>
                 <input
                   id="subject"
                   v-model="form.subject"
                   type="text"
                   name="subject"
-                  placeholder="What's this about?"
+                  :placeholder="$t('contact.subjectPlaceholder')"
                   required
                 />
               </div>
 
               <div class="field">
-                <label for="message">Message</label>
+                <label for="message">{{ $t("contact.messageLabel") }}</label>
                 <textarea
                   id="message"
                   v-model="form.message"
                   name="message"
                   rows="6"
-                  placeholder="Tell me about your project or idea..."
+                  :placeholder="$t('contact.messagePlaceholder')"
                   required
                 ></textarea>
               </div>
 
               <div v-if="status === 'error'" class="error-msg" role="alert">
                 <i class="ri-error-warning-line"></i>
-                <span>{{ errorMsg }}</span>
+                <span>{{ $t(errorKey) }}</span>
               </div>
 
               <GlowButton
@@ -238,10 +234,11 @@ export default {
                 :disabled="status === 'loading'"
               >
                 <template v-if="status === 'loading'">
-                  <i class="ri-loader-4-line spinning"></i> Sending…
+                  <i class="ri-loader-4-line spinning"></i>
+                  {{ $t("contact.sending") }}
                 </template>
                 <template v-else>
-                  Send Message
+                  {{ $t("contact.submitBtn") }}
                   <i class="ri-send-plane-line"></i>
                 </template>
               </GlowButton>
@@ -319,6 +316,7 @@ export default {
   line-height: 1.7;
   color: var(--text);
   opacity: 0.5;
+  white-space: pre-line;
 }
 
 /* Layout */
