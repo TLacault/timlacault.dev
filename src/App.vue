@@ -33,7 +33,17 @@ export default {
 
 <template>
   <NavigationBar />
-  <router-view />
+  <router-view v-slot="{ Component, route }">
+    <Transition
+      name="page"
+      mode="out-in"
+      :duration="{ enter: 350, leave: 200 }"
+    >
+      <div class="page-wrap" :key="route.fullPath">
+        <component :is="Component" />
+      </div>
+    </Transition>
+  </router-view>
   <!-- <ChatBot /> -->
   <FooterComp />
 </template>
@@ -109,11 +119,6 @@ button {
   display: flex;
   width: 100%;
   max-width: 1200px;
-}
-
-/* section spacing */
-section + section {
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
 </style>
 
@@ -322,6 +327,28 @@ section + section {
     0 0 30px rgba(94, 201, 255, 0.08);
 }
 
+/* Page transitions */
+.page-wrap {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.page-enter-active {
+  transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.page-leave-active {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.page-enter-from {
+  opacity: 0;
+  transform: translateY(12px);
+}
+.page-leave-to {
+  opacity: 0;
+  transform: translateY(-6px);
+}
+
 /* Animations */
 
 .slide-in {
@@ -390,6 +417,29 @@ section + section {
   &:active {
     transition: transform 0.1s ease-in-out;
     transform: scale(0.95);
+  }
+}
+
+/* Theme toggle — circular reveal via View Transition API */
+
+/* While the overlay is running, suppress all element-level transitions so
+   colors don't flash underneath the expanding circle. */
+.vt-running * {
+  transition: none !important;
+}
+
+::view-transition-old(root) {
+  animation: none;
+}
+::view-transition-new(root) {
+  animation: vt-theme-reveal 0.9s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+@keyframes vt-theme-reveal {
+  from {
+    clip-path: circle(0% at var(--vt-x, 50%) var(--vt-y, 50%));
+  }
+  to {
+    clip-path: circle(160vmax at var(--vt-x, 50%) var(--vt-y, 50%));
   }
 }
 </style>

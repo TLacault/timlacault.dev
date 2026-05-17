@@ -91,14 +91,22 @@ export default {
 
     onTouchStart(e) {
       this._touchY = e.touches[0].clientY;
+      this._touchX = e.touches[0].clientX;
     },
     onTouchEnd(e) {
+      if (this.popup) return;
       if (!this.isSceneActive()) return;
       const dy = this._touchY - e.changedTouches[0].clientY;
-      if (Math.abs(dy) < 35) return;
+      const dx = this._touchX - e.changedTouches[0].clientX;
       const n = this.projects.length;
-      if (dy > 0 && this.activeIndex < n - 1) this.advance(1);
-      else if (dy < 0 && this.activeIndex > 0) this.advance(-1);
+      // Prefer horizontal swipe when it dominates
+      if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) >= 30) {
+        if (dx > 0 && this.activeIndex < n - 1) this.advance(1);
+        else if (dx < 0 && this.activeIndex > 0) this.advance(-1);
+      } else if (Math.abs(dy) >= 35) {
+        if (dy > 0 && this.activeIndex < n - 1) this.advance(1);
+        else if (dy < 0 && this.activeIndex > 0) this.advance(-1);
+      }
     },
 
     advance(dir) {
@@ -326,7 +334,7 @@ export default {
           <span class="prompt-cursor"></span>
         </div>
 
-        <div class="term-body">
+        <div class="term-body" data-lenis-prevent>
           <div class="term-preview-banner" v-if="popup?.preview">
             <img :src="popup.preview" :alt="popup?.title" draggable="false" />
           </div>
@@ -910,7 +918,10 @@ export default {
 
 .term-body {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
   padding: 0;
   scrollbar-width: thin;
   scrollbar-color: rgba(0, 0, 0, 0.1) transparent;
@@ -1016,54 +1027,22 @@ export default {
   }
 }
 
-@media (max-width: 600px) {
-  .proj-stage {
-    flex-direction: column;
+@media (max-width: 680px) {
+  .proj-rail {
+    width: 160px;
+    padding: 1.5rem 1rem;
   }
+  .rail-title {
+    font-size: 1.3rem;
+  }
+}
+
+@media (max-width: 600px) {
   .proj-scene {
     height: calc(100dvh - 70px);
   }
+  /* Hide the rail entirely on mobile — navigation via dots/swipe */
   .proj-rail {
-    width: 100%;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.75rem 1.25rem;
-    border-right: none;
-    border-bottom: 1px solid var(--glow-card-border);
-    flex-shrink: 0;
-    height: auto;
-  }
-  .rail-head {
-    flex-direction: row;
-    align-items: baseline;
-    gap: 0.5rem;
-  }
-  .rail-title {
-    font-size: 1rem;
-    br {
-      display: none;
-    }
-  }
-  .rail-list {
-    flex-direction: row;
-    flex: 0;
-    gap: 0;
-  }
-  .rail-indicator {
-    display: none;
-  }
-  .rail-item {
-    height: auto;
-    padding: 0.4rem 0.6rem;
-    gap: 4px;
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  .rail-name {
-    font-size: 0.7rem;
-  }
-  .rail-footer {
     display: none;
   }
   .proj-card {
@@ -1075,8 +1054,106 @@ export default {
   .card-foot {
     padding: 0 1.25rem 1.25rem;
   }
+  /* Make progress dots more prominent */
+  .pdot {
+    width: 8px;
+    height: 8px;
+    opacity: 0.35;
+  }
+  .pdot.active {
+    width: 28px;
+    opacity: 1;
+  }
   .terminal-window {
     max-height: 92vh;
   }
+}
+</style>
+
+<style>
+/* Card shape depth — light shadow, dark glow */
+[data-theme="light"] .card-inner {
+  box-shadow: 0 4px 28px rgba(53, 107, 208, 0.1), 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+[data-theme="dark"] .card-inner {
+  box-shadow: 0 0 28px rgba(47, 102, 202, 0.14), 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+/* Preview image inside popup */
+[data-theme="light"] .term-preview-banner img {
+  box-shadow: 0 4px 28px rgba(53, 107, 208, 0.15), 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+[data-theme="dark"] .term-preview-banner img {
+  box-shadow: 0 0 28px rgba(94, 201, 255, 0.1), 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+/* Terminal dark theme */
+[data-theme="dark"] .terminal-window {
+  background: #0d1117;
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 40px 120px rgba(0, 0, 0, 0.65),
+    0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+}
+[data-theme="dark"] .term-bar {
+  background: #161b22;
+  border-bottom-color: rgba(255, 255, 255, 0.06);
+}
+[data-theme="dark"] .term-title {
+  color: rgba(240, 246, 252, 0.48);
+}
+[data-theme="dark"] .term-meta {
+  color: rgba(240, 246, 252, 0.24);
+}
+[data-theme="dark"] .term-prompt {
+  border-bottom-color: rgba(255, 255, 255, 0.05);
+}
+[data-theme="dark"] .prompt-user {
+  color: #3fb950;
+}
+[data-theme="dark"] .prompt-at {
+  color: rgba(240, 246, 252, 0.22);
+}
+[data-theme="dark"] .prompt-host {
+  color: #58a6ff;
+}
+[data-theme="dark"] .prompt-sep {
+  color: rgba(240, 246, 252, 0.22);
+}
+[data-theme="dark"] .prompt-dir {
+  color: #bc8cff;
+}
+[data-theme="dark"] .prompt-dollar {
+  color: rgba(240, 246, 252, 0.28);
+}
+[data-theme="dark"] .prompt-cmd {
+  color: rgba(240, 246, 252, 0.52);
+}
+[data-theme="dark"] .prompt-cursor {
+  background: rgba(88, 166, 255, 0.55);
+}
+[data-theme="dark"] .term-body {
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+}
+[data-theme="dark"] .term-body::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+}
+[data-theme="dark"] .term-preview-banner {
+  background: #161b22;
+  border-bottom-color: rgba(255, 255, 255, 0.06);
+}
+[data-theme="dark"] .term-loading {
+  color: rgba(240, 246, 252, 0.28);
+}
+[data-theme="dark"] .proj-section h2 {
+  color: var(--primary);
+}
+[data-theme="dark"] .proj-section p,
+[data-theme="dark"] .proj-section li {
+  color: rgba(240, 246, 252, 0.62);
+}
+[data-theme="dark"] .proj-section code {
+  background: rgba(94, 201, 255, 0.08);
+  border-color: rgba(94, 201, 255, 0.18);
+  color: rgba(94, 201, 255, 0.88);
 }
 </style>

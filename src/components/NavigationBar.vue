@@ -5,16 +5,46 @@ export default {
     return {
       theme: localStorage.getItem("theme") || "dark",
       menuOpen: false,
+      scrolled: false,
     };
   },
   mounted() {
     document.documentElement.setAttribute("data-theme", this.theme);
+    this._onScroll = () => {
+      this.scrolled = window.scrollY > 30;
+    };
+    window.addEventListener("scroll", this._onScroll, { passive: true });
+  },
+  beforeUnmount() {
+    window.removeEventListener("scroll", this._onScroll);
   },
   methods: {
-    toggleTheme() {
-      this.theme = this.theme === "dark" ? "light" : "dark";
-      document.documentElement.setAttribute("data-theme", this.theme);
-      localStorage.setItem("theme", this.theme);
+    toggleTheme(e) {
+      const next = this.theme === "dark" ? "light" : "dark";
+      this.theme = next;
+      localStorage.setItem("theme", next);
+
+      if (document.startViewTransition && e?.currentTarget) {
+        const rect = e.currentTarget.getBoundingClientRect();
+        document.documentElement.style.setProperty(
+          "--vt-x",
+          `${Math.round(rect.left + rect.width / 2)}px`
+        );
+        document.documentElement.style.setProperty(
+          "--vt-y",
+          `${Math.round(rect.top + rect.height / 2)}px`
+        );
+        // Suppress element-level transitions while the overlay animates
+        document.documentElement.classList.add("vt-running");
+        const t = document.startViewTransition(() => {
+          document.documentElement.setAttribute("data-theme", next);
+        });
+        t.finished.finally(() => {
+          document.documentElement.classList.remove("vt-running");
+        });
+      } else {
+        document.documentElement.setAttribute("data-theme", next);
+      }
     },
     toggleMenu() {
       this.menuOpen = !this.menuOpen;
@@ -73,14 +103,14 @@ Cal.ns["30min"]("ui", {
 </script>
 
 <template>
-  <nav class="slide-in" :class="{ 'menu-open': menuOpen }">
+  <nav class="slide-in" :class="{ 'menu-open': menuOpen, scrolled: scrolled }">
     <!-- Logo -->
     <router-link to="/" class="logo" @click="closeMenu">
       <span class="logo-text">Tim</span>
     </router-link>
 
     <!-- Desktop nav links -->
-    <div class="nav-links block">
+    <div class="nav-links">
       <router-link class="block-btn" to="/">Home</router-link>
       <router-link class="block-btn" to="/project">Projects</router-link>
       <router-link class="block-btn" to="/freelance">Freelance</router-link>
@@ -89,19 +119,17 @@ Cal.ns["30min"]("ui", {
 
     <!-- Desktop right -->
     <div class="nav-right">
-      <div class="call block">
-        <div
-          class="call-btn block-btn"
-          data-cal-link="tim-lacault/30min"
-          data-cal-namespace="30min"
-          data-cal-config='{"layout":"month_view","theme":"auto"}'
-        >
-          <p>Book a Call</p>
-          <i class="ri-calendar-event-line"></i>
-        </div>
+      <div
+        class="call-btn block-btn"
+        data-cal-link="tim-lacault/30min"
+        data-cal-namespace="30min"
+        data-cal-config='{"layout":"month_view","theme":"auto"}'
+      >
+        <span>Book a Call</span>
+        <i class="ri-calendar-event-line"></i>
       </div>
       <button
-        class="theme-toggle block"
+        class="theme-toggle block-btn"
         @click="toggleTheme"
         :aria-label="
           theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'
@@ -115,7 +143,7 @@ Cal.ns["30min"]("ui", {
     <!-- Mobile right: theme + burger -->
     <div class="mobile-right">
       <button
-        class="theme-toggle block"
+        class="theme-toggle block-btn"
         @click="toggleTheme"
         :aria-label="
           theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'
@@ -125,7 +153,7 @@ Cal.ns["30min"]("ui", {
         <i v-else class="ri-sun-fill"></i>
       </button>
       <button
-        class="burger block"
+        class="burger block-btn"
         @click="toggleMenu"
         :aria-label="menuOpen ? 'Close menu' : 'Open menu'"
         :aria-expanded="menuOpen"
@@ -189,6 +217,18 @@ nav {
   z-index: 200;
   opacity: 0;
   animation-delay: 0.5s;
+  border-radius: 18px;
+  padding: 6px 10px;
+  border: 1px solid transparent;
+}
+
+nav.scrolled {
+  background: rgba(5, 9, 15, 0.68);
+  border-color: rgba(94, 201, 255, 0.07);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+  box-shadow: 0 4px 32px rgba(0, 0, 0, 0.35);
+  margin-top: 10px;
 }
 
 .logo {
@@ -203,22 +243,29 @@ nav {
   color: var(--text);
 }
 
-/* Desktop nav links */
-.nav-links {
-  position: absolute;
+/* Shared pill style — desktop nav groups + mobile right */
+.nav-links,
+.nav-right,
+.mobile-right {
   display: flex;
-  left: 50%;
-  transform: translateX(-50%);
+  align-items: center;
   border-radius: 12px;
   padding: 4px;
-  gap: 2px;
+  gap: 4px;
   background: rgba(255, 255, 255, 0.04);
   outline: 1px solid rgba(94, 201, 255, 0.1);
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.28),
     0 0 0 1px rgba(94, 201, 255, 0.05) inset;
   backdrop-filter: blur(12px);
 }
-.nav-links .block-btn {
+.nav-links {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.nav-links .block-btn,
+.nav-right .block-btn,
+.mobile-right .block-btn {
   font-family: "Poppins", sans-serif;
   font-size: 0.84rem;
   font-weight: 500;
@@ -229,10 +276,20 @@ nav {
   transition: opacity 0.2s ease, background 0.22s ease, box-shadow 0.22s ease,
     color 0.2s ease;
 }
-.nav-links .block-btn:hover {
+.nav-links .block-btn:hover,
+.nav-right .block-btn:hover,
+.mobile-right .block-btn:hover {
   opacity: 1;
   background: rgba(94, 201, 255, 0.07);
   box-shadow: 0 0 0 1px rgba(94, 201, 255, 0.1);
+}
+
+/* Mobile-right buttons: icon-only, compact square */
+.mobile-right .block-btn {
+  padding: 0.45rem 0.65rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .nav-links a.router-link-exact-active {
   background: rgba(47, 102, 202, 0.22);
@@ -243,39 +300,31 @@ nav {
     0 1px 0 rgba(255, 255, 255, 0.06) inset;
 }
 
-/* Desktop right */
-.nav-right {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
 .call-btn {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   cursor: pointer;
+}
+.call-btn i {
+  font-size: 0.95rem;
 }
 .theme-toggle {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 38px;
-  height: 38px;
-  padding: 0;
-  font-size: 1.2rem;
-  transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+  font-size: 1.05rem;
+  color: var(--text);
+  opacity: 0.55;
 }
 .theme-toggle:hover {
-  background-color: var(--text);
-  color: var(--background);
-  box-shadow: 0 0 16px rgba(94, 201, 255, 0.25);
+  opacity: 1;
+  color: var(--accent);
 }
 
 /* Burger button */
 .mobile-right {
   display: none;
-  align-items: center;
-  gap: 8px;
 }
 .burger {
   display: flex;
@@ -401,21 +450,40 @@ nav {
   .mobile-right {
     display: flex;
   }
+  /* burger lines need to be visible inside the pill button */
+  .burger {
+    width: 36px;
+    height: 34px;
+    padding: 0.45rem 0.55rem;
+  }
 }
 </style>
 
 <style>
-/* Nav links — light theme overrides */
-[data-theme="light"] .nav-links {
+/* Scrolled nav — light theme */
+[data-theme="light"] nav.scrolled {
+  background: rgba(240, 244, 250, 0.82);
+  border-color: rgba(53, 107, 208, 0.1);
+  box-shadow: 0 4px 32px rgba(53, 107, 208, 0.1);
+}
+
+/* Nav — light theme overrides */
+[data-theme="light"] .nav-links,
+[data-theme="light"] .nav-right,
+[data-theme="light"] .mobile-right {
   background: rgba(255, 255, 255, 0.7);
   outline: 1px solid rgba(53, 107, 208, 0.14);
   box-shadow: 0 4px 20px rgba(53, 107, 208, 0.08),
     0 1px 0 rgba(255, 255, 255, 0.9) inset;
 }
-[data-theme="light"] .nav-links .block-btn {
+[data-theme="light"] .nav-links .block-btn,
+[data-theme="light"] .nav-right .block-btn,
+[data-theme="light"] .mobile-right .block-btn {
   color: rgba(5, 7, 10, 0.7);
 }
-[data-theme="light"] .nav-links .block-btn:hover {
+[data-theme="light"] .nav-links .block-btn:hover,
+[data-theme="light"] .nav-right .block-btn:hover,
+[data-theme="light"] .mobile-right .block-btn:hover {
   background: rgba(53, 107, 208, 0.07);
   box-shadow: 0 0 0 1px rgba(53, 107, 208, 0.12);
   color: rgb(5, 7, 10);

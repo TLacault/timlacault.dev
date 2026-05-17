@@ -121,8 +121,14 @@ export default {
     </div>
 
     <div class="scroll-cue slide-up" style="--delay: 0.7s" aria-hidden="true">
-      <p>scroll</p>
-      <i class="ri-arrow-down-double-line"></i>
+      <span class="scroll-label">scroll</span>
+      <div class="scroll-mouse">
+        <span class="scroll-wheel"></span>
+      </div>
+      <div class="scroll-chevrons">
+        <span class="scroll-chv chv-1"></span>
+        <span class="scroll-chv chv-2"></span>
+      </div>
     </div>
   </section>
 </template>
@@ -266,7 +272,7 @@ h1 {
   background: linear-gradient(0deg, var(--primary) 30%, var(--accent));
   background-clip: text;
   -webkit-background-clip: text;
-  font-weight: 600;
+  font-weight: 700;
   color: transparent;
   cursor: default;
   will-change: transform;
@@ -365,34 +371,127 @@ h1 {
 /* Scroll cue */
 .scroll-cue {
   position: absolute;
-  bottom: 2rem;
+  bottom: 2.5rem;
   left: 0;
   right: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
+  gap: 10px;
 }
-.scroll-cue p {
+
+.scroll-label {
   font-family: "Poppins", sans-serif;
-  font-size: 0.7rem;
-  letter-spacing: 0.12em;
+  font-size: 0.6rem;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
   color: var(--text-faint);
+  animation: scroll-label-breathe 3s ease-in-out infinite;
 }
-.scroll-cue i {
-  font-size: 1.6rem;
-  color: var(--text-subtle);
-  animation: bounce-arrow 1.2s ease-in-out infinite alternate;
-}
-@keyframes bounce-arrow {
-  from {
-    transform: translateY(0);
-    opacity: 0.3;
+
+@keyframes scroll-label-breathe {
+  0%,
+  100% {
+    opacity: 0.45;
   }
-  to {
-    transform: translateY(6px);
-    opacity: 0.7;
+  50% {
+    opacity: 0.85;
+  }
+}
+
+.scroll-mouse {
+  width: 22px;
+  height: 36px;
+  border: 1.5px solid rgba(94, 201, 255, 0.22);
+  border-radius: 11px;
+  display: flex;
+  justify-content: center;
+  padding-top: 6px;
+  position: relative;
+  animation: scroll-mouse-glow 3s ease-in-out infinite;
+}
+
+@keyframes scroll-mouse-glow {
+  0%,
+  100% {
+    border-color: rgba(94, 201, 255, 0.18);
+    box-shadow: none;
+  }
+  50% {
+    border-color: rgba(94, 201, 255, 0.42);
+    box-shadow: 0 0 14px rgba(94, 201, 255, 0.1);
+  }
+}
+
+.scroll-wheel {
+  width: 3px;
+  height: 7px;
+  background: var(--accent);
+  border-radius: 3px;
+  box-shadow: 0 0 8px rgba(94, 201, 255, 0.7);
+  animation: scroll-wheel-drop 2.4s cubic-bezier(0.33, 0.9, 0.66, 1) infinite;
+}
+
+@keyframes scroll-wheel-drop {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  45% {
+    transform: translateY(10px);
+    opacity: 0.25;
+  }
+  60% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  61% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+  80% {
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.scroll-chevrons {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.scroll-chv {
+  display: block;
+  width: 7px;
+  height: 7px;
+  border-right: 1.5px solid rgba(94, 201, 255, 0.5);
+  border-bottom: 1.5px solid rgba(94, 201, 255, 0.5);
+  transform: rotate(45deg);
+  opacity: 0;
+}
+
+.scroll-chv.chv-1 {
+  animation: scroll-chv-pulse 2.4s ease-in-out 0.1s infinite;
+}
+.scroll-chv.chv-2 {
+  animation: scroll-chv-pulse 2.4s ease-in-out 0.35s infinite;
+}
+
+@keyframes scroll-chv-pulse {
+  0%,
+  100% {
+    opacity: 0;
+    transform: rotate(45deg) translate(-1px, -1px);
+  }
+  40%,
+  60% {
+    opacity: 0.55;
+    transform: rotate(45deg) translate(2px, 2px);
   }
 }
 

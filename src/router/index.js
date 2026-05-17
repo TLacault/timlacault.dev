@@ -29,4 +29,12 @@ const router = createRouter({
   routes,
 });
 
+router.afterEach(() => {
+  if (window.__lenis) {
+    window.__lenis.scrollTo(0, { immediate: true });
+  } else {
+    window.scrollTo(0, 0);
+  }
+});
+
 export default router;

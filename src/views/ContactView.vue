@@ -12,6 +12,7 @@ export default {
   components: { GlowButton },
   data() {
     return {
+      resumePdf: "/resume_tim_lacault.pdf",
       form: {
         from_name: "",
         reply_to: "",
@@ -93,6 +94,29 @@ export default {
         </p>
       </div>
 
+      <!-- Resume download banner -->
+      <a
+        :href="resumePdf"
+        download="Tim_Lacault_Resume.pdf"
+        class="resume-banner"
+        v-reveal
+        style="--reveal-delay: 0ms"
+      >
+        <div class="resume-banner-left">
+          <i class="ri-file-pdf-2-line"></i>
+          <div class="resume-banner-text">
+            <span class="resume-banner-title">Curriculum Vitae</span>
+            <span class="resume-banner-sub"
+              >Download my full resume as PDF</span
+            >
+          </div>
+        </div>
+        <div class="resume-banner-right">
+          <span>Download PDF</span>
+          <i class="ri-download-2-line"></i>
+        </div>
+      </a>
+
       <div class="contact-body">
         <!-- Sidebar -->
         <aside class="contact-aside" v-reveal style="--reveal-delay: 80ms">
@@ -101,7 +125,8 @@ export default {
               v-for="ch in channels"
               :key="ch.label"
               :href="ch.href"
-              :target="ch.cal ? '_blank' : undefined"
+              target="_blank"
+              rel="noopener noreferrer"
               :data-cal-link="ch.cal ? 'tim-lacault/30min' : undefined"
               :data-cal-namespace="ch.cal ? '30min' : undefined"
               :data-cal-config="
@@ -110,7 +135,6 @@ export default {
                   : undefined
               "
               class="channel-card"
-              rel="noopener"
             >
               <span class="channel-icon">
                 <i :class="ch.icon"></i>
@@ -568,6 +592,80 @@ export default {
   opacity: 0;
 }
 
+/* Resume banner */
+.resume-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.25rem 1.75rem;
+  border-radius: 16px;
+  background: linear-gradient(
+    135deg,
+    rgba(47, 102, 202, 0.08),
+    rgba(94, 201, 255, 0.05)
+  );
+  border: 1px solid rgba(94, 201, 255, 0.14);
+  backdrop-filter: blur(10px);
+  text-decoration: none;
+  cursor: pointer;
+}
+.resume-banner:hover {
+  border-color: rgba(94, 201, 255, 0.28);
+  background: linear-gradient(
+    135deg,
+    rgba(47, 102, 202, 0.13),
+    rgba(94, 201, 255, 0.08)
+  );
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(47, 102, 202, 0.14);
+}
+.resume-banner-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.resume-banner-left > i {
+  font-size: 2.2rem;
+  color: var(--accent);
+  opacity: 0.75;
+  flex-shrink: 0;
+}
+.resume-banner-text {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.resume-banner-title {
+  font-family: "Cal Sans", sans-serif;
+  font-size: 1.1rem;
+  color: var(--text);
+}
+.resume-banner-sub {
+  font-family: "Poppins", sans-serif;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+.resume-banner-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: "Poppins", sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+.resume-banner:hover .resume-banner-right {
+  gap: 0.75rem;
+}
+.resume-banner-right i {
+  font-size: 1rem;
+}
+.resume-banner:hover .resume-banner-right i {
+  transform: translateY(2px);
+}
+
 /* Light theme overrides */
 :global([data-theme="light"]) .field input,
 :global([data-theme="light"]) .field textarea {
@@ -584,6 +682,13 @@ export default {
   }
   .contact-page {
     padding: 7rem 1.25rem 3rem;
+  }
+  .resume-banner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .resume-banner-right {
+    align-self: flex-end;
   }
 }
 </style>
