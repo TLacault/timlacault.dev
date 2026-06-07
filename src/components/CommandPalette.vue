@@ -358,7 +358,7 @@ export default {
           </span>
         </div>
 
-        <div class="cmdk-list" role="listbox">
+        <div class="cmdk-list" role="listbox" data-lenis-prevent>
           <p v-if="!filtered.length" class="cmdk-empty">
             {{ $t("cmd.empty") }}
           </p>
@@ -421,8 +421,8 @@ export default {
   align-items: flex-start;
   padding: 14vh 1rem 1rem;
   background: rgba(3, 6, 12, 0.5);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
 }
 
 .cmdk {
@@ -543,6 +543,7 @@ export default {
 .cmdk-list {
   flex: 1;
   overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 0.4rem;
   scrollbar-width: none;
 }
@@ -622,7 +623,7 @@ export default {
   display: flex;
   align-items: center;
   gap: 1rem;
-  padding: 0.55rem 1rem;
+  padding: 1rem 1rem;
   border-top: 1px solid var(--glow-card-border);
   font-size: 0.68rem;
   color: var(--text-subtle);

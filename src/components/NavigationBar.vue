@@ -148,8 +148,9 @@ Cal.ns["30min"]("ui", {
         />
         <span class="logo-text">Tim</span>
       </router-link>
+      <span class="brand-divider" aria-hidden="true"></span>
       <button
-        class="cmdk-btn block-btn"
+        class="cmdk-btn"
         @click="openPalette"
         :aria-label="$t('cmd.open')"
       >
@@ -369,29 +370,44 @@ nav.scrolled {
   margin-top: 10px;
 }
 
+/* Brand dock — matches the nav + tools docks (shared recipe below) */
 .nav-left {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.6rem;
   justify-self: start;
+  border-radius: 12px;
+  padding: 4px 4px 4px 8px;
+  background: rgba(255, 255, 255, 0.04);
+  outline: 1px solid rgba(94, 201, 255, 0.1);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.28),
+    0 0 0 1px rgba(94, 201, 255, 0.05) inset;
+  backdrop-filter: blur(12px);
 }
 .logo {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.45rem;
+  padding: 0.25rem;
   z-index: 1;
 }
 .logo-img {
-  height: 26px;
+  height: 22px;
   width: auto;
   display: block;
   object-fit: contain;
 }
 .logo-text {
   font-family: "Cal Sans", sans-serif;
-  font-size: 2rem;
+  font-size: 1.5rem;
   letter-spacing: 1px;
   color: var(--text);
+}
+.brand-divider {
+  width: 1px;
+  height: 20px;
+  flex-shrink: 0;
+  background: rgba(94, 201, 255, 0.18);
 }
 
 /* Shared pill style — desktop nav groups + mobile right */
@@ -484,36 +500,45 @@ nav.scrolled {
   letter-spacing: 0.08em;
 }
 
-/* ⌘K command-palette trigger — standalone search pill beside the logo */
+/* ⌘K command-palette trigger — icon button inside the brand dock */
 .cmdk-btn {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.45rem 0.7rem;
-  border-radius: 10px;
+  gap: 0;
+  padding: 0.4rem 0.55rem;
+  border-radius: 8px;
   font-family: "Poppins", sans-serif;
   color: var(--text);
-  opacity: 0.6;
-  background: rgba(255, 255, 255, 0.04);
-  outline: 1px solid rgba(94, 201, 255, 0.1);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.28),
-    0 0 0 1px rgba(94, 201, 255, 0.05) inset;
-  backdrop-filter: blur(12px);
-  transition: opacity 0.2s ease, background 0.22s ease, color 0.2s ease,
-    box-shadow 0.22s ease;
+  opacity: 0.55;
+  /* reset the UA default button background (grey buttonface) */
+  background: transparent;
+  transition: opacity 0.2s ease, background 0.22s ease, color 0.2s ease;
 }
 .cmdk-btn:hover {
   opacity: 1;
   color: var(--accent);
   background: rgba(94, 201, 255, 0.07);
-  box-shadow: 0 0 0 1px rgba(94, 201, 255, 0.12);
+}
+.cmdk-btn:active {
+  transform: scale(0.95);
 }
 .cmdk-btn i {
   font-size: 1rem;
 }
+/* Hint reveals on hover so the dock stays compact at rest */
 .cmdk-hint {
   display: flex;
   gap: 2px;
+  max-width: 0;
+  margin-left: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-width 0.25s ease, margin-left 0.25s ease, opacity 0.2s ease;
+}
+.cmdk-btn:hover .cmdk-hint {
+  max-width: 3rem;
+  margin-left: 0.4rem;
+  opacity: 1;
 }
 .cmdk-hint kbd {
   font-family: "Poppins", sans-serif;
@@ -808,8 +833,23 @@ nav.scrolled {
   }
   .nav-links,
   .nav-right,
-  .cmdk-btn {
+  .cmdk-btn,
+  .brand-divider {
     display: none;
+  }
+  /* Brand dock reverts to a bare logo on mobile */
+  .nav-left {
+    background: none;
+    outline: none;
+    box-shadow: none;
+    backdrop-filter: none;
+    padding: 0;
+  }
+  .logo-img {
+    height: 26px;
+  }
+  .logo-text {
+    font-size: 2rem;
   }
   .mobile-right {
     display: flex;
@@ -859,20 +899,26 @@ nav.scrolled {
   box-shadow: 0 0 12px rgba(53, 107, 208, 0.1);
 }
 
+/* Brand dock — light theme (desktop only; mobile keeps the bare logo) */
+@media (min-width: 901px) {
+  [data-theme="light"] .nav-left {
+    background: rgba(255, 255, 255, 0.7);
+    outline: 1px solid rgba(53, 107, 208, 0.14);
+    box-shadow: 0 4px 20px rgba(53, 107, 208, 0.08),
+      0 1px 0 rgba(255, 255, 255, 0.9) inset;
+  }
+}
+[data-theme="light"] .brand-divider {
+  background: rgba(53, 107, 208, 0.18);
+}
+[data-theme="light"] .cmdk-btn:hover {
+  background: rgba(53, 107, 208, 0.07);
+  color: var(--primary);
+}
 /* ⌘K hint — light theme */
 [data-theme="light"] .cmdk-hint kbd {
   background: rgba(53, 107, 208, 0.06);
   border-color: rgba(53, 107, 208, 0.16);
-}
-[data-theme="light"] .cmdk-btn {
-  background: rgba(255, 255, 255, 0.7);
-  outline: 1px solid rgba(53, 107, 208, 0.14);
-  box-shadow: 0 4px 20px rgba(53, 107, 208, 0.08),
-    0 1px 0 rgba(255, 255, 255, 0.9) inset;
-}
-[data-theme="light"] .cmdk-btn:hover {
-  background: rgba(53, 107, 208, 0.07);
-  box-shadow: 0 0 0 1px rgba(53, 107, 208, 0.12);
 }
 
 /* Mobile menu — light theme */
