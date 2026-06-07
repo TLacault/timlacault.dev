@@ -1,4 +1,6 @@
 <script>
+import { radioState, radioControls } from "@/stores/radio";
+
 // Auto-load every track in src/assets/radio (mp3 + matching cover image).
 // Webpack require.context resolves these at build time.
 function loadTracks() {
@@ -70,6 +72,32 @@ export default {
   },
   mounted() {
     this.applyVolume();
+
+    // Register controls + state into the shared bridge so the command palette
+    // (and anything else) can drive the radio. Methods are bound to this vm.
+    radioControls.togglePlay = this.togglePlay.bind(this);
+    radioControls.next = this.next.bind(this);
+    radioControls.prev = this.prev.bind(this);
+    radioControls.toggleShuffle = this.toggleShuffle.bind(this);
+    radioControls.toggleLoop = this.toggleLoop.bind(this);
+    radioControls.expand = () => {
+      this.expanded = true;
+    };
+
+    // Keep the shared mirror in sync with local state.
+    const sync = () => {
+      radioState.playing = this.playing;
+      radioState.shuffle = this.shuffle;
+      radioState.loop = this.loop;
+      radioState.title = this.current?.title || "";
+      radioState.artist = this.current?.artist || "";
+    };
+    this.$watch(
+      () => [this.playing, this.shuffle, this.loop, this.index],
+      sync
+    );
+    sync();
+    radioState.ready = !!this.current;
   },
   beforeUnmount() {
     window.removeEventListener("pointermove", this.onDragMove);

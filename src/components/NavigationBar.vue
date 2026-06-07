@@ -1,20 +1,24 @@
 <script>
 import logoBlack from "@/assets/logo_black.png";
 import logoWhite from "@/assets/logo_white.png";
+import { themeState, toggleTheme } from "@/stores/theme";
 
 export default {
   name: "NavigationBar",
   data() {
     return {
-      theme: localStorage.getItem("theme") || "dark",
       logoBlack,
       logoWhite,
       menuOpen: false,
       scrolled: false,
     };
   },
+  computed: {
+    theme() {
+      return themeState.theme;
+    },
+  },
   mounted() {
-    document.documentElement.setAttribute("data-theme", this.theme);
     this._onScroll = () => {
       this.scrolled = window.scrollY > 30;
     };
@@ -25,31 +29,11 @@ export default {
   },
   methods: {
     toggleTheme(e) {
-      const next = this.theme === "dark" ? "light" : "dark";
-      this.theme = next;
-      localStorage.setItem("theme", next);
-
-      if (document.startViewTransition && e?.currentTarget) {
-        const rect = e.currentTarget.getBoundingClientRect();
-        document.documentElement.style.setProperty(
-          "--vt-x",
-          `${Math.round(rect.left + rect.width / 2)}px`
-        );
-        document.documentElement.style.setProperty(
-          "--vt-y",
-          `${Math.round(rect.top + rect.height / 2)}px`
-        );
-        // Suppress element-level transitions while the overlay animates
-        document.documentElement.classList.add("vt-running");
-        const t = document.startViewTransition(() => {
-          document.documentElement.setAttribute("data-theme", next);
-        });
-        t.finished.finally(() => {
-          document.documentElement.classList.remove("vt-running");
-        });
-      } else {
-        document.documentElement.setAttribute("data-theme", next);
-      }
+      toggleTheme(e?.currentTarget);
+    },
+    openPalette() {
+      this.closeMenu();
+      window.dispatchEvent(new CustomEvent("open-command-palette"));
     },
     toggleLocale() {
       const next = this.$locale.locale === "en" ? "fr" : "en";
@@ -127,16 +111,26 @@ Cal.ns["30min"]("ui", {
 
 <template>
   <nav class="slide-in" :class="{ 'menu-open': menuOpen, scrolled: scrolled }">
-    <!-- Logo -->
-    <router-link to="/" class="logo" @click="closeMenu">
-      <img
-        :src="theme === 'dark' ? logoWhite : logoBlack"
-        class="logo-img"
-        alt=""
-        aria-hidden="true"
-      />
-      <span class="logo-text">Tim</span>
-    </router-link>
+    <!-- Left: logo + command palette -->
+    <div class="nav-left">
+      <router-link to="/" class="logo" @click="closeMenu">
+        <img
+          :src="theme === 'dark' ? logoWhite : logoBlack"
+          class="logo-img"
+          alt=""
+          aria-hidden="true"
+        />
+        <span class="logo-text">Tim</span>
+      </router-link>
+      <button
+        class="cmdk-btn block-btn"
+        @click="openPalette"
+        :aria-label="$t('cmd.open')"
+      >
+        <i class="ri-search-line"></i>
+        <span class="cmdk-hint"><kbd>⌘</kbd><kbd>K</kbd></span>
+      </button>
+    </div>
 
     <!-- Desktop nav links -->
     <div class="nav-links">
@@ -187,8 +181,15 @@ Cal.ns["30min"]("ui", {
       </button>
     </div>
 
-    <!-- Mobile right: lang + theme + burger -->
+    <!-- Mobile right: search + lang + theme + burger -->
     <div class="mobile-right">
+      <button
+        class="cmdk-toggle block-btn"
+        @click="openPalette"
+        :aria-label="$t('cmd.open')"
+      >
+        <i class="ri-search-line"></i>
+      </button>
       <button
         class="lang-toggle block-btn"
         @click="toggleLocale"
@@ -267,8 +268,10 @@ nav {
   top: 0;
   left: 50%;
   transform: translateX(-50%);
-  display: flex;
-  justify-content: space-between;
+  /* 3 balanced zones: side columns are equal (1fr) so the center links pill
+     stays perfectly centered and can never be overlapped by either side. */
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
   width: 90vw;
   max-width: 1100px;
@@ -290,6 +293,12 @@ nav.scrolled {
   margin-top: 10px;
 }
 
+.nav-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  justify-self: start;
+}
 .logo {
   display: flex;
   align-items: center;
@@ -325,9 +334,10 @@ nav.scrolled {
   backdrop-filter: blur(12px);
 }
 .nav-links {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
+  justify-self: center;
+}
+.nav-right {
+  justify-self: end;
 }
 .nav-links .block-btn,
 .nav-right .block-btn,
@@ -396,6 +406,63 @@ nav.scrolled {
   font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.08em;
+}
+
+/* ⌘K command-palette trigger — standalone search pill beside the logo */
+.cmdk-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.7rem;
+  border-radius: 10px;
+  font-family: "Poppins", sans-serif;
+  color: var(--text);
+  opacity: 0.6;
+  background: rgba(255, 255, 255, 0.04);
+  outline: 1px solid rgba(94, 201, 255, 0.1);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.28),
+    0 0 0 1px rgba(94, 201, 255, 0.05) inset;
+  backdrop-filter: blur(12px);
+  transition: opacity 0.2s ease, background 0.22s ease, color 0.2s ease,
+    box-shadow 0.22s ease;
+}
+.cmdk-btn:hover {
+  opacity: 1;
+  color: var(--accent);
+  background: rgba(94, 201, 255, 0.07);
+  box-shadow: 0 0 0 1px rgba(94, 201, 255, 0.12);
+}
+.cmdk-btn i {
+  font-size: 1rem;
+}
+.cmdk-hint {
+  display: flex;
+  gap: 2px;
+}
+.cmdk-hint kbd {
+  font-family: "Poppins", sans-serif;
+  font-size: 0.62rem;
+  font-weight: 700;
+  line-height: 1;
+  padding: 3px 4px;
+  min-width: 16px;
+  text-align: center;
+  border-radius: 4px;
+  color: var(--text-muted);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+.cmdk-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.05rem;
+  color: var(--text);
+  opacity: 0.55;
+}
+.cmdk-toggle:hover {
+  opacity: 1;
+  color: var(--accent);
 }
 
 /* Burger button */
@@ -517,10 +584,16 @@ nav.scrolled {
   transform: translateY(-12px);
 }
 
-/* Responsive breakpoint */
-@media (max-width: 768px) {
+/* Responsive breakpoint — collapse to the burger menu while there's still room,
+   so the full desktop nav never gets cramped. */
+@media (max-width: 900px) {
+  nav {
+    display: flex;
+    justify-content: space-between;
+  }
   .nav-links,
-  .nav-right {
+  .nav-right,
+  .cmdk-btn {
     display: none;
   }
   .mobile-right {
@@ -569,6 +642,22 @@ nav.scrolled {
   border: 1px solid rgba(53, 107, 208, 0.22);
   color: var(--primary);
   box-shadow: 0 0 12px rgba(53, 107, 208, 0.1);
+}
+
+/* ⌘K hint — light theme */
+[data-theme="light"] .cmdk-hint kbd {
+  background: rgba(53, 107, 208, 0.06);
+  border-color: rgba(53, 107, 208, 0.16);
+}
+[data-theme="light"] .cmdk-btn {
+  background: rgba(255, 255, 255, 0.7);
+  outline: 1px solid rgba(53, 107, 208, 0.14);
+  box-shadow: 0 4px 20px rgba(53, 107, 208, 0.08),
+    0 1px 0 rgba(255, 255, 255, 0.9) inset;
+}
+[data-theme="light"] .cmdk-btn:hover {
+  background: rgba(53, 107, 208, 0.07);
+  box-shadow: 0 0 0 1px rgba(53, 107, 208, 0.12);
 }
 
 /* Mobile menu — light theme */
