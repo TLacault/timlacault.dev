@@ -2,6 +2,15 @@
 import logoBlack from "@/assets/logo_black.png";
 import logoWhite from "@/assets/logo_white.png";
 import { themeState, toggleTheme } from "@/stores/theme";
+import {
+  presenceState,
+  startPresence,
+  fmtTime,
+  statusLabel,
+  dotClass,
+  githubText,
+  relativeTime,
+} from "@/stores/presence";
 
 export default {
   name: "NavigationBar",
@@ -11,14 +20,28 @@ export default {
       logoWhite,
       menuOpen: false,
       scrolled: false,
+      pres: presenceState,
     };
   },
   computed: {
     theme() {
       return themeState.theme;
     },
+    presTime() {
+      return fmtTime(this.pres.nowTs);
+    },
+    presStatus() {
+      return statusLabel(this.$t, this.pres.nowTs);
+    },
+    presDot() {
+      return dotClass(this.pres.discordStatus, this.pres.nowTs);
+    },
+    presGithub() {
+      return githubText(this.$t, this.pres.github);
+    },
   },
   mounted() {
+    startPresence();
     this._onScroll = () => {
       this.scrolled = window.scrollY > 30;
     };
@@ -58,6 +81,9 @@ export default {
     },
     closeMenu() {
       this.menuOpen = false;
+    },
+    presRelative(at) {
+      return relativeTime(this.$t, at, this.pres.nowTs);
     },
   },
 };
@@ -256,6 +282,56 @@ Cal.ns["30min"]("ui", {
             <i class="ri-calendar-event-line"></i>
             <span>{{ $t("nav.bookCall") }}</span>
           </div>
+        </div>
+      </div>
+
+      <!-- Live presence — separate island beneath the menu -->
+      <div class="mobile-presence">
+        <div class="mp-head">
+          <span class="dot live" :class="presDot"></span>
+          <span>{{ $t("presence.label") }}</span>
+        </div>
+
+        <div class="mp-row">
+          <span class="mp-ico grape">🍇</span>
+          <div class="mp-body">
+            <span class="mp-main">
+              {{ presTime }}
+              <span class="mp-muted">· {{ $t("presence.bordeaux") }}</span>
+            </span>
+            <span class="mp-sub">{{ presStatus }}</span>
+          </div>
+        </div>
+
+        <a
+          v-if="pres.github"
+          class="mp-row link"
+          :href="pres.github.url"
+          target="_blank"
+          rel="noopener"
+          @click="closeMenu"
+        >
+          <span class="mp-ico"><i class="ri-github-line"></i></span>
+          <div class="mp-body">
+            <span class="mp-main">{{ presGithub }}</span>
+            <span class="mp-sub">{{ presRelative(pres.github.at) }}</span>
+          </div>
+          <i class="ri-arrow-right-up-line mp-go"></i>
+        </a>
+
+        <div v-if="pres.spotify" class="mp-row">
+          <img class="mp-art" :src="pres.spotify.art" alt="" />
+          <div class="mp-body">
+            <span class="mp-main">{{ pres.spotify.song }}</span>
+            <span class="mp-sub">{{ pres.spotify.artist }}</span>
+          </div>
+          <i class="ri-spotify-fill mp-sp"></i>
+        </div>
+        <div v-else class="mp-row">
+          <span class="mp-ico"><i class="ri-headphone-line"></i></span>
+          <span class="mp-main mp-muted">{{
+            $t("presence.notListening")
+          }}</span>
         </div>
       </div>
     </div>
@@ -552,6 +628,145 @@ nav.scrolled {
   padding-top: 0.75rem;
   border-top: 1px solid rgba(255, 255, 255, 0.07);
 }
+
+/* Live presence — detached island beneath the burger menu */
+.mobile-presence {
+  pointer-events: all;
+  margin-top: 0.6rem;
+  padding: 1rem;
+  border-radius: 16px;
+  background: rgba(5, 9, 15, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(94, 201, 255, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+.mp-head {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0 0.25rem 0.35rem;
+  font-family: "Poppins", sans-serif;
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+.mp-row {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  padding: 0.5rem 0.25rem;
+  border-radius: 10px;
+  font-family: "Poppins", sans-serif;
+}
+.mp-row.link {
+  transition: background 0.2s ease;
+}
+.mp-row.link:active {
+  background: rgba(94, 201, 255, 0.08);
+}
+.mp-ico {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+  border-radius: 8px;
+  font-size: 1.05rem;
+  color: var(--text-muted);
+  background: var(--glow-card-border);
+}
+.mp-art {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+.mp-body {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+.mp-main {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mp-muted {
+  color: var(--text-muted);
+  font-weight: 400;
+}
+.mp-sub {
+  font-size: 0.7rem;
+  color: var(--text-subtle);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mp-go {
+  font-size: 0.95rem;
+  color: var(--text-faint);
+  flex-shrink: 0;
+}
+.mp-sp {
+  font-size: 1.15rem;
+  color: #1db954;
+  flex-shrink: 0;
+}
+/* live status dot (matches the floating widget) */
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--text-subtle);
+}
+.dot.online {
+  background: #3ba55d;
+}
+.dot.idle {
+  background: #faa81a;
+}
+.dot.dnd {
+  background: #ed4245;
+}
+.dot.offline {
+  background: #747f8d;
+}
+.dot.live {
+  position: relative;
+}
+.dot.live::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: inherit;
+  animation: ping 2s ease-out infinite;
+}
+@keyframes ping {
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(2.6);
+    opacity: 0;
+  }
+}
 .mobile-call-btn {
   display: flex;
   align-items: center;
@@ -676,5 +891,16 @@ nav.scrolled {
 }
 [data-theme="light"] .mobile-menu-footer {
   border-top-color: rgba(0, 0, 0, 0.08);
+}
+[data-theme="light"] .mobile-presence {
+  background: rgba(240, 244, 252, 0.95);
+  border-color: rgba(0, 0, 0, 0.1);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dot.live::after {
+    animation: none;
+  }
 }
 </style>
