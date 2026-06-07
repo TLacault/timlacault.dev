@@ -80,7 +80,7 @@ export default {
     <div class="marquee-wrap" aria-hidden="true">
       <div class="marquee-track track-fwd">
         <div
-          v-for="(t, i) in [...row1, ...row1]"
+          v-for="(t, i) in [...row1, ...row1, ...row1]"
           :key="'r1-' + i"
           class="t-card"
         >
@@ -106,7 +106,7 @@ export default {
     <div class="marquee-wrap" aria-hidden="true">
       <div class="marquee-track track-rev">
         <div
-          v-for="(t, i) in [...row2, ...row2]"
+          v-for="(t, i) in [...row2, ...row2, ...row2]"
           :key="'r2-' + i"
           class="t-card"
         >
@@ -137,8 +137,11 @@ export default {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 3rem;
-  overflow: hidden;
+  /* gap is 0; vertical rhythm comes from the marquee-wrap padding below so the
+     card hover glow has opaque room to paint inside the masked box */
+  gap: 0;
+  /* let the top glow + card hover glow bleed past the section */
+  overflow: visible;
   position: relative;
 }
 .fl-testimonials::before {
@@ -184,7 +187,13 @@ export default {
 /* Marquee wrapper */
 .marquee-wrap {
   width: 100%;
-  overflow: hidden;
+  /* Vertical padding gives the cards' hover glow room to paint *inside* the
+     masked box (where the mask is fully opaque), so it isn't clipped. The
+     negative margin between rows below reclaims this space for layout. */
+  padding-block: 4rem;
+  /* No overflow:hidden — it would crop the cards' hover glow top/bottom.
+     The mask fades horizontal edges; repeat-y keeps it opaque vertically
+     (glow shows) while leaving horizontal beyond-box content clipped. */
   mask-image: linear-gradient(
     to right,
     transparent,
@@ -192,6 +201,8 @@ export default {
     black 90%,
     transparent
   );
+  mask-repeat: repeat-y;
+  mask-size: 100% 100%;
   -webkit-mask-image: linear-gradient(
     to right,
     transparent,
@@ -199,6 +210,13 @@ export default {
     black 90%,
     transparent
   );
+  -webkit-mask-repeat: repeat-y;
+  -webkit-mask-size: 100% 100%;
+}
+/* Pull the second row back up so the 4rem paint-padding doesn't inflate the
+   gap between rows — net vertical rhythm stays the same. */
+.marquee-wrap + .marquee-wrap {
+  margin-top: -4rem;
 }
 .marquee-wrap:hover .marquee-track {
   animation-play-state: paused;
@@ -208,7 +226,9 @@ export default {
 .marquee-track {
   display: flex;
   width: max-content;
-  gap: 1.25rem;
+  /* Gap lives on each card (margin-right) so every copy — including across the
+     loop boundary — has identical width. Flex `gap` omits the trailing gap,
+     which breaks seamless tiling. */
   padding: 0.5rem 0;
 }
 .track-fwd {
@@ -217,12 +237,13 @@ export default {
 .track-rev {
   animation: marquee-left 28s linear infinite reverse;
 }
+/* 3 identical copies → translating exactly one copy (-33.3333%) loops seamlessly */
 @keyframes marquee-left {
   0% {
     transform: translateX(0);
   }
   100% {
-    transform: translateX(-50%);
+    transform: translateX(-33.3333%);
   }
 }
 
@@ -230,6 +251,7 @@ export default {
 .t-card {
   flex-shrink: 0;
   width: 320px;
+  margin-right: 1.25rem;
   padding: 1.5rem;
   border-radius: 16px;
   background: var(--glow-card-bg);

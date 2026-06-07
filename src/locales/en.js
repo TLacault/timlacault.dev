@@ -73,7 +73,8 @@ export default {
     titleLine1: "I turn your ideas",
     titleLine2: "into ",
     titleEm: "real products.",
-    tagline1: "Full-stack web development & design — from concept to launch.",
+    tagline1: "Full-stack web development & design",
+    tagline1b: "from concept to launch",
     tagline2: "Clean code. Fast delivery. No surprises.",
     bookCall: "Book a free call",
     sendBrief: "Send a brief",
@@ -123,7 +124,7 @@ export default {
     titleLine2: "you're ",
     titleEm: "proud of.",
     sub: "One conversation is all it takes to figure out if we're a good fit. No strings attached.",
-    avail: "Available · Taking projects from June 2025",
+    avail: "Available · Taking projects from",
     bookCall: "Book a free call",
     buildLabel: "I can build",
     buildSub: "across industries and stacks.",
@@ -160,5 +161,14 @@ export default {
     successAnother: "Send another",
     errorDefault:
       "Something went wrong. Try emailing me directly at lacault.tim@gmail.com",
+    errorRequired: "Please fill in all fields before sending.",
+    hireLabel: "Open to work",
+    hireTitle: "Hire me?",
+    hireSub:
+      "Seeking a SWE internship or full-time position — remote or hybrid.",
+    hireBadge1: "SWE internship · position",
+    hireBadge2: "Available immediately",
+    channelsTitle: "Reach me directly",
+    formTitle: "Send a message",
   },
 };

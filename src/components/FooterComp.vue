@@ -1,14 +1,19 @@
 <script>
+import logoBlack from "@/assets/logo_black.png";
+import logoWhite from "@/assets/logo_white.png";
+
 export default {
   name: "FooterComp",
   data() {
     return {
       year: new Date().getFullYear(),
+      logoBlack,
+      logoWhite,
       links: [
-        { label: "Home", to: "/" },
-        { label: "Projects", to: "/project" },
-        { label: "Freelance", to: "/freelance" },
-        { label: "Contact", to: "/contact" },
+        { label: "Home", to: "/", icon: "ri-home-4-line" },
+        { label: "Projects", to: "/project", icon: "ri-folder-line" },
+        { label: "Freelance", to: "/freelance", icon: "ri-briefcase-line" },
+        { label: "Contact", to: "/contact", icon: "ri-mail-line" },
       ],
       socials: [
         {
@@ -37,7 +42,21 @@ export default {
     <div class="footer-inner">
       <div class="footer-top">
         <div class="footer-brand">
-          <router-link to="/" class="footer-logo">Tim</router-link>
+          <router-link to="/" class="footer-logo">
+            <img
+              :src="logoWhite"
+              class="footer-logo-img footer-logo-dark"
+              alt=""
+              aria-hidden="true"
+            />
+            <img
+              :src="logoBlack"
+              class="footer-logo-img footer-logo-light"
+              alt=""
+              aria-hidden="true"
+            />
+            <span>Tim</span>
+          </router-link>
           <p class="footer-tagline">{{ $t("footer.tagline") }}</p>
         </div>
 
@@ -47,8 +66,10 @@ export default {
             :key="link.label"
             :to="link.to"
             class="footer-link"
-            >{{ $t(`nav.${link.label.toLowerCase()}`) }}</router-link
           >
+            <i :class="link.icon"></i>
+            <span>{{ $t(`nav.${link.label.toLowerCase()}`) }}</span>
+          </router-link>
         </nav>
 
         <div class="footer-socials">
@@ -115,6 +136,9 @@ footer {
   gap: 0.5rem;
 }
 .footer-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   font-family: "Cal Sans", sans-serif;
   font-size: 1.75rem;
   color: var(--text);
@@ -123,6 +147,12 @@ footer {
 }
 .footer-logo:hover {
   color: var(--accent);
+}
+.footer-logo-img {
+  height: 26px;
+  width: auto;
+  display: block;
+  object-fit: contain;
 }
 .footer-tagline {
   font-family: "Poppins", sans-serif;
@@ -140,12 +170,20 @@ footer {
   gap: 0.6rem;
 }
 .footer-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
   font-family: "Poppins", sans-serif;
   font-size: 0.875rem;
   font-weight: 500;
   color: var(--text);
   opacity: 0.5;
   transition: opacity 0.2s ease, color 0.2s ease;
+}
+.footer-link i {
+  font-size: 1rem;
+  color: var(--accent);
+  opacity: 0.8;
 }
 .footer-link:hover {
   opacity: 1;
@@ -218,5 +256,17 @@ footer {
     flex-wrap: wrap;
     gap: 0.5rem 1.25rem;
   }
+}
+</style>
+
+<style>
+/* Theme-based logo swap — unscoped so it can read data-theme on <html>.
+   (Must NOT use scoped :global() here: the compiler collapses it to
+   `[data-theme=dark]{display:none}` and hides the whole page.) */
+[data-theme="light"] .footer-logo-dark {
+  display: none;
+}
+[data-theme="dark"] .footer-logo-light {
+  display: none;
 }
 </style>

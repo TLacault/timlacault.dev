@@ -1,9 +1,14 @@
 <script>
+import logoBlack from "@/assets/logo_black.png";
+import logoWhite from "@/assets/logo_white.png";
+
 export default {
   name: "NavigationBar",
   data() {
     return {
       theme: localStorage.getItem("theme") || "dark",
+      logoBlack,
+      logoWhite,
       menuOpen: false,
       scrolled: false,
     };
@@ -124,6 +129,12 @@ Cal.ns["30min"]("ui", {
   <nav class="slide-in" :class="{ 'menu-open': menuOpen, scrolled: scrolled }">
     <!-- Logo -->
     <router-link to="/" class="logo" @click="closeMenu">
+      <img
+        :src="theme === 'dark' ? logoWhite : logoBlack"
+        class="logo-img"
+        alt=""
+        aria-hidden="true"
+      />
       <span class="logo-text">Tim</span>
     </router-link>
 
@@ -159,6 +170,7 @@ Cal.ns["30min"]("ui", {
           $locale.locale === 'en' ? $t('nav.switchToFr') : $t('nav.switchToEn')
         "
       >
+        <i class="ri-translate-2"></i>
         <span class="lang-label">{{
           $locale.locale === "en" ? "FR" : "EN"
         }}</span>
@@ -184,6 +196,7 @@ Cal.ns["30min"]("ui", {
           $locale.locale === 'en' ? $t('nav.switchToFr') : $t('nav.switchToEn')
         "
       >
+        <i class="ri-translate-2"></i>
         <span class="lang-label">{{
           $locale.locale === "en" ? "FR" : "EN"
         }}</span>
@@ -280,7 +293,14 @@ nav.scrolled {
 .logo {
   display: flex;
   align-items: center;
+  gap: 0.5rem;
   z-index: 1;
+}
+.logo-img {
+  height: 26px;
+  width: auto;
+  display: block;
+  object-fit: contain;
 }
 .logo-text {
   font-family: "Cal Sans", sans-serif;
@@ -360,6 +380,7 @@ nav.scrolled {
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 0.3rem;
   font-size: 1.05rem;
   color: var(--text);
   opacity: 0.55;
@@ -372,7 +393,7 @@ nav.scrolled {
 
 .lang-label {
   font-family: "Poppins", sans-serif;
-  font-size: 0.7rem;
+  font-size: 0.68rem;
   font-weight: 700;
   letter-spacing: 0.08em;
 }

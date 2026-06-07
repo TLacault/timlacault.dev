@@ -41,17 +41,17 @@ export default {
       </h1>
 
       <p class="tagline slide-up" style="--delay: 0.22s">
-        {{ $t("flHero.tagline1") }}
+        {{ $t("flHero.tagline1") }}<br />{{ $t("flHero.tagline1b") }}
         <br class="br-desk" />{{ $t("flHero.tagline2") }}
       </p>
 
       <div class="cta-row slide-up" style="--delay: 0.34s">
         <GlowButton
-          tag="a"
-          href="https://cal.com/tim-lacault/30min"
-          target="_blank"
           variant="primary"
           size="lg"
+          data-cal-link="tim-lacault/30min"
+          data-cal-namespace="30min"
+          data-cal-config='{"layout":"month_view","theme":"auto"}'
         >
           {{ $t("flHero.bookCall") }}
           <i class="ri-calendar-event-line"></i>
@@ -71,7 +71,7 @@ export default {
     <div class="ticker slide-up" style="--delay: 0.5s" aria-hidden="true">
       <div class="ticker-track">
         <span
-          v-for="(t, i) in [...tickers, ...tickers]"
+          v-for="(t, i) in [...tickers, ...tickers, ...tickers]"
           :key="i"
           class="ticker-item"
           >{{ t }}<span class="sep">·</span></span
@@ -90,7 +90,8 @@ export default {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
+  /* let decorative glows bleed past the section; #app clips horizontal scroll */
+  overflow: visible;
   gap: 5rem;
 }
 
@@ -262,12 +263,13 @@ h1 em {
   color: var(--accent);
   opacity: 0.45;
 }
+/* 3 identical copies → translating exactly one copy (-33.3333%) loops seamlessly */
 @keyframes ticker-scroll {
   0% {
     transform: translateX(0);
   }
   100% {
-    transform: translateX(-50%);
+    transform: translateX(-33.3333%);
   }
 }
 

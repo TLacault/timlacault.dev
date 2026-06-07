@@ -2,6 +2,7 @@
 import Lenis from "lenis";
 import NavigationBar from "@/components/NavigationBar.vue";
 import FooterComp from "@/components/FooterComp.vue";
+import RadioPlayer from "@/components/RadioPlayer.vue";
 
 document.title = "Tim Lacault - Portfolio";
 const theme = localStorage.getItem("theme") || "dark";
@@ -9,7 +10,7 @@ document.documentElement.setAttribute("data-theme", theme);
 
 export default {
   name: "App",
-  components: { NavigationBar, FooterComp },
+  components: { NavigationBar, FooterComp, RadioPlayer },
   mounted() {
     this.lenis = new Lenis({
       duration: 1.15,
@@ -46,6 +47,7 @@ export default {
   </router-view>
   <!-- <ChatBot /> -->
   <FooterComp />
+  <RadioPlayer />
 </template>
 
 <style>
@@ -96,6 +98,8 @@ body {
   transition: all 0.3s ease-in-out;
   font-family: "Inter", sans-serif;
   font-weight: 500;
+  /* kill the blue tap-highlight box on mobile */
+  -webkit-tap-highlight-color: transparent;
 }
 
 ul {

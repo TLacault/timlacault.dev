@@ -83,11 +83,11 @@ export default {
           <i class="ri-arrow-right-line"></i>
         </GlowButton>
         <GlowButton
-          tag="a"
-          href="https://cal.com/tim-lacault/30min"
-          target="_blank"
           variant="ghost"
           size="lg"
+          data-cal-link="tim-lacault/30min"
+          data-cal-namespace="30min"
+          data-cal-config='{"layout":"month_view","theme":"auto"}'
         >
           {{ $t("hero.bookCall") }}
           <i class="ri-calendar-event-line"></i>
@@ -145,7 +145,8 @@ export default {
   justify-content: center;
   min-height: 100dvh;
   width: 100%;
-  overflow: hidden;
+  /* let decorative glows bleed past the section; #app clips horizontal scroll */
+  overflow: visible;
 }
 
 /* Glows */

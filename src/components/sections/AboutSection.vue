@@ -6,22 +6,63 @@ export default {
   components: { GlowButton },
   data() {
     return {
+      // Pulled from resume.md — languages, web, tooling.
       stack: [
-        { name: "Vue.js", icon: "ri-vuejs-line" },
-        { name: "React", icon: "ri-reactjs-line" },
+        { name: "C", icon: "ri-code-s-slash-line" },
+        { name: "C++", icon: "ri-braces-line" },
+        { name: "Python", icon: "ri-terminal-box-line" },
+        { name: "Java", icon: "ri-cup-line" },
+        { name: "OCaml", icon: "ri-code-box-line" },
+        { name: "Assembly", icon: "ri-cpu-line" },
+        { name: "JavaScript", icon: "ri-javascript-line" },
         { name: "TypeScript", icon: "ri-code-s-slash-line" },
+        { name: "HTML", icon: "ri-html5-line" },
+        { name: "CSS / Sass", icon: "ri-css3-line" },
+        { name: "Vue.js", icon: "ri-vuejs-line" },
+        { name: "Nuxt", icon: "ri-triangle-line" },
         { name: "Node.js", icon: "ri-nodejs-line" },
-        { name: "Python", icon: "ri-python-line" },
-        { name: "Docker", icon: "ri-server-line" },
+        { name: "Express", icon: "ri-server-line" },
+        { name: "REST / Swagger", icon: "ri-global-line" },
         { name: "PostgreSQL", icon: "ri-database-2-line" },
+        { name: "Prisma ORM", icon: "ri-database-line" },
         { name: "Git", icon: "ri-git-branch-line" },
+        { name: "GitHub", icon: "ri-github-line" },
+        { name: "GitLab", icon: "ri-gitlab-line" },
+        { name: "Docker", icon: "ri-box-3-line" },
+        { name: "CI/CD", icon: "ri-git-merge-line" },
+        { name: "Azure", icon: "ri-microsoft-line" },
+        { name: "Vercel", icon: "ri-rocket-line" },
+        { name: "Linux", icon: "ri-ubuntu-line" },
+        { name: "SSH", icon: "ri-terminal-line" },
+        { name: "Copilot / MCP", icon: "ri-robot-line" },
+        { name: "MQTT", icon: "ri-broadcast-line" },
+        { name: "Node-RED", icon: "ri-flow-chart" },
+        { name: "Shopify", icon: "ri-shopping-bag-line" },
+        { name: "Google APIs", icon: "ri-google-line" },
+        { name: "JWT / OpenID", icon: "ri-key-2-line" },
       ],
+      stackPerPage: 8,
+      stackPage: 0,
       stats: [
         { value: "10+", label: "Projects shipped" },
         { value: "6+", label: "Years coding" },
         { value: "∞", label: "Curiosity" },
       ],
     };
+  },
+  computed: {
+    stackPageCount() {
+      return Math.ceil(this.stack.length / this.stackPerPage);
+    },
+    pagedStack() {
+      const start = this.stackPage * this.stackPerPage;
+      return this.stack.slice(start, start + this.stackPerPage);
+    },
+  },
+  methods: {
+    setStackPage(i) {
+      this.stackPage = i;
+    },
   },
 };
 </script>
@@ -64,10 +105,21 @@ export default {
             <i class="ri-code-box-line"></i> {{ $t("about.stackLabel") }}
           </p>
           <div class="stack-grid">
-            <div v-for="tech in stack" :key="tech.name" class="stack-chip">
+            <div v-for="tech in pagedStack" :key="tech.name" class="stack-chip">
               <i :class="tech.icon"></i>
               <span>{{ tech.name }}</span>
             </div>
+          </div>
+          <div class="stack-pagination">
+            <button
+              v-for="i in stackPageCount"
+              :key="i"
+              class="stack-dot"
+              :class="{ active: i - 1 === stackPage }"
+              :aria-label="`Show stack page ${i}`"
+              :aria-current="i - 1 === stackPage"
+              @click="setStackPage(i - 1)"
+            ></button>
           </div>
         </div>
 
@@ -81,11 +133,20 @@ export default {
           <p class="card-label">
             <i class="ri-map-pin-line"></i> {{ $t("about.locationLabel") }}
           </p>
-          <div class="location-inner">
-            <div class="location-map-dot"></div>
-            <div>
-              <p class="location-city">Bordeaux</p>
-              <p class="location-country">France 🇫🇷</p>
+          <div class="location-stack">
+            <div class="location-inner">
+              <div class="location-map-dot"></div>
+              <div>
+                <p class="location-city">Bordeaux</p>
+                <p class="location-country">France 🇫🇷</p>
+              </div>
+            </div>
+            <div class="location-inner">
+              <div class="location-map-dot location-map-dot--alt"></div>
+              <div>
+                <p class="location-city">New York</p>
+                <p class="location-country">USA 🇺🇸</p>
+              </div>
             </div>
           </div>
         </div>
@@ -319,6 +380,8 @@ export default {
 .stack-card {
   grid-column: 3;
   grid-row: 1 / 3;
+  display: flex;
+  flex-direction: column;
 }
 .stack-grid {
   position: relative;
@@ -326,6 +389,35 @@ export default {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0.6rem;
+  margin-top: 0.75rem;
+}
+/* Pagination */
+.stack-pagination {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: auto;
+  padding-top: 1.25rem;
+}
+.stack-dot {
+  width: 7px;
+  height: 7px;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  background: var(--glow-card-border);
+  cursor: pointer;
+  transition: width 0.25s ease, background 0.25s ease;
+}
+.stack-dot:hover {
+  background: var(--text-subtle);
+}
+.stack-dot.active {
+  width: 20px;
+  background: var(--accent);
 }
 .stack-chip {
   display: flex;
@@ -360,9 +452,14 @@ export default {
   grid-column: 1;
   grid-row: 2;
 }
-.location-inner {
+.location-stack {
   position: relative;
   z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+.location-inner {
   display: flex;
   align-items: center;
   gap: 1rem;
@@ -387,6 +484,14 @@ export default {
   border-radius: 50%;
   background: var(--primary);
   box-shadow: 0 0 10px var(--primary);
+}
+.location-map-dot--alt {
+  background: rgba(94, 201, 255, 0.12);
+  border-color: rgba(94, 201, 255, 0.3);
+}
+.location-map-dot--alt::after {
+  background: var(--accent);
+  box-shadow: 0 0 10px var(--accent);
 }
 .location-city {
   font-family: "Cal Sans", sans-serif;

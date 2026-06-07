@@ -133,11 +133,6 @@ export default {
 .service-card:hover .card-glow {
   opacity: 0.8;
 }
-.service-card:hover .service-chips {
-  opacity: 1;
-  transform: translateY(0);
-}
-
 /* Glow overlay */
 .card-glow {
   position: absolute;
@@ -191,14 +186,11 @@ export default {
   background: linear-gradient(to right, var(--glow-card-border), transparent);
 }
 
-/* Chips — revealed on hover */
+/* Chips */
 .service-chips {
   display: flex;
   flex-wrap: wrap;
   gap: 0.35rem;
-  opacity: 0;
-  transform: translateY(6px);
-  transition: opacity 0.25s ease, transform 0.25s ease;
 }
 .chip {
   padding: 0.2rem 0.65rem;

@@ -14,6 +14,13 @@ export default {
     buildItems() {
       return this.$ta("flCta.buildItems");
     },
+    availFrom() {
+      const loc = this.$locale.locale === "fr" ? "fr-FR" : "en-US";
+      const now = new Date();
+      // en-US → "June 2026", fr-FR → "juin 2026" (French months stay lowercase)
+      const month = now.toLocaleString(loc, { month: "long" });
+      return `${month} ${now.getFullYear()}`;
+    },
   },
   mounted() {
     this._rotator = setInterval(() => {
@@ -47,7 +54,7 @@ export default {
 
         <div class="avail-pill">
           <span class="avail-dot"></span>
-          <span>{{ $t("flCta.avail") }}</span>
+          <span>{{ $t("flCta.avail") }} {{ availFrom }}</span>
         </div>
 
         <div class="cta-actions">
@@ -94,7 +101,8 @@ export default {
   padding: 8rem 2rem 10rem;
   display: flex;
   justify-content: center;
-  overflow: hidden;
+  /* let decorative glows bleed past the section; #app clips horizontal scroll */
+  overflow: visible;
 }
 
 /* Background glows */

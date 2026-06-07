@@ -3,9 +3,9 @@ import emailjs from "@emailjs/browser";
 import GlowButton from "@/components/ui/GlowButton.vue";
 
 // Replace these with your EmailJS credentials
-const EMAILJS_SERVICE_ID = "YOUR_SERVICE_ID";
-const EMAILJS_TEMPLATE_ID = "YOUR_TEMPLATE_ID";
-const EMAILJS_PUBLIC_KEY = "YOUR_PUBLIC_KEY";
+const EMAILJS_SERVICE_ID = "service_hxniaw4";
+const EMAILJS_TEMPLATE_ADMIN_ID = "template_nn6a8mb";
+const EMAILJS_PUBLIC_KEY = "foVHr7K1XuV3pMbRN";
 
 export default {
   name: "ContactView",
@@ -21,6 +21,12 @@ export default {
       },
       status: "idle", // idle | loading | success | error
       errorKey: "",
+      fieldErrors: {
+        from_name: false,
+        reply_to: false,
+        subject: false,
+        message: false,
+      },
       channels: [
         {
           icon: "ri-mail-send-line",
@@ -53,19 +59,34 @@ export default {
   methods: {
     async submit() {
       if (this.status === "loading") return;
+      const { from_name, reply_to, subject, message } = this.form;
+      this.fieldErrors = {
+        from_name: !from_name.trim(),
+        reply_to: !reply_to.trim(),
+        subject: !subject.trim(),
+        message: !message.trim(),
+      };
+      if (Object.values(this.fieldErrors).some(Boolean)) return;
       this.status = "loading";
       this.errorKey = "";
       try {
         await emailjs.send(
           EMAILJS_SERVICE_ID,
-          EMAILJS_TEMPLATE_ID,
+          EMAILJS_TEMPLATE_ADMIN_ID,
           { ...this.form },
           // eslint-disable-next-line prettier/prettier
           EMAILJS_PUBLIC_KEY,
         );
         this.status = "success";
         this.form = { from_name: "", reply_to: "", subject: "", message: "" };
-      } catch {
+        this.fieldErrors = {
+          from_name: false,
+          reply_to: false,
+          subject: false,
+          message: false,
+        };
+      } catch (err) {
+        console.error("[EmailJS error]", err);
         this.status = "error";
         this.errorKey = "contact.errorDefault";
       }
@@ -88,6 +109,28 @@ export default {
         <p class="section-label">{{ $t("contact.label") }}</p>
         <h1 class="contact-title">{{ $t("contact.title") }}</h1>
         <p class="contact-sub">{{ $t("contact.sub") }}</p>
+      </div>
+
+      <!-- Hire me banner -->
+      <div class="hire-banner" v-reveal style="--reveal-delay: 0ms">
+        <div class="hire-banner-left">
+          <span class="hire-label">
+            <span class="hire-dot"></span>
+            {{ $t("contact.hireLabel") }}
+          </span>
+          <h2 class="hire-title">{{ $t("contact.hireTitle") }}</h2>
+          <p class="hire-sub">{{ $t("contact.hireSub") }}</p>
+        </div>
+        <div class="hire-badges">
+          <span class="hire-badge hire-badge--primary">
+            <i class="ri-briefcase-line"></i>
+            {{ $t("contact.hireBadge1") }}
+          </span>
+          <span class="hire-badge hire-badge--secondary">
+            <i class="ri-flashlight-line"></i>
+            {{ $t("contact.hireBadge2") }}
+          </span>
+        </div>
       </div>
 
       <!-- Resume download banner -->
@@ -116,6 +159,7 @@ export default {
       <div class="contact-body">
         <!-- Sidebar -->
         <aside class="contact-aside" v-reveal style="--reveal-delay: 80ms">
+          <p class="body-section-title">{{ $t("contact.channelsTitle") }}</p>
           <div class="channel-list">
             <a
               v-for="ch in channels"
@@ -150,100 +194,129 @@ export default {
         </aside>
 
         <!-- Form -->
-        <div class="form-wrap" v-reveal style="--reveal-delay: 160ms">
-          <!-- Success state -->
-          <Transition name="fade">
-            <div v-if="status === 'success'" class="form-feedback success">
-              <div class="feedback-icon">
-                <i class="ri-check-line"></i>
-              </div>
-              <h3>{{ $t("contact.successTitle") }}</h3>
-              <p>{{ $t("contact.successSub") }}</p>
-              <GlowButton variant="ghost" size="sm" @click="reset">
-                {{ $t("contact.successAnother") }}
-              </GlowButton>
-            </div>
-
-            <form
-              v-else
-              class="contact-form"
-              @submit.prevent="submit"
-              novalidate
-            >
-              <div class="form-row">
-                <div class="field">
-                  <label for="from_name">{{ $t("contact.nameLabel") }}</label>
-                  <input
-                    id="from_name"
-                    v-model="form.from_name"
-                    type="text"
-                    name="from_name"
-                    :placeholder="$t('contact.namePlaceholder')"
-                    required
-                    autocomplete="name"
-                  />
+        <div class="form-col">
+          <p class="body-section-title" style="margin-bottom: 1rem">
+            {{ $t("contact.formTitle") }}
+          </p>
+          <div class="form-wrap" v-reveal style="--reveal-delay: 160ms">
+            <!-- Success state -->
+            <Transition name="fade">
+              <div v-if="status === 'success'" class="form-feedback success">
+                <div class="feedback-icon">
+                  <i class="ri-check-line"></i>
                 </div>
-                <div class="field">
-                  <label for="reply_to">{{ $t("contact.emailLabel") }}</label>
-                  <input
-                    id="reply_to"
-                    v-model="form.reply_to"
-                    type="email"
-                    name="reply_to"
-                    placeholder="your@email.com"
-                    required
-                    autocomplete="email"
-                  />
-                </div>
+                <h3>{{ $t("contact.successTitle") }}</h3>
+                <p>{{ $t("contact.successSub") }}</p>
+                <GlowButton variant="ghost" size="sm" @click="reset">
+                  {{ $t("contact.successAnother") }}
+                </GlowButton>
               </div>
 
-              <div class="field">
-                <label for="subject">{{ $t("contact.subjectLabel") }}</label>
-                <input
-                  id="subject"
-                  v-model="form.subject"
-                  type="text"
-                  name="subject"
-                  :placeholder="$t('contact.subjectPlaceholder')"
-                  required
-                />
-              </div>
-
-              <div class="field">
-                <label for="message">{{ $t("contact.messageLabel") }}</label>
-                <textarea
-                  id="message"
-                  v-model="form.message"
-                  name="message"
-                  rows="6"
-                  :placeholder="$t('contact.messagePlaceholder')"
-                  required
-                ></textarea>
-              </div>
-
-              <div v-if="status === 'error'" class="error-msg" role="alert">
-                <i class="ri-error-warning-line"></i>
-                <span>{{ $t(errorKey) }}</span>
-              </div>
-
-              <GlowButton
-                tag="button"
-                type="submit"
-                variant="primary"
-                size="lg"
-                :disabled="status === 'loading'"
+              <form
+                v-else
+                class="contact-form"
+                @submit.prevent="submit"
+                novalidate
               >
-                <template v-if="status === 'loading'">
-                  <i class="ri-loader-4-line spinning"></i>
-                  {{ $t("contact.sending") }}
-                </template>
-                <template v-else>
-                  {{ $t("contact.submitBtn") }}
-                  <i class="ri-send-plane-line"></i>
-                </template>
-              </GlowButton>
-            </form>
-          </Transition>
+                <div class="form-row">
+                  <div
+                    class="field"
+                    :class="{ 'field--error': fieldErrors.from_name }"
+                  >
+                    <label for="from_name">{{ $t("contact.nameLabel") }}</label>
+                    <input
+                      id="from_name"
+                      v-model="form.from_name"
+                      type="text"
+                      name="from_name"
+                      :placeholder="$t('contact.namePlaceholder')"
+                      autocomplete="name"
+                      @input="fieldErrors.from_name = false"
+                    />
+                    <span v-if="fieldErrors.from_name" class="field-error-msg"
+                      >Required</span
+                    >
+                  </div>
+                  <div
+                    class="field"
+                    :class="{ 'field--error': fieldErrors.reply_to }"
+                  >
+                    <label for="reply_to">{{ $t("contact.emailLabel") }}</label>
+                    <input
+                      id="reply_to"
+                      v-model="form.reply_to"
+                      type="email"
+                      name="reply_to"
+                      placeholder="your@email.com"
+                      autocomplete="email"
+                      @input="fieldErrors.reply_to = false"
+                    />
+                    <span v-if="fieldErrors.reply_to" class="field-error-msg"
+                      >Required</span
+                    >
+                  </div>
+                </div>
+
+                <div
+                  class="field"
+                  :class="{ 'field--error': fieldErrors.subject }"
+                >
+                  <label for="subject">{{ $t("contact.subjectLabel") }}</label>
+                  <input
+                    id="subject"
+                    v-model="form.subject"
+                    type="text"
+                    name="subject"
+                    :placeholder="$t('contact.subjectPlaceholder')"
+                    @input="fieldErrors.subject = false"
+                  />
+                  <span v-if="fieldErrors.subject" class="field-error-msg"
+                    >Required</span
+                  >
+                </div>
+
+                <div
+                  class="field"
+                  :class="{ 'field--error': fieldErrors.message }"
+                >
+                  <label for="message">{{ $t("contact.messageLabel") }}</label>
+                  <textarea
+                    id="message"
+                    v-model="form.message"
+                    name="message"
+                    rows="6"
+                    :placeholder="$t('contact.messagePlaceholder')"
+                    @input="fieldErrors.message = false"
+                  ></textarea>
+                  <span v-if="fieldErrors.message" class="field-error-msg"
+                    >Required</span
+                  >
+                </div>
+
+                <div v-if="status === 'error'" class="error-msg" role="alert">
+                  <i class="ri-error-warning-line"></i>
+                  <span>{{ $t(errorKey) }}</span>
+                </div>
+
+                <GlowButton
+                  tag="button"
+                  type="submit"
+                  variant="primary"
+                  size="lg"
+                  :disabled="status === 'loading'"
+                >
+                  <template v-if="status === 'loading'">
+                    <i class="ri-loader-4-line spinning"></i>
+                    {{ $t("contact.sending") }}
+                  </template>
+                  <template v-else>
+                    {{ $t("contact.submitBtn") }}
+                    <i class="ri-send-plane-line"></i>
+                  </template>
+                </GlowButton>
+              </form>
+            </Transition>
+          </div>
         </div>
       </div>
     </div>
@@ -353,6 +426,7 @@ export default {
   cursor: pointer;
 }
 .channel-card:hover {
+  text-decoration: none;
   border-color: var(--glow-card-hover-border);
   box-shadow: var(--glow-card-hover-shadow);
   transform: translateX(4px);
@@ -436,13 +510,17 @@ export default {
 }
 
 /* Form */
+.form-col {
+  display: flex;
+  flex-direction: column;
+}
+
 .form-wrap {
   border-radius: 20px;
   padding: 2rem;
   background: var(--glow-card-bg);
   border: 1px solid var(--glow-card-border);
   backdrop-filter: blur(16px);
-  min-height: 400px;
   display: flex;
   flex-direction: column;
 }
@@ -499,7 +577,21 @@ export default {
   background: rgba(255, 255, 255, 0.05);
 }
 
-/* Error */
+/* Field error */
+.field--error input,
+.field--error textarea {
+  border-color: rgba(239, 68, 68, 0.45);
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.06);
+}
+.field-error-msg {
+  font-family: "Poppins", sans-serif;
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: #f87171;
+  margin-top: -0.1rem;
+}
+
+/* Send error */
 .error-msg {
   display: flex;
   align-items: flex-start;
@@ -597,6 +689,7 @@ export default {
   justify-content: space-between;
   gap: 1rem;
   padding: 1.25rem 1.75rem;
+  margin-top: -1.5rem;
   border-radius: 16px;
   background: linear-gradient(
     135deg,
@@ -664,6 +757,100 @@ export default {
   transform: translateY(2px);
 }
 
+/* Body section titles */
+.body-section-title {
+  font-family: "Poppins", sans-serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text);
+  opacity: 0.35;
+}
+
+/* Hire banner */
+.hire-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  padding: 1.75rem 2rem;
+  border-radius: 16px;
+  background: linear-gradient(
+    135deg,
+    rgba(47, 102, 202, 0.06) 0%,
+    rgba(94, 201, 255, 0.04) 100%
+  );
+  border: 1px solid rgba(47, 102, 202, 0.14);
+  backdrop-filter: blur(10px);
+  flex-wrap: wrap;
+}
+.hire-banner-left {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.hire-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-family: "Poppins", sans-serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #4ade80;
+}
+.hire-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #4ade80;
+  box-shadow: 0 0 6px #4ade80;
+  flex-shrink: 0;
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+.hire-title {
+  font-family: "Cal Sans", sans-serif;
+  font-size: 1.5rem;
+  color: var(--text);
+  line-height: 1.15;
+}
+.hire-sub {
+  font-family: "Poppins", sans-serif;
+  font-size: 0.85rem;
+  font-weight: 400;
+  line-height: 1.6;
+  color: var(--text-muted);
+}
+.hire-badges {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+.hire-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0.9rem;
+  border-radius: 20px;
+  font-family: "Poppins", sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.hire-badge--primary {
+  background: rgba(47, 102, 202, 0.1);
+  border: 1px solid rgba(47, 102, 202, 0.22);
+  color: var(--primary);
+}
+.hire-badge--secondary {
+  background: rgba(74, 222, 128, 0.07);
+  border: 1px solid rgba(74, 222, 128, 0.2);
+  color: #4ade80;
+}
+
 /* Light theme overrides */
 :global([data-theme="light"]) .field input,
 :global([data-theme="light"]) .field textarea {
@@ -687,6 +874,14 @@ export default {
   }
   .resume-banner-right {
     align-self: flex-end;
+  }
+  .hire-banner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .hire-badges {
+    flex-direction: row;
+    flex-wrap: wrap;
   }
 }
 </style>

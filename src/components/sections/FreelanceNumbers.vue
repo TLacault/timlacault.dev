@@ -116,13 +116,15 @@ export default {
 }
 
 .stat-icon {
-  font-size: 1.4rem;
+  font-size: 2rem;
   color: var(--accent);
   opacity: 0.7;
   margin-bottom: 1rem;
 }
 
 .stat-value {
+  width: 100%;
+  text-align: center;
   font-family: "Cal Sans", sans-serif;
   font-size: clamp(2.8rem, 5vw, 4rem);
   line-height: 1;
@@ -135,6 +137,10 @@ export default {
 .stat-suffix {
   font-size: 0.65em;
   opacity: 0.8;
+  /* parent uses gradient text (color: transparent); re-assert a visible color
+     on the unit so it isn't clipped to nothing */
+  color: var(--accent);
+  -webkit-text-fill-color: var(--accent);
 }
 
 .stat-label {

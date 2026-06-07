@@ -51,7 +51,8 @@ export default {
   padding: 6rem 1.5rem 5rem;
   display: flex;
   justify-content: center;
-  overflow: hidden;
+  /* let decorative glows bleed past the section; #app clips horizontal scroll */
+  overflow: visible;
 }
 
 .banner-glow {
