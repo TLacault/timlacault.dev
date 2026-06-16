@@ -136,13 +136,21 @@ Cal.ns["30min"]("ui", {
 </script>
 
 <template>
-  <nav class="slide-in" :class="{ 'menu-open': menuOpen, scrolled: scrolled }">
+  <nav :class="{ 'menu-open': menuOpen, scrolled: scrolled }">
     <!-- Left: logo + command palette -->
     <div class="nav-left">
       <router-link to="/" class="logo" @click="closeMenu">
+        <!-- Both logos rendered; toggled via [data-theme] CSS so the swap
+             rides the view-transition reveal instead of switching instantly. -->
         <img
-          :src="theme === 'dark' ? logoWhite : logoBlack"
-          class="logo-img"
+          :src="logoWhite"
+          class="logo-img logo-img-dark"
+          alt=""
+          aria-hidden="true"
+        />
+        <img
+          :src="logoBlack"
+          class="logo-img logo-img-light"
           alt=""
           aria-hidden="true"
         />
@@ -343,30 +351,43 @@ Cal.ns["30min"]("ui", {
 nav {
   position: fixed;
   top: 0;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 0;
+  right: 0;
+  /* Center via auto margins instead of translateX — a transform here would
+     create a backdrop root and break the pills' backdrop-filter blur. */
+  margin: 24px auto 0;
   /* 3 balanced zones: side columns are equal (1fr) so the center links pill
      stays perfectly centered and can never be overlapped by either side. */
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  width: 90vw;
+  /* Match the content containers: 1100px cap with 1.5rem gutters each side */
+  width: calc(100% - 3rem);
   max-width: 1100px;
-  margin-top: 24px;
   z-index: 200;
-  opacity: 0;
-  animation-delay: 0.5s;
+  /* Base opacity is 1 with a `backwards`-filled entrance (NOT `forwards`):
+     a forwards-filling animation keeps <nav> promoted to its own compositing
+     layer, which isolates it and breaks the pills' backdrop-filter. Letting
+     the animation finish and fall away returns nav to a normal box. */
+  opacity: 1;
+  animation: navFadeIn 1s ease-in-out 0.5s backwards;
   border-radius: 18px;
-  padding: 6px 10px;
+  padding: 6px 0;
   border: 1px solid transparent;
 }
 
+@keyframes navFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 nav.scrolled {
-  background: rgba(5, 9, 15, 0.68);
-  border-color: rgba(94, 201, 255, 0.07);
-  backdrop-filter: blur(22px);
-  -webkit-backdrop-filter: blur(22px);
-  box-shadow: 0 4px 32px rgba(0, 0, 0, 0.35);
+  /* No background pill on scroll — the floating docks keep their own glass.
+     Only the slight upward shift remains. */
   margin-top: 10px;
 }
 
@@ -382,7 +403,8 @@ nav.scrolled {
   outline: 1px solid rgba(94, 201, 255, 0.1);
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.28),
     0 0 0 1px rgba(94, 201, 255, 0.05) inset;
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 .logo {
   display: flex;
@@ -423,7 +445,8 @@ nav.scrolled {
   outline: 1px solid rgba(94, 201, 255, 0.1);
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.28),
     0 0 0 1px rgba(94, 201, 255, 0.05) inset;
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
 }
 .nav-links {
   justify-self: center;
@@ -864,11 +887,13 @@ nav.scrolled {
 </style>
 
 <style>
-/* Scrolled nav — light theme */
-[data-theme="light"] nav.scrolled {
-  background: rgba(240, 244, 250, 0.82);
-  border-color: rgba(53, 107, 208, 0.1);
-  box-shadow: 0 4px 32px rgba(53, 107, 208, 0.1);
+/* Theme-based logo swap — unscoped so it reads data-theme on <html>, and the
+   display toggle is captured by the view-transition reveal (no instant pop). */
+[data-theme="light"] .logo-img-dark {
+  display: none;
+}
+[data-theme="dark"] .logo-img-light {
+  display: none;
 }
 
 /* Nav — light theme overrides */

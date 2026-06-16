@@ -119,7 +119,9 @@ export default {
               :aria-label="`Show stack page ${i}`"
               :aria-current="i - 1 === stackPage"
               @click="setStackPage(i - 1)"
-            ></button>
+            >
+              {{ i }}
+            </button>
           </div>
         </div>
 
@@ -356,6 +358,12 @@ export default {
   font-size: 1.3rem;
   color: var(--accent);
 }
+/* Light theme: --background is translucent + accent is pale cyan → poor
+   contrast inside the gradient ring. Use a solid white disc with blue text. */
+:root[data-theme="light"] .avatar-placeholder {
+  background: #fff;
+  color: var(--primary);
+}
 .bio-text h3 {
   font-family: "Cal Sans", sans-serif;
   font-size: 1.4rem;
@@ -403,21 +411,39 @@ export default {
   padding-top: 1.25rem;
 }
 .stack-dot {
-  width: 7px;
-  height: 7px;
-  padding: 0;
-  border: none;
-  border-radius: 999px;
-  background: var(--glow-card-border);
+  min-width: 24px;
+  height: 24px;
+  padding: 0 6px;
+  border: 1px solid var(--glow-card-border);
+  border-radius: 7px;
+  background: var(--glow-card-bg);
+  color: var(--text-muted);
   cursor: pointer;
-  transition: width 0.25s ease, background 0.25s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Poppins", sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease,
+    transform 0.2s ease;
 }
 .stack-dot:hover {
-  background: var(--text-subtle);
+  color: var(--text);
+  border-color: var(--glow-card-hover-border);
+  transform: translateY(-1px);
 }
 .stack-dot.active {
-  width: 20px;
   background: var(--accent);
+  border-color: var(--accent);
+  color: #06121f;
+}
+/* Light theme: accent (pale cyan) reads washed-out as an active fill — use the
+   brand blue with white text for a clean "selected" state. */
+:root[data-theme="light"] .stack-dot.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
 }
 .stack-chip {
   display: flex;

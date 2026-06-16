@@ -146,6 +146,10 @@ export default {
   font-weight: 500;
   color: #4ade80;
 }
+/* Light theme: the pale green washes out on white — use a darker green. */
+:root[data-theme="light"] .banner-avail {
+  color: #15803d;
+}
 
 .avail-dot {
   width: 7px;

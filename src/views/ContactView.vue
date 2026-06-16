@@ -857,6 +857,29 @@ export default {
   background: rgba(255, 255, 255, 0.6);
 }
 
+/* Hire + resume banners: the blue-tinted gradient reads poorly on the light
+   page — give them the standard white "block" surface instead. */
+:root[data-theme="light"] .hire-banner,
+:root[data-theme="light"] .resume-banner {
+  background: rgba(255, 255, 255, 0.85);
+  border-color: var(--block-border);
+  box-shadow: var(--block-shadow);
+}
+:root[data-theme="light"] .hire-banner:hover,
+:root[data-theme="light"] .resume-banner:hover {
+  background: rgba(255, 255, 255, 0.92);
+  border-color: rgba(53, 107, 208, 0.3);
+}
+/* Pale greens/cyans → darker tones for contrast on white. */
+:root[data-theme="light"] .hire-label,
+:root[data-theme="light"] .hire-badge--secondary {
+  color: #15803d;
+}
+:root[data-theme="light"] .resume-banner-left > i,
+:root[data-theme="light"] .resume-banner-right {
+  color: var(--primary);
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .contact-body {

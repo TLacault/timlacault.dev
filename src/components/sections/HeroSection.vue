@@ -4,32 +4,6 @@ import GlowButton from "@/components/ui/GlowButton.vue";
 export default {
   name: "HeroSection",
   components: { GlowButton },
-  data() {
-    return {
-      first: "Tim".split(""),
-      last: "Lacault".split(""),
-    };
-  },
-  mounted() {
-    this.setupBounce();
-  },
-  methods: {
-    setupBounce() {
-      const spans = this.$el.querySelectorAll(".name-letter");
-      spans.forEach((el) => {
-        let active = false;
-        el.addEventListener("mouseenter", () => {
-          if (active) return;
-          active = true;
-          el.classList.add("bounce");
-          setTimeout(() => {
-            el.classList.remove("bounce");
-            active = false;
-          }, 600);
-        });
-      });
-    },
-  },
 };
 </script>
 
@@ -47,22 +21,7 @@ export default {
 
       <div class="title slide-up" style="--delay: 0.1s">
         <h2>{{ $t("hero.greeting") }}</h2>
-        <h1>
-          <span
-            v-for="(l, i) in first"
-            :key="'f' + i"
-            class="name-letter"
-            :style="{ animationDelay: `${0.1 * i}s` }"
-            >{{ l }}</span
-          ><span class="name-gap"></span
-          ><span
-            v-for="(l, i) in last"
-            :key="'l' + i"
-            class="name-letter"
-            :style="{ animationDelay: `${0.1 * (first.length + i)}s` }"
-            >{{ l }}</span
-          >
-        </h1>
+        <h1 class="hero-name">Tim Lacault</h1>
         <h3>
           {{ $t("hero.subtitlePre") }}
           <span>{{ $t("hero.subtitleSoftware") }}</span>
@@ -256,72 +215,37 @@ export default {
 
 .title h2 {
   font-family: "Cal Sans", sans-serif;
-  font-size: 2.5rem;
+  font-size: clamp(1.2rem, 4vw, 2.5rem);
   color: var(--text);
   opacity: 0.8;
 }
 
-h1 {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: "Cal Sans", sans-serif;
-  font-size: clamp(3rem, 11vw, 8.5rem);
+.hero-name {
+  font-family: "Syncopate", sans-serif;
+  text-transform: uppercase;
+  font-size: clamp(2.4rem, 10vw, 10rem);
   line-height: 1;
+  font-weight: 800;
+  letter-spacing: -0.01em;
   user-select: none;
-}
-
-.name-letter {
-  display: inline-block;
-  background: linear-gradient(0deg, var(--primary) 30%, var(--accent));
-  background-clip: text;
+  background-image: url("~@/assets/hero_textbg.png");
+  background-repeat: repeat-x;
+  background-size: 12em 100%;
+  background-position: 0 center;
   -webkit-background-clip: text;
-  font-weight: 700;
+  background-clip: text;
   color: transparent;
-  cursor: default;
-  will-change: transform;
-  animation: float 6s ease-in-out infinite;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 4px rgba(114, 203, 255, 0.6);
+  animation: hero-name-scroll 20s linear infinite;
 }
 
-/* .name-letter.bounce {
-  animation: letter-bounce 0.6s ease both;
-} */
-
-.name-gap {
-  display: inline-block;
-  width: 0.3em;
-}
-
-@keyframes float {
-  0%,
-  40% {
-    transform: translateY(0);
+@keyframes hero-name-scroll {
+  from {
+    background-position: 0 center;
   }
-  50% {
-    transform: translateY(-10px);
-    filter: drop-shadow(0 0 8px var(--accent));
-  }
-  60%,
-  100% {
-    transform: translateY(0);
-  }
-}
-
-@keyframes letter-bounce {
-  0% {
-    transform: translateY(0) rotate(0deg);
-  }
-  20% {
-    transform: translateY(-18px) rotate(-4deg);
-  }
-  50% {
-    transform: translateY(-8px) rotate(2deg);
-  }
-  75% {
-    transform: translateY(-12px) rotate(-2deg);
-  }
-  100% {
-    transform: translateY(0) rotate(0deg);
+  to {
+    background-position: -12em center;
   }
 }
 
@@ -558,7 +482,7 @@ h1 {
 
 @media (prefers-reduced-motion: reduce) {
   .glow,
-  .name-letter,
+  .hero-name,
   .scroll-cue i {
     animation: none;
   }

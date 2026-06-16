@@ -285,7 +285,9 @@ export default {
               :class="{ active: activeIndex === i }"
               @click="selectProject(i)"
               :aria-label="p.title"
-            ></button>
+            >
+              {{ String(i + 1).padStart(2, "0") }}
+            </button>
           </div>
         </div>
       </div>
@@ -355,10 +357,12 @@ export default {
   width: 100%;
 }
 
-/* ── Scene: fills viewport below nav ─────────────────────────── */
+/* ── Scene: fills the full viewport height ───────────────────── */
 .proj-scene {
   width: 100%;
-  height: calc(100dvh - 80px);
+  /* Full height, top to bottom — the rail/stage span the entire screen and
+     the floating nav sits over the top. */
+  height: 100dvh;
   position: relative;
 }
 
@@ -380,9 +384,25 @@ export default {
   justify-content: space-between;
   padding: 2.5rem 2rem;
   border-right: 1px solid var(--glow-card-border);
-  background: var(--background);
   position: relative;
   z-index: 10;
+}
+/* Background + blur live on an absolutely-positioned layer: backdrop-filter on
+   a stretched flex item only paints over its content height (Chromium quirk),
+   which cut the rail short. A filled ::before covers the full height. */
+.proj-rail::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: var(--background);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+}
+/* Light theme --background is translucent (0.4) — make the rail a near-solid
+   surface so it reads as a panel rather than washed-out glass. */
+:root[data-theme="light"] .proj-rail::before {
+  background: rgba(240, 244, 250, 0.92);
 }
 
 .rail-head {
@@ -732,23 +752,46 @@ export default {
   pointer-events: auto;
 }
 .pdot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  border: none;
-  background: var(--text);
-  opacity: 0.2;
+  min-width: 28px;
+  height: 28px;
+  padding: 0 7px;
+  border-radius: 8px;
+  border: 1px solid var(--glow-card-border);
+  background: var(--glow-card-bg);
+  color: var(--text);
+  opacity: 0.6;
   cursor: pointer;
-  padding: 0;
-  transition: width 0.35s cubic-bezier(0.34, 1.3, 0.64, 1), opacity 0.3s ease,
-    background 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Poppins", sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: opacity 0.25s ease, background 0.25s ease, color 0.25s ease,
+    border-color 0.25s ease, transform 0.2s ease;
+}
+.pdot:hover {
+  opacity: 1;
+  border-color: var(--glow-card-hover-border);
+  transform: translateY(-1px);
 }
 .pdot.active {
-  width: 24px;
-  border-radius: 4px;
   background: var(--accent);
+  border-color: var(--accent);
+  color: #06121f;
   opacity: 1;
-  box-shadow: 0 0 8px rgba(94, 201, 255, 0.45);
+  box-shadow: 0 0 12px rgba(94, 201, 255, 0.45);
+}
+/* Light theme: accent (pale cyan) reads washed-out as an active fill — use the
+   brand blue with white text and a matching glow. */
+:root[data-theme="light"] .pdot.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(53, 107, 208, 0.3);
 }
 
 /* ── Terminal overlay ────────────────────────────────────────── */
@@ -1039,7 +1082,7 @@ export default {
 
 @media (max-width: 600px) {
   .proj-scene {
-    height: calc(100dvh - 70px);
+    height: 100dvh;
   }
   /* Hide the rail entirely on mobile — navigation via dots/swipe */
   .proj-rail {
@@ -1054,16 +1097,7 @@ export default {
   .card-foot {
     padding: 0 1.25rem 1.25rem;
   }
-  /* Make progress dots more prominent */
-  .pdot {
-    width: 8px;
-    height: 8px;
-    opacity: 0.35;
-  }
-  .pdot.active {
-    width: 28px;
-    opacity: 1;
-  }
+  /* Numbered index buttons stay as-is on mobile — already touch-friendly. */
   .terminal-window {
     max-height: 92dvh;
   }

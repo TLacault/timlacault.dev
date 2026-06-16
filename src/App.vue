@@ -41,6 +41,7 @@ export default {
 </script>
 
 <template>
+  <div class="app-bg" aria-hidden="true"></div>
   <NavigationBar />
   <router-view v-slot="{ Component, route }">
     <Transition
@@ -64,7 +65,9 @@ export default {
 @import url("https://cdn.jsdelivr.net/npm/remixicon@4.6.0/fonts/remixicon.css");
 @import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Cal+Sans&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&display=swap");
 @import url("https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&display=swap");
 
 #app {
   font-family: "Inter", sans-serif;
@@ -96,7 +99,20 @@ html {
 }
 
 body {
-  background: var(--background-radial);
+  background: var(--background);
+}
+
+.app-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -10;
+  pointer-events: none;
+  background: var(--background-radial),
+    var(--background-noise) center / cover no-repeat;
+  filter: blur(5px) var(--background-filter, contrast(1));
+  /* light theme blends the pale noise onto the page via multiply */
+  mix-blend-mode: var(--background-blend, normal);
+  transform: scale(1.05);
 }
 
 * {
@@ -140,7 +156,7 @@ button {
 /* main colors */
 :root[data-theme="light"] {
   --text: rgb(5, 7, 10);
-  --background: rgb(240, 244, 250);
+  --background: rgb(240, 244, 250, 0.4);
   --primary: rgb(53, 107, 208);
   --secondary: #80a5ea;
   --accent: #55b4dd;
@@ -151,7 +167,7 @@ button {
 
 :root[data-theme="dark"] {
   --text: #f4f6fa;
-  --background: rgb(5, 9, 15);
+  --background: rgb(5, 9, 15, 0.4);
   --primary: rgb(47, 102, 202);
   --secondary: #153a7f;
   --accent: rgb(94, 201, 255);
@@ -300,19 +316,24 @@ button {
 :root[data-theme="light"] {
   --background-radial: radial-gradient(
     ellipse at 70% 0%,
-    rgb(215, 228, 255) 0%,
-    rgb(235, 241, 252) 50%,
-    rgb(245, 248, 255) 100%
+    rgba(120, 160, 235, 0.35) 0%,
+    rgba(190, 210, 245, 0.15) 60%,
+    rgba(255, 255, 255, 0) 100%
   );
+  --background-noise: url("~@/assets/background/white_noise.png");
+  --background-filter: contrast(1.15);
+  --background-blend: multiply;
 }
 
 :root[data-theme="dark"] {
   --background-radial: radial-gradient(
     ellipse at 70% 0%,
-    rgb(12, 18, 35) 0%,
-    rgb(5, 9, 15) 55%,
-    rgb(3, 5, 10) 100%
+    rgba(12, 18, 35, 0.6) 0%,
+    rgba(5, 9, 15, 0.7) 55%,
+    rgba(3, 5, 10, 0.8) 100%
   );
+  --background-noise: url("~@/assets/background/blue_noise.png");
+  --background-filter: contrast(1.12) brightness(0.95);
 }
 
 /* ui colors */

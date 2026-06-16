@@ -208,6 +208,8 @@ footer {
   opacity: 0.45;
   background: var(--glow-card-bg);
   border: 1px solid var(--glow-card-border);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
   transition: opacity 0.2s ease, color 0.2s ease, border-color 0.2s ease,
     box-shadow 0.2s ease, transform 0.2s ease;
 }
@@ -217,6 +219,10 @@ footer {
   border-color: rgba(94, 201, 255, 0.35);
   box-shadow: 0 4px 16px rgba(94, 201, 255, 0.12);
   transform: translateY(-2px);
+}
+:root[data-theme="light"] .footer-social {
+  box-shadow: 0 2px 12px rgba(53, 107, 208, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.7);
 }
 
 /* Bottom row */

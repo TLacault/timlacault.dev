@@ -86,6 +86,22 @@ export default {
   transition: transform 0.1s ease;
 }
 
+/* Light theme: the translucent-white ghost vanishes against the light page,
+   so give it the same white "block" surface with grey text. */
+:root[data-theme="light"] .glow-btn--ghost {
+  background: var(--block-background);
+  color: var(--text-muted);
+  box-shadow: inset 0 0 0 1px var(--block-border),
+    0 4px 20px rgba(53, 107, 208, 0.08);
+  backdrop-filter: blur(10px);
+}
+:root[data-theme="light"] .glow-btn--ghost:hover {
+  background: rgba(255, 255, 255, 0.85);
+  color: var(--primary);
+  box-shadow: inset 0 0 0 1px rgba(53, 107, 208, 0.35),
+    0 8px 30px rgba(53, 107, 208, 0.15);
+}
+
 .glow-btn--sm {
   padding: 0.5rem 1.25rem;
   font-size: 0.825rem;
