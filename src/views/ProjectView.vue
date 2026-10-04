@@ -1,8 +1,20 @@
 <script>
 import { projects } from "@/data/projects.js";
+import ProjectCarousel from "@/components/ProjectCarousel.vue";
+
+// Accepts youtu.be/<id>, youtube.com/watch?v=<id>, /embed/<id> and /shorts/<id>.
+function youtubeId(url) {
+  if (!url) return null;
+  const m = url.match(
+    // eslint-disable-next-line prettier/prettier
+    /(?:youtu\.be\/|youtube(?:-nocookie)?\.com\/(?:watch\?(?:.*&)?v=|embed\/|shorts\/|live\/))([\w-]{11})/,
+  );
+  return m ? m[1] : null;
+}
 
 export default {
   name: "ProjectView",
+  components: { ProjectCarousel },
   data() {
     return {
       projects,
@@ -38,6 +50,12 @@ export default {
     document.removeEventListener("touchend", this._onTouchEnd);
     document.body.style.overflow = "";
   },
+  computed: {
+    demoEmbed() {
+      const id = youtubeId(this.popup?.demo);
+      return id ? `https://www.youtube-nocookie.com/embed/${id}?rel=0` : null;
+    },
+  },
   methods: {
     /* ── Scroll / input interception ─────────────────────────── */
     isSceneActive() {
@@ -52,8 +70,18 @@ export default {
       return visible / (rect.bottom - rect.top) >= 0.8;
     },
 
+    // Events aimed at a modal on top (command palette) belong to it, not the
+    // scene underneath — otherwise the capture-phase wheel listener swallows
+    // the palette's scroll and its arrow keys snap the carousel.
+    fromModal(e) {
+      return (
+        e.target instanceof Element && !!e.target.closest('[aria-modal="true"]')
+      );
+    },
+
     onWheel(e) {
       if (this.popup) return; // let the popup body scroll natively
+      if (this.fromModal(e)) return;
       if (!this.isSceneActive()) return;
       const n = this.projects.length;
       const down = e.deltaY > 0;
@@ -72,6 +100,7 @@ export default {
     },
 
     onKeyDown(e) {
+      if (this.fromModal(e)) return;
       if (!this.isSceneActive()) return;
       const n = this.projects.length;
       if (
@@ -95,6 +124,7 @@ export default {
     },
     onTouchEnd(e) {
       if (this.popup) return;
+      if (this.fromModal(e)) return;
       if (!this.isSceneActive()) return;
       const dy = this._touchY - e.changedTouches[0].clientY;
       const dx = this._touchX - e.changedTouches[0].clientX;
@@ -114,7 +144,8 @@ export default {
       this.busy = true;
       this.activeIndex = Math.max(
         0,
-        Math.min(this.projects.length - 1, this.activeIndex + dir)
+        // eslint-disable-next-line prettier/prettier
+        Math.min(this.projects.length - 1, this.activeIndex + dir),
       );
       // Throttle matches CSS transition duration (550ms)
       setTimeout(() => {
@@ -138,9 +169,22 @@ export default {
       const offset = i - this.activeIndex;
       return {
         transform: `translate(calc(-50% + ${offset * 115}%), -50%)`,
-        pointerEvents: offset === 0 ? "auto" : "none",
         zIndex: offset === 0 ? 10 : 1,
       };
+    },
+
+    /* ── Card click: any visible card opens its popup, and the
+       carousel snaps to it behind the overlay ─────────────────── */
+    onCardClick(i, project) {
+      if (this.popup) return;
+      if (i !== this.activeIndex) {
+        this.busy = true;
+        this.activeIndex = i;
+        setTimeout(() => {
+          this.busy = false;
+        }, 550);
+      }
+      this.openProject(project);
     },
 
     /* ── Popup ───────────────────────────────────────────────── */
@@ -235,7 +279,7 @@ export default {
             :key="p.id"
             class="proj-card"
             :style="cardStyle(i)"
-            @click="activeIndex === i && openProject(p)"
+            @click="onCardClick(i, p)"
           >
             <div class="card-inner" :class="{ 'is-active': activeIndex === i }">
               <!-- Preview image -->
@@ -337,8 +381,17 @@ export default {
         </div>
 
         <div class="term-body" data-lenis-prevent>
-          <div class="term-preview-banner" v-if="popup?.preview">
-            <img :src="popup.preview" :alt="popup?.title" draggable="false" />
+          <div class="term-preview-banner" v-if="popup">
+            <ProjectCarousel :images="popup.images" :alt="popup.title" />
+            <div v-if="demoEmbed" class="term-demo">
+              <iframe
+                :src="demoEmbed"
+                :title="`${popup.title} demo`"
+                loading="lazy"
+                allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+                allowfullscreen
+              ></iframe>
+            </div>
           </div>
           <component :is="popupComponent" v-if="popupComponent" />
           <div v-else class="term-loading">
@@ -982,12 +1035,19 @@ export default {
   background: #eef2f7;
   border-bottom: 1px solid rgba(0, 0, 0, 0.07);
 }
-.term-preview-banner img {
-  width: 100%;
-  height: auto;
-  display: block;
+.term-demo {
+  margin-top: 1.25rem;
+  aspect-ratio: 16 / 9;
   border-radius: 10px;
+  overflow: hidden;
+  background: #000;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+.term-demo iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  display: block;
 }
 
 .term-loading {
@@ -1114,10 +1174,10 @@ export default {
 }
 
 /* Preview image inside popup */
-[data-theme="light"] .term-preview-banner img {
+[data-theme="light"] .term-demo {
   box-shadow: 0 4px 28px rgba(53, 107, 208, 0.15), 0 2px 8px rgba(0, 0, 0, 0.1);
 }
-[data-theme="dark"] .term-preview-banner img {
+[data-theme="dark"] .term-demo {
   box-shadow: 0 0 28px rgba(94, 201, 255, 0.1), 0 4px 20px rgba(0, 0, 0, 0.5);
 }
 
