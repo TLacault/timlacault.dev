@@ -25,6 +25,4 @@ pnpm-debug.log*
 # Agents
 .claude*
 docs
-agentdb*
 CLAUDE.md
-*.db
