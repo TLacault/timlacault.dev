@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import src from './Work.vue?raw'
 import { projects, clients } from '~/data/projects'
+const { t } = useLang()
 </script>
 
 <template>
@@ -8,9 +9,9 @@ import { projects, clients } from '~/data/projects'
     <WorkExhibit v-for="(p, i) in projects" :key="p.slug" :project="p" :index="i" />
     <div class="local" id="local">
       <div class="local-head">
-        <h3 class="display">{{ clients.length }} sites for local businesses</h3>
-        <p>Hair salons, bakeries, a boxing club, a plumber. Each one designed and built by hand, around the business's real photos, prices and reviews. They're live: open any of them.</p>
-        <NuxtLink to="/freelance" class="more">Need one for your business?</NuxtLink>
+        <h3 class="display">{{ clients.length }} {{ t('sites for local businesses', 'sites pour des commerces') }}</h3>
+        <p>{{ t("Hair salons, bakeries, a boxing club, a plumber. Each one designed and built by hand, around the business's real photos, prices and reviews. They're live: open any of them.", 'Coiffeurs, boulangeries, un club de boxe, un plombier. Chacun dessiné et codé à la main, avec les vraies photos, les vrais prix et les vrais avis du commerce. Ils sont en ligne : ouvrez-les.') }}</p>
+        <NuxtLink to="/freelance" class="more">{{ t('Need one for your business?', 'Un site pour votre commerce ?') }}</NuxtLink>
       </div>
       <ClientWall />
     </div>

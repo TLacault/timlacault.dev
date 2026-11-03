@@ -1,11 +1,12 @@
 <script setup lang="ts">
-const sections = [
-  { id: 'top', label: 'Intro' },
-  { id: 'work', label: 'Work' },
-  { id: 'local', label: 'Local businesses' },
-  { id: 'path', label: 'Path' },
-  { id: 'contact', label: 'Contact' },
-]
+const { t } = useLang()
+const sections = computed(() => [
+  { id: 'top', label: t('Intro', 'Intro') },
+  { id: 'work', label: t('Work', 'Projets') },
+  { id: 'local', label: t('Local businesses', 'Commerces') },
+  { id: 'path', label: t('Path', 'Parcours') },
+  { id: 'contact', label: t('Contact', 'Contact') },
+])
 </script>
 
 <template>

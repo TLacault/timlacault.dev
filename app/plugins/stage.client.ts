@@ -100,6 +100,10 @@ export default defineNuxtPlugin((nuxt) => {
       if (b.bottom < -lens.r || b.top > innerHeight + lens.r) continue
       el.style.setProperty('--cx', `${lens.x - b.left}px`)
       el.style.setProperty('--cy', `${lens.y - b.top}px`)
+      // The surface sits inside the section's padding: its mask needs coordinates from its own corner.
+      const s = (el.firstElementChild as HTMLElement).getBoundingClientRect()
+      el.style.setProperty('--sx', `${lens.x - s.left}px`)
+      el.style.setProperty('--sy', `${lens.y - s.top}px`)
       el.style.setProperty('--lr', `${lens.r}px`)
     }
   })

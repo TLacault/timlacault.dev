@@ -9,6 +9,7 @@ Phones keep the centre and a compact right dock.
 import gsap from 'gsap'
 
 const p = usePresence()
+const { t, lang } = useLang()
 const settings = useSettings()
 const fine = ref(true)
 const ready = ref(false) // time-dependent text: render on the client only (no hydration mismatch)
@@ -16,10 +17,11 @@ const { $go } = useNuxtApp()
 const go = (e: MouseEvent, to: string) => { e.preventDefault(); ($go as (t: string) => void)(to) }
 
 const items = computed(() => {
-  const list = [`Bordeaux ${parisTime(p.now)}, ${parisStatus(p.now)}`]
-  if (p.spotify) list.push(`Listening to ${p.spotify.song}, ${p.spotify.artist}`)
-  if (p.github) list.push(`Tim ${p.github.text}, ${ago(p.github.at, p.now)}`)
-  list.push(fine.value ? 'Hold space to view the source' : 'Long-press to view the source')
+  const l = lang.value
+  const list = [`Bordeaux ${parisTime(p.now)}, ${parisStatus(p.now, l)}`]
+  if (p.spotify) list.push(`${t('Listening to', 'Écoute')} ${p.spotify.song}, ${p.spotify.artist}`)
+  if (p.github) list.push(`Tim ${eventText(p.github, l)}, ${ago(p.github.at, p.now, l)}`)
+  list.push(fine.value ? t('Hold space to view the source', 'Maintenez espace pour voir le code') : t('Long-press to view the source', 'Appui long pour voir le code'))
   return list
 })
 const i = ref(0)
@@ -46,30 +48,34 @@ onBeforeUnmount(() => clearInterval(timer))
 
 <template>
   <div class="docks">
-    <NuxtLink to="/source" class="dock live mono" title="How this site is made" data-enter style="--d: .95s">
+    <NuxtLink to="/source" class="dock live mono" :title="t('How this site is made', 'Comment ce site est fait')" data-enter style="--d: .95s">
       <span class="pulse" aria-hidden="true" />
       <Transition name="tick" mode="out-in"><span v-if="ready" :key="current" class="tick">{{ current }}</span></Transition>
     </NuxtLink>
 
-    <nav class="dock nav" aria-label="Site" data-enter style="--d: .85s">
-      <a href="/#work" @click="go($event, '/#work')">Work</a>
-      <a href="/#path" @click="go($event, '/#path')">Path</a>
+    <nav class="dock nav" :aria-label="t('Site', 'Site')" data-enter style="--d: .85s">
+      <a href="/#work" @click="go($event, '/#work')">{{ t('Work', 'Projets') }}</a>
+      <a href="/#path" @click="go($event, '/#path')">{{ t('Path', 'Parcours') }}</a>
       <NuxtLink to="/freelance">Freelance</NuxtLink>
       <a href="/#contact" @click="go($event, '/#contact')">Contact</a>
     </nav>
 
-    <div class="dock settings" role="group" aria-label="Settings" data-enter style="--d: 1.05s">
-      <button type="button" class="sound" :aria-pressed="settings.sound" :aria-label="settings.sound ? 'Turn the sound off' : 'Turn the sound on'" @click="toggleSound">
+    <div class="dock settings" role="group" :aria-label="t('Settings', 'Réglages')" data-enter style="--d: 1.05s">
+      <button type="button" class="sound" :aria-pressed="settings.sound" :aria-label="settings.sound ? t('Turn the sound off', 'Couper le son') : t('Turn the sound on', 'Activer le son')" @click="toggleSound">
         <i v-for="k in 4" :key="k" :style="{ '--k': k }" />
       </button>
       <label class="volume" :class="{ open: settings.sound }">
-        <span class="sr-only">Volume</span>
+        <span class="sr-only">{{ t('Volume', 'Volume') }}</span>
         <input v-model.number="settings.volume" type="range" min="0" max="1" step="0.01" :tabindex="settings.sound ? 0 : -1" :style="{ '--v': settings.volume }">
       </label>
       <span class="sep" aria-hidden="true" />
-      <button type="button" class="toggle mono" :aria-pressed="settings.ghosts" title="Other readers" @click="settings.ghosts = !settings.ghosts">
-        <span class="dot" />Ghosts
+      <button type="button" class="toggle mono" :aria-pressed="settings.ghosts" :title="t('Other readers', 'Autres lecteurs')" @click="settings.ghosts = !settings.ghosts">
+        <span class="dot" />{{ t('Ghosts', 'Fantômes') }}
       </button>
+      <span class="sep" aria-hidden="true" />
+      <div class="lang mono" role="radiogroup" :aria-label="t('Language', 'Langue')">
+        <button v-for="l in (['en', 'fr'] as const)" :key="l" type="button" role="radio" :aria-checked="lang === l" @click="lang = l">{{ l.toUpperCase() }}</button>
+      </div>
     </div>
   </div>
 </template>
@@ -119,11 +125,17 @@ input[type=range]::-moz-range-thumb { width: 12px; height: 12px; border: 0; bord
 .toggle .dot { width: 7px; height: 7px; border-radius: 50%; border: 1px solid var(--fg-2); transition: background .25s, border-color .25s; }
 .toggle[aria-pressed="true"] { color: var(--fg); }
 .toggle[aria-pressed="true"] .dot { background: var(--accent); border-color: var(--accent); }
+.lang { display: flex; gap: 2px; }
+.lang button { height: 28px; padding: 0 8px; border: 0; border-radius: 999px; background: none; color: var(--fg-2); font: inherit; font-size: 12px; cursor: pointer; transition: background .25s, color .25s; }
+.lang button:hover { color: var(--fg); }
+.lang button[aria-checked="true"] { background: var(--accent); color: var(--ink); }
 
 @media (max-width: 1100px) { .live { display: none; } .docks { grid-template-columns: 1fr auto; } .nav { justify-self: start; } }
 @media (max-width: 767px) {
-  .docks { left: 12px; right: 12px; bottom: 12px; }
+  .docks { left: 12px; right: 12px; bottom: 12px; grid-template-columns: 1fr; justify-items: center; gap: 8px; }
+  .settings { grid-row: 1; justify-self: end; height: 38px; } /* settings sit above the nav: side by side they don't fit */
   .nav { gap: 14px; padding: 0 14px; font-size: 13px; }
   .toggle, .sep, .volume { display: none; }
+  .settings .lang { display: flex; }
 }
 </style>

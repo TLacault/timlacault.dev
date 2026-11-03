@@ -4,22 +4,32 @@ import gsap from 'gsap'
 import src from './Contact.vue?raw'
 
 // ── FAQ: type a question, the closest answers surface. Nothing found → it becomes the message below.
-const faq = [
+const { t, lang } = useLang()
+const faq = computed(() => (lang.value === 'fr' ? [
+  { q: 'Vous cherchez un stage ?', k: 'stage alternance disponible disponibilite quand dates ete fevrier embauche emploi internship', a: 'Oui, deux. Un stage de 4e année de 3 à 4 mois, de juin à septembre 2027, et mon stage de fin d’études de 5 à 6 mois, de février à septembre 2028.' },
+  { q: 'Vous êtes où ? En télétravail ?', k: 'ou lieu ville bordeaux teletravail distance hybride bureau demenager remote', a: 'À Bordeaux. Sur place à Bordeaux, en hybride ou à distance : tout me va.' },
+  { q: 'Avec quoi vous travaillez ?', k: 'stack technologies langages framework vue nuxt typescript competences outils', a: 'Surtout Vue et Nuxt avec TypeScript, Node, PostgreSQL, Supabase et Docker, avec GSAP et three.js pour le mouvement. L’école a ajouté le C, le C++, Python, Java et OCaml.' },
+  { q: 'Vous pouvez faire le site de mon commerce ?', k: 'site web commerce boutique salon restaurant freelance client devis prix tarif cout', a: 'Oui. Je suis freelance depuis 2023 et je construis chaque site à la main, avec les vraies photos, les prix et les avis du commerce. Parlez-moi du vôtre ci-dessous et je reviens vers vous avec un plan et un devis.' },
+  { q: "C'est quoi Mobilit'Eirb ?", k: 'mobiliteirb mobilit eirb startup carbone empreinte entreprise', a: "Ma startup. Elle mesure l'empreinte carbone des mobilités étudiantes. Elle est née d'un projet d'école que j'ai mené avec une équipe de cinq à l'ENSEIRB-MATMECA." },
+  { q: 'Vous parlez quelles langues ?', k: 'langue langues parler anglais francais japonais', a: 'Français (langue maternelle), anglais (C1), et le japonais, que j’apprends encore.' },
+  { q: 'Où est votre CV ?', k: 'cv curriculum resume pdf telecharger', a: 'Juste ici : le lien PDF en bas de cette section.' },
+  { q: 'Comment vous joindre au plus vite ?', k: 'contact joindre email mail telephone appel rendez-vous vite rapidement', a: 'Écrivez à lacault.tim@gmail.com, appelez le 06 52 30 05 10, ou réservez un appel de 30 minutes. Ou utilisez le formulaire.' },
+] : [
   { q: 'Are you looking for an internship?', k: 'internship stage intern available availability when dates summer february hire job', a: 'Yes, two of them. A 4th-year internship of 3 to 4 months, June to September 2027, and my end-of-studies internship of 5 to 6 months, February to September 2028.' },
   { q: 'Where are you based? Remote?', k: 'where based location city bordeaux remote hybrid onsite office move relocate', a: 'Bordeaux, France. On-site in Bordeaux, hybrid, or remote all work for me.' },
   { q: 'What do you work with?', k: 'stack tech technologies languages framework vue nuxt typescript skills tools', a: 'Mostly Vue and Nuxt with TypeScript, Node, PostgreSQL, Supabase and Docker, with GSAP and three.js for motion. School added C, C++, Python, Java and OCaml.' },
-  { q: 'Can you build a website for my business?', k: 'website site business shop salon restaurant freelance client quote price cost build', a: 'Yes. I have been freelancing since 2023 and build every site by hand around the business\'s real photos, prices and reviews. Tell me about yours below and I will reply with a plan and a quote.' },
+  { q: 'Can you build a website for my business?', k: 'website site business shop salon restaurant freelance client quote price cost build', a: "Yes. I have been freelancing since 2023 and build every site by hand around the business's real photos, prices and reviews. Tell me about yours below and I will reply with a plan and a quote." },
   { q: "What is Mobilit'Eirb?", k: 'mobiliteirb mobilit eirb startup carbon footprint company', a: 'My startup. It measures the carbon footprint of student trips. It began as a school project I led with a team of five at ENSEIRB-MATMECA.' },
   { q: 'Which languages do you speak?', k: 'language languages speak english french japanese', a: 'French (native), English (C1), and Japanese, which I am still learning.' },
   { q: 'Where is your résumé?', k: 'resume cv curriculum pdf download', a: 'Right here: the PDF link at the bottom of this section.' },
   { q: 'How do I reach you fastest?', k: 'contact reach email phone call book meeting fast quickly', a: 'Email lacault.tim@gmail.com, call 06 52 30 05 10, or book a 30-minute call. Or use the form.' },
-]
+]))
 const norm = (s: string) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9 ]/g, ' ')
 const query = ref('')
 const answers = computed(() => {
   const words = norm(query.value).split(' ').filter((w) => w.length > 2)
-  if (!words.length) return faq.slice(0, 3)
-  return faq
+  if (!words.length) return faq.value.slice(0, 3)
+  return faq.value
     .map((f) => ({ f, score: words.filter((w) => norm(f.q + ' ' + f.k).includes(w)).length }))
     .filter((x) => x.score > 0)
     .sort((a, b) => b.score - a.score)
@@ -58,7 +68,7 @@ async function send() {
   if (errors.from_name || errors.reply_to || errors.message) return
   status.value = 'sending'
   try {
-    await emailjs.send('service_hxniaw4', 'template_nn6a8mb', { ...form, subject: `timlacault.dev: message from ${form.from_name}` }, 'foVHr7K1XuV3pMbRN')
+    await emailjs.send('service_hxniaw4', 'template_nn6a8mb', { ...form, subject: `timlacault.dev: message from ${form.from_name} (${lang.value})` }, 'foVHr7K1XuV3pMbRN')
     status.value = 'sent'
     Object.assign(form, { from_name: '', reply_to: '', message: '' })
     foldCrane()
@@ -71,13 +81,13 @@ async function send() {
 <template>
   <Blueprint :source="src" class="contact" id="contact">
     <div class="contact-inner">
-      <h2 class="display title" data-field="name"><span class="line">Work</span> <span class="line">with me</span></h2>
+      <h2 class="display title" data-field="name"><span class="line">{{ t('Work', 'Travaillons') }}</span> <span class="line">{{ t('with me', 'ensemble') }}</span></h2>
 
       <div class="cols">
         <section class="faq" aria-labelledby="faq-title">
-          <h3 id="faq-title">Ask me something</h3>
-          <label class="sr-only" for="faq-q">Your question</label>
-          <input id="faq-q" v-model="query" class="ask" type="search" placeholder="When are you available?" autocomplete="off">
+          <h3 id="faq-title">{{ t('Ask me something', 'Posez-moi une question') }}</h3>
+          <label class="sr-only" for="faq-q">{{ t('Your question', 'Votre question') }}</label>
+          <input id="faq-q" v-model="query" class="ask" type="search" :placeholder="t('When are you available?', 'Quand êtes-vous disponible ?')" autocomplete="off">
           <ul v-if="answers.length" class="answers">
             <li v-for="f in answers" :key="f.q" :class="{ open: open === f.q }">
               <button type="button" :aria-expanded="open === f.q" @click="open = open === f.q ? null : f.q">{{ f.q }}</button>
@@ -85,8 +95,8 @@ async function send() {
             </li>
           </ul>
           <div v-else class="none">
-            <p>No answer for that yet.</p>
-            <button type="button" class="link" @click="askDirectly">Ask me directly</button>
+            <p>{{ t('No answer for that yet.', 'Pas encore de réponse à ça.') }}</p>
+            <button type="button" class="link" @click="askDirectly">{{ t('Ask me directly', 'Demandez-moi directement') }}</button>
           </div>
         </section>
 
@@ -95,26 +105,26 @@ async function send() {
             v-if="crane" class="crane" data-field="image" data-src="/img/crane.svg" data-field-priority aria-hidden="true"
             :style="{ transform: `translate(${fly * 70}vw, ${-fly * 110}vh) rotate(${-fly * 14}deg) scale(${1 - fly * 0.35})` }"
           />
-          <h3>Write to me</h3>
+          <h3>{{ t('Write to me', 'Écrivez-moi') }}</h3>
           <div class="field">
-            <label for="cf-name">Name</label>
+            <label for="cf-name">{{ t('Name', 'Nom') }}</label>
             <input id="cf-name" v-model="form.from_name" autocomplete="name" :aria-invalid="errors.from_name">
-            <p v-if="errors.from_name" class="err">Tell me who you are.</p>
+            <p v-if="errors.from_name" class="err">{{ t('Tell me who you are.', 'Dites-moi qui vous êtes.') }}</p>
           </div>
           <div class="field">
-            <label for="cf-mail">Email</label>
+            <label for="cf-mail">{{ t('Email', 'E-mail') }}</label>
             <input id="cf-mail" v-model="form.reply_to" type="email" autocomplete="email" :aria-invalid="errors.reply_to">
-            <p v-if="errors.reply_to" class="err">I need an email address to answer you.</p>
+            <p v-if="errors.reply_to" class="err">{{ t('I need an email address to answer you.', 'Il me faut un e-mail pour vous répondre.') }}</p>
           </div>
           <div class="field">
-            <label for="cf-msg">Message</label>
+            <label for="cf-msg">{{ t('Message', 'Message') }}</label>
             <textarea id="cf-msg" v-model="form.message" rows="5" :aria-invalid="errors.message" />
-            <p v-if="errors.message" class="err">Your message is empty.</p>
+            <p v-if="errors.message" class="err">{{ t('Your message is empty.', 'Votre message est vide.') }}</p>
           </div>
           <div class="send">
-            <Magnetic class="btn" type="submit" :aria-disabled="status === 'sending'">{{ status === 'sending' ? 'Sending' : 'Send' }}</Magnetic>
-            <p v-if="status === 'sent'" class="ok" role="status">Sent. I'll answer within a couple of days.</p>
-            <p v-if="status === 'error'" class="err" role="alert">That didn't go through. Write to lacault.tim@gmail.com instead.</p>
+            <Magnetic class="btn" type="submit" :aria-disabled="status === 'sending'">{{ status === 'sending' ? t('Sending', 'Envoi') : t('Send', 'Envoyer') }}</Magnetic>
+            <p v-if="status === 'sent'" class="ok" role="status">{{ t("Sent. I'll answer within a couple of days.", 'Envoyé. Je réponds sous quelques jours.') }}</p>
+            <p v-if="status === 'error'" class="err" role="alert">{{ t("That didn't go through. Write to lacault.tim@gmail.com instead.", "Ça n'est pas passé. Écrivez plutôt à lacault.tim@gmail.com.") }}</p>
           </div>
         </form>
       </div>
@@ -122,10 +132,10 @@ async function send() {
       <div class="reach">
         <a href="mailto:lacault.tim@gmail.com">lacault.tim@gmail.com</a>
         <a href="tel:+33652300510">06 52 30 05 10</a>
-        <button type="button" class="cal" v-bind="calAttrs">Book a call</button>
+        <button type="button" class="cal" v-bind="calAttrs">{{ t('Book a call', 'Réserver un appel') }}</button>
         <a href="https://github.com/TLacault" target="_blank" rel="noopener">GitHub</a>
         <a href="https://www.linkedin.com/in/tim-lacault" target="_blank" rel="noopener">LinkedIn</a>
-        <a href="/resume_tim_lacault.pdf" download>Résumé (PDF)</a>
+        <a href="/resume_tim_lacault.pdf" download>{{ t('Résumé (PDF)', 'CV (PDF)') }}</a>
       </div>
     </div>
   </Blueprint>
@@ -134,6 +144,7 @@ async function send() {
 <style scoped>
 .contact-inner { padding: 18vh var(--margin) 140px; display: grid; gap: 9vh; }
 .title { font-size: min(11vw, 22vh); }
+:global(html[lang="fr"] .contact .title) { font-size: min(7.4vw, 16vh); } /* TRAVAILLONS is twice as long as WORK */
 .line { display: inline-block; }
 :global(html.field-live .contact .title) { color: transparent; }
 .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 6vw; align-items: start; }

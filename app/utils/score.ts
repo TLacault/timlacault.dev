@@ -1,18 +1,16 @@
 // Generative ambient score, synthesised live with Web Audio: no files, no licences.
 // A slow pad (detuned triangle pairs through a lowpass) changes chord with the page section,
-// scroll speed opens the filter, holding the Lens adds a fifth, and sparse glass "pings" fall
+// scroll speed opens the filter, holding the Lens open sinks it an octave into a darker, wetter
+// room (going inside the page), and sparse glass "pings" fall
 // on a pentatonic scale. Built on first toggle (a user gesture), then faded in and out.
 
 const hz = (midi: number) => 440 * 2 ** ((midi - 69) / 12)
-// Voicings in D minor territory, one per section label (fallback: the first).
+// Voicings in D minor territory, one per section id (ScrollRail ids; unknown ids keep the current chord).
+const DM9 = [50, 57, 60, 64, 69], BB = [46, 53, 57, 62, 69], F = [41, 53, 57, 60, 64], GM9 = [43, 50, 58, 62, 65], ASUS = [45, 52, 57, 59, 64]
 const CHORDS: Record<string, number[]> = {
-  Intro: [50, 57, 60, 64, 69], // Dm9
-  Work: [46, 53, 57, 62, 69], // Bbmaj7
-  'Local businesses': [41, 53, 57, 60, 64], // Fmaj7
-  Path: [43, 50, 58, 62, 65], // Gm9
-  Contact: [45, 52, 57, 59, 64], // Asus2
-  Story: [46, 53, 57, 62, 69],
-  Screens: [41, 53, 57, 60, 64],
+  top: DM9, work: BB, local: F, path: GM9, contact: ASUS, // home
+  demo: BB, story: GM9, gallery: F, next: ASUS, // project pages
+  how: BB, sites: F, start: ASUS, // freelance
 }
 const PENTA = [74, 76, 77, 81, 84, 86, 88]
 
@@ -38,21 +36,23 @@ export function createScore() {
   const lfoAmt = ctx.createGain(); lfoAmt.gain.value = 0.035
   lfo.connect(lfoAmt).connect(pad.gain); lfo.start()
 
-  const voices = CHORDS.Intro!.map((n) => [-7, 7].map((cents) => {
+  const SPREAD = [-7, 7] // cents: the two triangles of each voice beat slowly against each other
+  const voices = DM9.map((n) => SPREAD.map((cents) => {
     const o = ctx.createOscillator(); o.type = 'triangle'; o.frequency.value = hz(n); o.detune.value = cents
     o.connect(filter); o.start(); return o
   }))
-  const fifth = ctx.createOscillator(); fifth.type = 'sine'; fifth.frequency.value = hz(69)
-  const fifthGain = ctx.createGain(); fifthGain.gain.value = 0
-  fifth.connect(fifthGain).connect(filter); fifth.start()
+  // A sine sub an octave under the root, only heard while the Lens is held.
+  const sub = ctx.createOscillator(); sub.type = 'sine'; sub.frequency.value = hz(DM9[0]! - 12)
+  const subGain = ctx.createGain(); subGain.gain.value = 0
+  sub.connect(subGain).connect(pad); sub.start()
 
-  let chord = 'Intro'
+  let chord = 'top'
   function setChord(label: string) {
     const notes = CHORDS[label]
     if (!notes || label === chord) return
     chord = label
     voices.forEach((pair, i) => pair.forEach((o) => o.frequency.setTargetAtTime(hz(notes[i]!), ctx.currentTime, 1.2)))
-    fifth.frequency.setTargetAtTime(hz(notes[1]! + 19), ctx.currentTime, 1.2)
+    sub.frequency.setTargetAtTime(hz(notes[0]! - 12), ctx.currentTime, 1.2)
   }
 
   function ping() {
@@ -65,11 +65,18 @@ export function createScore() {
   let pingTimer: ReturnType<typeof setTimeout> | undefined
   const schedule = () => { pingTimer = setTimeout(() => { ping(); schedule() }, 1800 + Math.random() * 4200) }
 
-  // Per frame: scroll speed opens the filter, the held Lens brings in the fifth.
+  // Per frame: scroll speed opens the filter; holding the Lens sinks everything an octave, closes
+  // the filter, brings in the sub and pushes the reverb (a slow glide in and out, never a jump).
+  let deep = false
   function update(velocity: number, held: boolean, section: string) {
     const t = ctx.currentTime
-    filter.frequency.setTargetAtTime(520 + Math.min(Math.abs(velocity) * 60, 2200), t, 0.25)
-    fifthGain.gain.setTargetAtTime(held ? 0.05 : 0, t, 0.4)
+    filter.frequency.setTargetAtTime(held ? 260 : 520 + Math.min(Math.abs(velocity) * 60, 2200), t, held ? 0.5 : 0.25)
+    if (held !== deep) {
+      deep = held
+      voices.forEach((pair) => pair.forEach((o, k) => o.detune.setTargetAtTime(SPREAD[k]! + (held ? -1200 : 0), t, 0.45)))
+      subGain.gain.setTargetAtTime(held ? 0.5 : 0, t, 0.6)
+      wet.gain.setTargetAtTime(held ? 0.95 : 0.55, t, 0.6)
+    }
     setChord(section)
   }
 

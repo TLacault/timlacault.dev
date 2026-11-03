@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import src from './Hero.vue?raw'
+const { t } = useLang()
 </script>
 
 <template>
@@ -11,11 +12,11 @@ import src from './Hero.vue?raw'
       </h1>
       <a class="cue mono" href="#work" data-enter style="--d: .75s">
         <span class="cue-line" aria-hidden="true" />
-        Scroll to see the work
+        {{ t('Scroll to see the work', 'Défilez pour voir le travail') }}
       </a>
       <div class="hero-side">
-        <p class="lede" data-enter style="--d: .35s">Software engineer in Bordeaux. I build websites that feel alive.</p>
-        <div data-enter style="--d: .55s"><Magnetic class="btn" href="#contact">Work with me</Magnetic></div>
+        <p class="lede" data-enter style="--d: .35s">{{ t('Software engineer in Bordeaux. I build websites that feel alive.', 'Ingénieur logiciel à Bordeaux. Je construis des sites qui ont du vivant.') }}</p>
+        <div data-enter style="--d: .55s"><Magnetic class="btn" href="#contact">{{ t('Work with me', 'Travaillons ensemble') }}</Magnetic></div>
       </div>
     </div>
   </Blueprint>

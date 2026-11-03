@@ -12,6 +12,7 @@ const browser = await puppeteer.launch({
   args: (process.env.CHROME_ARGS ?? '--use-gl=angle --use-angle=gl-egl --ignore-gpu-blocklist').split(' '),
 })
 const page = await browser.newPage()
+if (process.env.LANG_FR) await page.evaluateOnNewDocument(() => localStorage.setItem('tl-lang', 'fr'))
 await page.setViewport({ width: w, height: h, deviceScaleFactor: 1 })
 page.on('console', (m) => ['error', 'warn'].includes(m.type()) && console.log(`[${m.type()}]`, m.text().slice(0, 300)))
 page.on('pageerror', (e) => console.log('[pageerror]', e.message))

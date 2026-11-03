@@ -49,7 +49,9 @@ const tick = () => {
   let label = props.sections[0]?.label ?? ''
   ticks.value.forEach((t, i) => { if (p >= t - 0.02) label = props.sections[i]!.label })
   current.value = label
-  stage.section = label
+  let id = props.sections[0]?.id ?? ''
+  ticks.value.forEach((t, i) => { if (p >= t - 0.02) id = props.sections[i]!.id })
+  stage.section = id
 }
 
 let ro: ResizeObserver | undefined
@@ -68,7 +70,7 @@ onBeforeUnmount(() => { gsap.ticker.remove(tick); ro?.disconnect() })
     <div ref="rail" class="rail" @pointerdown.prevent="scrubFrom">
       <button
         v-for="(s, i) in sections" :key="s.id" class="tick" :style="{ top: `${(ticks[i] ?? 0) * 100}%` }"
-        :aria-label="`Go to ${s.label}`" @pointerdown.stop @click="go(i)"
+        :aria-label="s.label" @pointerdown.stop @click="go(i)"
       >
         <span class="mono">{{ s.label }}</span>
       </button>

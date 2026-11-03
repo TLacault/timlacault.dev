@@ -17,6 +17,7 @@ const tick = (_t: number, dt: number) => {
 <script setup lang="ts">
 import { clients } from '~/data/projects'
 
+const { t, L } = useLang()
 const half = Math.ceil(clients.length / 2)
 const rows = [clients.slice(0, half), clients.slice(half)]
 const tracks = ref<HTMLElement[]>([])
@@ -44,9 +45,9 @@ onBeforeUnmount(() => {
     <div v-for="(row, r) in rows" :key="r" class="row">
       <ul :ref="(el) => { if (el) tracks[r] = el as HTMLElement }" class="track">
         <li v-for="(c, i) in [...row, ...row]" :key="i" :aria-hidden="i >= row.length">
-          <a class="site" :href="c.url" target="_blank" rel="noopener" data-cursor="Visit" :tabindex="i >= row.length ? -1 : undefined">
-            <div class="bar mono"><span class="dot" />{{ c.name }}<span class="trade">{{ c.trade }}</span></div>
-            <img :src="`/clients/${c.slug}.webp`" :alt="`${c.name} website`" loading="lazy" decoding="async" width="960" height="540">
+          <a class="site" :href="c.url" target="_blank" rel="noopener" :data-cursor="t('Visit', 'Visiter')" :tabindex="i >= row.length ? -1 : undefined">
+            <div class="bar mono"><span class="dot" />{{ c.name }}<span class="trade">{{ L(c.trade) }}</span></div>
+            <img :src="`/clients/${c.slug}.webp`" :alt="`${t('Website of', 'Site de')} ${c.name}`" loading="lazy" decoding="async" width="960" height="540">
           </a>
         </li>
       </ul>

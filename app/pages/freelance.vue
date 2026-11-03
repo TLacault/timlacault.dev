@@ -5,73 +5,73 @@
 <script setup lang="ts">
 import src from './freelance.vue?raw'
 import { clients } from '~/data/projects'
+import type { Txt } from '~/composables/useLang'
 
-useHead({
-  htmlAttrs: { lang: 'fr' },
-  title: 'Sites pour commerces et artisans · Tim Lacault',
-  meta: [{ name: 'description', content: 'Je conçois et je code des sites pour les commerces et les artisans de Bordeaux. Vos vraies photos, vos vrais prix, vos vrais avis.' }],
-})
-const offer = [
-  { t: 'Fait à la main', d: 'Pas de modèle acheté : chaque site est dessiné et codé pour votre métier et votre quartier.' },
-  { t: 'Votre vrai contenu', d: 'Vos photos, vos tarifs, vos horaires et vos avis, repris de votre page de réservation ou de Google.' },
-  { t: 'Pensé pour le téléphone', d: 'Vos clients vous trouvent sur mobile. Réserver, appeler ou venir se fait en un geste.' },
-  { t: 'Une démo avant de signer', d: 'Vous voyez votre site en ligne, avec votre contenu, avant de vous engager.' },
+const { t, L } = useLang()
+useHead(() => ({
+  title: t('Websites for local businesses · Tim Lacault', 'Sites pour commerces et artisans · Tim Lacault'),
+  meta: [{ name: 'description', content: t('I design and build websites for shops and trades in Bordeaux. Your real photos, prices and reviews.', 'Je conçois et je code des sites pour les commerces et les artisans de Bordeaux. Vos vraies photos, vos vrais prix, vos vrais avis.') }],
+}))
+const offer: { t: Txt, d: Txt }[] = [
+  { t: { en: 'Built by hand', fr: 'Fait à la main' }, d: { en: 'No bought template: every site is designed and coded for your trade and your neighbourhood.', fr: 'Pas de modèle acheté : chaque site est dessiné et codé pour votre métier et votre quartier.' } },
+  { t: { en: 'Your real content', fr: 'Votre vrai contenu' }, d: { en: 'Your photos, prices, opening hours and reviews, taken from your booking page or Google.', fr: 'Vos photos, vos tarifs, vos horaires et vos avis, repris de votre page de réservation ou de Google.' } },
+  { t: { en: 'Made for phones', fr: 'Pensé pour le téléphone' }, d: { en: 'Your customers find you on their phone. Booking, calling or getting directions takes one tap.', fr: 'Vos clients vous trouvent sur mobile. Réserver, appeler ou venir se fait en un geste.' } },
+  { t: { en: 'A demo before you sign', fr: 'Une démo avant de signer' }, d: { en: 'You see your site online, with your content, before you commit to anything.', fr: 'Vous voyez votre site en ligne, avec votre contenu, avant de vous engager.' } },
 ]
-const steps = [
-  { t: 'Je regarde votre activité', d: 'Votre page actuelle, vos avis, vos concurrents, ce que vos clients cherchent.' },
-  { t: 'Je construis une démo', d: 'Un vrai site en ligne, avec vos photos et vos prix, que vous pouvez ouvrir sur votre téléphone.' },
-  { t: 'On ajuste ensemble', d: 'Textes, couleurs, sections : on corrige jusqu’à ce que ce soit vous.' },
-  { t: 'Mise en ligne', d: 'Sur votre nom de domaine, prêt à recevoir vos clients.' },
+const steps: { t: Txt, d: Txt }[] = [
+  { t: { en: 'I look at your business', fr: 'Je regarde votre activité' }, d: { en: 'Your current page, your reviews, your competitors, what your customers search for.', fr: 'Votre page actuelle, vos avis, vos concurrents, ce que vos clients cherchent.' } },
+  { t: { en: 'I build a demo', fr: 'Je construis une démo' }, d: { en: 'A real site online, with your photos and prices, that you can open on your phone.', fr: 'Un vrai site en ligne, avec vos photos et vos prix, que vous pouvez ouvrir sur votre téléphone.' } },
+  { t: { en: 'We adjust it together', fr: 'On ajuste ensemble' }, d: { en: 'Words, colours, sections: we change it until it feels like you.', fr: 'Textes, couleurs, sections : on corrige jusqu’à ce que ce soit vous.' } },
+  { t: { en: 'It goes live', fr: 'Mise en ligne' }, d: { en: 'On your own domain, ready for your customers.', fr: 'Sur votre nom de domaine, prêt à recevoir vos clients.' } },
 ]
-onMounted(useCal)
-const sections = [
-  { id: 'top', label: 'Offre' },
-  { id: 'how', label: 'Méthode' },
-  { id: 'sites', label: 'Réalisations' },
+const sections = computed(() => [
+  { id: 'top', label: t('Offer', 'Offre') },
+  { id: 'how', label: t('How it goes', 'Méthode') },
+  { id: 'sites', label: t('Sites', 'Réalisations') },
   { id: 'start', label: 'Contact' },
-]
+])
 </script>
 
 <template>
   <div class="fl">
     <Blueprint :source="src" id="top">
       <div class="hero">
-        <p class="mono kicker" data-enter style="--d: .3s"><span>Freelance</span> Bordeaux et ailleurs</p>
-        <h1 class="display title" data-field="name"><span class="line">Votre site,</span> <span class="line">fait main</span></h1>
+        <p class="mono kicker" data-enter style="--d: .3s"><span>Freelance</span> {{ t('Bordeaux and beyond', 'Bordeaux et ailleurs') }}</p>
+        <h1 class="display title" data-field="name"><span class="line">{{ t('Your site,', 'Votre site,') }}</span> <span class="line">{{ t('by hand', 'fait main') }}</span></h1>
         <div class="hero-side" data-enter style="--d: .5s">
-          <p class="lede">Je conçois et je code des sites pour les commerces et les artisans. Vos vraies photos, vos vrais prix, vos vrais avis.</p>
-          <Magnetic class="btn" type="button" v-bind="calAttrs">Réserver un appel</Magnetic>
+          <p class="lede">{{ t('I design and build websites for shops and trades. Your real photos, your real prices, your real reviews.', 'Je conçois et je code des sites pour les commerces et les artisans. Vos vraies photos, vos vrais prix, vos vrais avis.') }}</p>
+          <Magnetic class="btn" type="button" v-bind="calAttrs">{{ t('Book a call', 'Réserver un appel') }}</Magnetic>
         </div>
       </div>
       <ul class="offer">
-        <li v-for="(o, k) in offer" :key="o.t"><span class="mono">{{ String(k + 1).padStart(2, '0') }}</span><h2>{{ o.t }}</h2><p>{{ o.d }}</p></li>
+        <li v-for="(o, k) in offer" :key="o.t.en"><span class="mono">{{ String(k + 1).padStart(2, '0') }}</span><h2>{{ L(o.t) }}</h2><p>{{ L(o.d) }}</p></li>
       </ul>
     </Blueprint>
 
     <Blueprint :source="src" id="how">
       <div class="how">
-        <h2 class="display h">Comment ça se passe</h2>
+        <h2 class="display h">{{ t('How it goes', 'Comment ça se passe') }}</h2>
         <ol>
-          <li v-for="s in steps" :key="s.t"><h3>{{ s.t }}</h3><p>{{ s.d }}</p></li>
+          <li v-for="s in steps" :key="s.t.en"><h3>{{ L(s.t) }}</h3><p>{{ L(s.d) }}</p></li>
         </ol>
       </div>
     </Blueprint>
 
     <Blueprint :source="src" id="sites">
       <div class="sites">
-        <h2 class="display h">{{ clients.length }} sites déjà en ligne</h2>
-        <p class="sub">Coiffeurs, boulangeries, restaurants, un club de boxe, un plombier. Ouvrez-les : ils sont en ligne.</p>
+        <h2 class="display h">{{ clients.length }} {{ t('sites already live', 'sites déjà en ligne') }}</h2>
+        <p class="sub">{{ t('Hair salons, bakeries, restaurants, a boxing club, a plumber. Open them: they are live.', 'Coiffeurs, boulangeries, restaurants, un club de boxe, un plombier. Ouvrez-les : ils sont en ligne.') }}</p>
       </div>
       <ClientWall />
     </Blueprint>
 
     <Blueprint :source="src" id="start">
       <div class="start">
-        <h2 class="display title" data-field="name"><span class="line">Parlons</span> <span class="line">de votre</span> <span class="line">commerce</span></h2>
+        <h2 class="display title" data-field="name"><span class="line">{{ t('Let’s talk', 'Parlons') }}</span> <span class="line">{{ t('about your', 'de votre') }}</span> <span class="line">{{ t('business', 'commerce') }}</span></h2>
         <div class="ways">
-          <button type="button" v-bind="calAttrs" data-cursor="Réserver"><span class="mono">Appel de 30 min</span>Réserver un créneau</button>
-          <a href="tel:+33652300510" data-cursor="Appeler"><span class="mono">Téléphone</span>06 52 30 05 10</a>
-          <a href="mailto:lacault.tim@gmail.com" data-cursor="Écrire"><span class="mono">E-mail</span>lacault.tim@gmail.com</a>
+          <button type="button" v-bind="calAttrs" :data-cursor="t('Book', 'Réserver')"><span class="mono">{{ t('30-minute call', 'Appel de 30 min') }}</span>{{ t('Pick a time', 'Réserver un créneau') }}</button>
+          <a href="tel:+33652300510" :data-cursor="t('Call', 'Appeler')"><span class="mono">{{ t('Phone', 'Téléphone') }}</span>06 52 30 05 10</a>
+          <a href="mailto:lacault.tim@gmail.com" :data-cursor="t('Write', 'Écrire')"><span class="mono">E-mail</span>lacault.tim@gmail.com</a>
         </div>
       </div>
     </Blueprint>

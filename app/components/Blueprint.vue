@@ -55,8 +55,8 @@ onBeforeUnmount(() => { stage.blueprints.delete(root.value!); clearInterval(time
 <style scoped>
 .bp { position: relative; z-index: 1; }
 .bp-surface {
-  -webkit-mask-image: radial-gradient(circle var(--lr, 0px) at var(--cx, -999px) var(--cy, -999px), transparent 99%, #000 100%);
-  mask-image: radial-gradient(circle var(--lr, 0px) at var(--cx, -999px) var(--cy, -999px), transparent 99%, #000 100%);
+  -webkit-mask-image: radial-gradient(circle var(--lr, 0px) at var(--sx, -999px) var(--sy, -999px), transparent 99%, #000 100%);
+  mask-image: radial-gradient(circle var(--lr, 0px) at var(--sx, -999px) var(--sy, -999px), transparent 99%, #000 100%);
 }
 .bp-xray {
   position: absolute; inset: 0; overflow: clip; pointer-events: none; /* clip, not hidden: sticky children keep sticking */

@@ -11,7 +11,6 @@ export default defineNuxtConfig({
   experimental: { viewTransition: true },
   app: {
     head: {
-      htmlAttrs: { lang: 'en' },
       title: 'Tim Lacault · Software engineer',
       meta: [
         { name: 'description', content: 'Tim Lacault, software engineer in Bordeaux. I build websites that feel alive.' },

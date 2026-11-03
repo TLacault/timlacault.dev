@@ -7,6 +7,7 @@ continues as the page's hero (shared view-transition-name).
 import type { Project } from '~/data/projects'
 
 const props = defineProps<{ project: Project, index: number }>()
+const { t, L } = useLang()
 const to = `/work/${props.project.slug}`
 const host = props.project.live?.replace(/^https?:\/\//, '') ?? ''
 </script>
@@ -14,19 +15,19 @@ const host = props.project.live?.replace(/^https?:\/\//, '') ?? ''
 <template>
   <article class="exhibit" :class="{ flip: index % 2 }">
     <header class="head">
-      <p class="mono kicker"><span>{{ String(index + 1).padStart(2, '0') }}</span> {{ project.kind }} / {{ project.role }} / {{ project.year }}</p>
+      <p class="mono kicker"><span>{{ String(index + 1).padStart(2, '0') }}</span> {{ L(project.kind) }} / {{ L(project.role) }} / {{ project.year }}</p>
       <h3 class="display title" data-field="name">
         <span v-for="w in project.title.split(' ')" :key="w" class="line">{{ w }}</span>
       </h3>
     </header>
     <div class="meta">
-      <p class="tagline">{{ project.tagline }}</p>
+      <p class="tagline">{{ L(project.tagline) }}</p>
       <ul class="stack mono"><li v-for="s in project.stack" :key="s">{{ s }}</li></ul>
-      <Magnetic class="btn" :href="to">See the project</Magnetic>
+      <Magnetic class="btn" :href="to">{{ t('See the project', 'Voir le projet') }}</Magnetic>
     </div>
-    <NuxtLink :to="to" class="frame" data-cursor="Open" :aria-label="`Open ${project.title}`">
+    <NuxtLink :to="to" class="frame" :data-cursor="t('Open', 'Ouvrir')" :aria-label="`${t('Open', 'Ouvrir')} ${project.title}`">
       <div class="bar mono"><span class="dot" /><span>{{ host }}</span></div>
-      <img :src="project.images[0]" :alt="`${project.title}, home screen`" :style="{ viewTransitionName: `shot-${project.slug}` }" loading="lazy" decoding="async">
+      <img :src="project.images[0]" :alt="`${project.title}, ${t('home screen', 'accueil')}`" :style="{ viewTransitionName: `shot-${project.slug}` }" loading="lazy" decoding="async">
     </NuxtLink>
   </article>
 </template>

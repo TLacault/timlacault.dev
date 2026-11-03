@@ -9,7 +9,7 @@ const GH_TTL = 10 * 60 * 1000 // keyless GitHub API: 60 requests/hour
 export interface Presence {
   now: number
   spotify: { song: string, artist: string, art: string } | null
-  github: { text: string, url: string, at: string } | null
+  github: { kind: 'push' | 'pr' | 'create' | 'release', n: number, repo: string, url: string, at: string } | null
 }
 const state = reactive<Presence>({ now: Date.now(), spotify: null, github: null })
 let started = false
@@ -17,42 +17,41 @@ let started = false
 export const parisTime = (ts: number) =>
   new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Paris', hour: '2-digit', minute: '2-digit', hour12: false }).format(ts)
 
-export function parisStatus(ts: number) {
+const STATUS = [
+  [6, 'probably asleep', 'sûrement en train de dormir'], [9, 'easing into the day', 'démarre la journée'], [12, 'deep work', 'concentré'],
+  [14, 'lunch break', 'pause déjeuner'], [18, 'building things', 'en train de construire'], [22, 'side projects', 'projets perso'], [24, 'late-night coding', 'code tard le soir'],
+] as const
+export function parisStatus(ts: number, lang: 'en' | 'fr' = 'en') {
   const h = Number(new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/Paris', hour: '2-digit', hour12: false }).format(ts))
-  if (h < 6) return 'probably asleep'
-  if (h < 9) return 'easing into the day'
-  if (h < 12) return 'deep work'
-  if (h < 14) return 'lunch break'
-  if (h < 18) return 'building things'
-  if (h < 22) return 'side projects'
-  return 'late-night coding'
+  const s = STATUS.find(([max]) => h < max)!
+  return lang === 'fr' ? s[2] : s[1]
 }
 
-export function ago(at: string, now: number) {
+export function ago(at: string, now: number, lang: 'en' | 'fr' = 'en') {
   const m = Math.floor(Math.max(0, now - new Date(at).getTime()) / 60000)
-  if (m < 1) return 'just now'
-  if (m < 60) return `${m}m ago`
-  if (m < 1440) return `${Math.floor(m / 60)}h ago`
-  return `${Math.floor(m / 1440)}d ago`
+  const v = m < 60 ? `${m} min` : m < 1440 ? `${Math.floor(m / 60)} h` : `${Math.floor(m / 1440)} ${lang === 'fr' ? 'j' : 'd'}`
+  if (m < 1) return lang === 'fr' ? "à l'instant" : 'just now'
+  return lang === 'fr' ? `il y a ${v}` : `${v.replace(' min', 'm').replace(' h', 'h').replace(' d', 'd')} ago`
+}
+
+/** One line about a GitHub event, in either language. */
+export function eventText(g: NonNullable<Presence['github']>, lang: 'en' | 'fr' = 'en') {
+  const s = g.n > 1 ? 's' : ''
+  return lang === 'fr'
+    ? { push: `a poussé ${g.n} commit${s} sur ${g.repo}`, pr: `a ouvert une PR sur ${g.repo}`, create: `a créé ${g.repo}`, release: `a publié une version de ${g.repo}` }[g.kind]
+    : { push: `pushed ${g.n} commit${s} to ${g.repo}`, pr: `opened a PR in ${g.repo}`, create: `created ${g.repo}`, release: `shipped a release of ${g.repo}` }[g.kind]
 }
 
 type GhEvent = { type: string, repo: { name: string }, created_at: string, payload?: { size?: number, commits?: unknown[] } }
 export function describeEvent(events: GhEvent[]): Presence['github'] {
   const ev = events.find((e) => ['PushEvent', 'PullRequestEvent', 'CreateEvent', 'ReleaseEvent'].includes(e.type))
   if (!ev) return null
-  const repo = ev.repo.name.split('/').pop()
-  const n = ev.payload?.size ?? ev.payload?.commits?.length ?? 1
-  const text = {
-    PushEvent: `pushed ${n} commit${n > 1 ? 's' : ''} to ${repo}`,
-    PullRequestEvent: `opened a PR in ${repo}`,
-    CreateEvent: `created ${repo}`,
-    ReleaseEvent: `shipped a release of ${repo}`,
-  }[ev.type]!
-  return { text, url: `https://github.com/${ev.repo.name}`, at: ev.created_at }
+  const kind = ({ PushEvent: 'push', PullRequestEvent: 'pr', CreateEvent: 'create', ReleaseEvent: 'release' } as const)[ev.type as 'PushEvent']
+  return { kind, n: ev.payload?.size ?? ev.payload?.commits?.length ?? 1, repo: ev.repo.name.split('/').pop()!, url: `https://github.com/${ev.repo.name}`, at: ev.created_at }
 }
 
 async function fetchGithub() {
-  const key = `presence_gh_${GITHUB_USER}`
+  const key = `presence_gh2_${GITHUB_USER}` // v2: structured event
   try {
     const c = JSON.parse(localStorage.getItem(key) || 'null')
     if (c && Date.now() - c.ts < GH_TTL) { state.github = c.data; return }

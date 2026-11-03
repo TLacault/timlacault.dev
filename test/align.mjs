@@ -3,10 +3,11 @@
 import puppeteer from 'puppeteer-core'
 const paths = process.argv.slice(2).length ? process.argv.slice(2) : ['/', '/work/badminton-records', '/freelance', '/source']
 const b = await puppeteer.launch({ executablePath: '/usr/bin/google-chrome-stable', headless: true })
-const p = await b.newPage(); await p.setViewport({ width: 1440, height: 900 })
+const p = await b.newPage(); if (process.env.LANG_FR) await p.evaluateOnNewDocument(() => localStorage.setItem('tl-lang', 'fr')); await p.setViewport({ width: 1440, height: 900 })
 let bad = 0
 for (const path of paths) {
   await p.goto(`http://localhost:3300${path}?nofield`, { waitUntil: 'networkidle2' }); await new Promise((r) => setTimeout(r, 2500))
+  await p.mouse.move(700, 400); await p.mouse.move(720, 420, { steps: 4 })
   const res = await p.evaluate(() => [...document.querySelectorAll('.bp')].map((bp) => {
     const a = [...bp.querySelectorAll(':scope > .bp-surface *')], c = [...bp.querySelectorAll(':scope > .bp-xray .bp-copy *')]
     let worst = 0, at = ''
@@ -16,6 +17,12 @@ for (const path of paths) {
       const d = Math.max(Math.abs(r1.left - r2.left), Math.abs(r1.top - r2.top))
       if (d > worst) { worst = d; at = el.tagName + '.' + [...el.classList].join('.') }
     })
+    // The two circles: the hole in the surface (mask, from the surface's corner) and the copy's clip
+    // (from the section's corner) must share one centre in page coordinates.
+    const s = bp.firstElementChild.getBoundingClientRect(), r = bp.getBoundingClientRect(), cs = getComputedStyle(bp)
+    const sx = parseFloat(cs.getPropertyValue('--sx')), cx = parseFloat(cs.getPropertyValue('--cx'))
+    const sy = parseFloat(cs.getPropertyValue('--sy')), cy = parseFloat(cs.getPropertyValue('--cy'))
+    if (!Number.isNaN(sx) && Math.hypot(s.left + sx - (r.left + cx), s.top + sy - (r.top + cy)) > 1) { worst = 999; at = 'lens circles apart' }
     return { id: bp.id || bp.className, n: a.length, copy: c.length, worst: Math.round(worst), at }
   }))
   for (const r of res) { if (r.worst > 1 || r.n !== r.copy) bad++; console.log(path.padEnd(26), (r.worst > 1 || r.n !== r.copy ? 'MISALIGNED' : 'ok').padEnd(11), r.id.padEnd(24), r.worst + 'px', r.at, r.n !== r.copy ? `(${r.n} vs ${r.copy} elements)` : '') }

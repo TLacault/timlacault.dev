@@ -8,20 +8,21 @@ import src from './[slug].vue?raw'
 import { projects } from '~/data/projects'
 
 const route = useRoute()
+const { t, L } = useLang()
 const i = computed(() => projects.findIndex((p) => p.slug === route.params.slug))
 const p = computed(() => projects[i.value])
 if (!p.value) throw createError({ statusCode: 404, statusMessage: 'No project here' })
 const next = computed(() => projects[(i.value + 1) % projects.length]!)
 const ytId = computed(() => p.value?.demo?.match(/v=([\w-]+)/)?.[1])
 const host = computed(() => p.value?.live?.replace(/^https?:\/\//, '') ?? '')
-useHead(() => ({ title: `${p.value?.title} · Tim Lacault`, meta: [{ name: 'description', content: p.value?.tagline }] }))
+useHead(() => ({ title: `${p.value?.title} · Tim Lacault`, meta: [{ name: 'description', content: p.value ? L(p.value.tagline) : '' }] }))
 
 const sections = computed(() => [
   { id: 'top', label: 'Intro' },
-  ...(ytId.value ? [{ id: 'demo', label: 'Demo' }] : []),
-  { id: 'story', label: 'Story' },
-  { id: 'gallery', label: 'Screens' },
-  { id: 'next', label: 'Next' },
+  ...(ytId.value ? [{ id: 'demo', label: t('Demo', 'Démo') }] : []),
+  { id: 'story', label: t('Story', 'Histoire') },
+  { id: 'gallery', label: t('Screens', 'Écrans') },
+  { id: 'next', label: t('Next', 'Suivant') },
 ])
 </script>
 
@@ -29,55 +30,55 @@ const sections = computed(() => [
   <div v-if="p" class="case">
     <Blueprint :source="src" id="top" class="case-hero">
       <div class="hero-in">
-        <NuxtLink to="/#work" class="back mono" data-enter style="--d: .3s">Back to the work</NuxtLink>
-        <p class="mono kicker" data-enter style="--d: .4s"><span>{{ p.kind }}</span> {{ p.role }} / {{ p.year }}</p>
+        <NuxtLink to="/#work" class="back mono" data-enter style="--d: .3s">{{ t('Back to the work', 'Retour aux projets') }}</NuxtLink>
+        <p class="mono kicker" data-enter style="--d: .4s"><span>{{ L(p.kind) }}</span> {{ L(p.role) }} / {{ p.year }}</p>
         <h1 class="display title" data-field="name"><span v-for="w in p.title.split(' ')" :key="w" class="line">{{ w }}</span></h1>
         <div class="facts" data-enter style="--d: .55s">
-          <p class="tagline">{{ p.tagline }}</p>
+          <p class="tagline">{{ L(p.tagline) }}</p>
           <ul class="stack mono"><li v-for="s in p.stack" :key="s">{{ s }}</li></ul>
           <div class="actions">
-            <Magnetic v-if="p.live" class="btn" :href="p.live">Visit the site</Magnetic>
-            <a v-if="p.demo" class="link" :href="p.demo" target="_blank" rel="noopener">Watch on YouTube</a>
+            <Magnetic v-if="p.live" class="btn" :href="p.live">{{ t('Visit the site', 'Voir le site') }}</Magnetic>
+            <a v-if="p.demo" class="link" :href="p.demo" target="_blank" rel="noopener">{{ t('Watch on YouTube', 'Voir sur YouTube') }}</a>
           </div>
         </div>
         <figure class="frame lead">
           <div class="bar mono"><span class="dot" />{{ host }}</div>
-          <img :src="p.images[0]" :alt="`${p.title}, home screen`" :style="{ viewTransitionName: `shot-${p.slug}` }">
+          <img :src="p.images[0]" :alt="`${p.title}, ${t('home screen', 'accueil')}`" :style="{ viewTransitionName: `shot-${p.slug}` }">
         </figure>
       </div>
     </Blueprint>
 
     <Blueprint v-if="ytId" :source="src" id="demo" class="demo">
       <figure class="frame video">
-        <div class="bar mono"><span class="dot" />Demo</div>
-        <VideoEmbed :id="ytId" :title="`${p.title} demo`" />
+        <div class="bar mono"><span class="dot" />{{ t('Demo', 'Démo') }}</div>
+        <VideoEmbed :id="ytId" :title="`${p.title}, ${t('demo', 'démo')}`" />
       </figure>
     </Blueprint>
 
     <Blueprint :source="src" id="story" class="story">
       <div class="story-in">
-      <section v-for="(s, k) in p.sections" :key="s.title" class="chapter">
-        <h2><span class="mono">{{ String(k + 1).padStart(2, '0') }}</span>{{ s.title }}</h2>
+      <section v-for="(s, k) in p.sections" :key="s.title.en" class="chapter">
+        <h2><span class="mono">{{ String(k + 1).padStart(2, '0') }}</span>{{ L(s.title) }}</h2>
         <div class="text">
-          <p v-if="s.body">{{ s.body }}</p>
-          <ul v-if="s.points"><li v-for="pt in s.points" :key="pt">{{ pt }}</li></ul>
+          <p v-if="s.body">{{ L(s.body) }}</p>
+          <ul v-if="s.points"><li v-for="pt in s.points" :key="pt.en">{{ L(pt) }}</li></ul>
         </div>
       </section>
       </div>
     </Blueprint>
 
     <Blueprint :source="src" id="gallery" class="gallery">
-      <h2 class="display g-title">Screens</h2>
+      <h2 class="display g-title">{{ t('Screens', 'Écrans') }}</h2>
       <div class="shots">
         <figure v-for="(img, k) in p.images.slice(1)" :key="img" class="frame">
-          <img :src="img" :alt="`${p.title}, screenshot ${k + 2}`" loading="lazy" decoding="async">
+          <img :src="img" :alt="`${p.title}, ${t('screenshot', 'capture')} ${k + 2}`" loading="lazy" decoding="async">
         </figure>
       </div>
     </Blueprint>
 
     <Blueprint :source="src" id="next" class="next">
-      <NuxtLink :to="`/work/${next.slug}`" class="next-link" data-cursor="Next">
-        <span class="mono">Next project</span>
+      <NuxtLink :to="`/work/${next.slug}`" class="next-link" :data-cursor="t('Next', 'Suivant')">
+        <span class="mono">{{ t('Next project', 'Projet suivant') }}</span>
         <span class="display next-title" data-field="name"><span v-for="w in next.title.split(' ')" :key="w" class="line">{{ w }}</span></span>
       </NuxtLink>
     </Blueprint>

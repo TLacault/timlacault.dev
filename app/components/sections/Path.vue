@@ -8,19 +8,31 @@ the word gives way to the portrait, drawn in glyphs.
 <script setup lang="ts">
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import src from './Path.vue?raw'
+import type { Txt } from '~/composables/useLang'
 
 type Lane = 0 | 1 | 2 // main, freelance, cio
-const commits: { word: string, when: string, lane: Lane, msg: string, body: string }[] = [
-  { word: 'Scratch', when: 'age 13', lane: 0, msg: 'init: Scratch', body: 'Algorithms and logic for the first time. Dragging blocks around until a cat did what I meant.' },
-  { word: 'Calc', when: 'school', lane: 0, msg: 'feat: games on a calculator', body: 'Coding small games while my classmates were still learning what its functions did.' },
-  { word: 'Web', when: 'age 17', lane: 0, msg: 'feat: first website', body: 'For a high-school environmental project. The moment I saw you could build anything with simple tools.' },
-  { word: 'Epitech', when: '2020', lane: 0, msg: 'Epitech', body: 'Two years of project-based IT: learning by shipping, in C and everything after.' },
-  { word: 'Car', when: '2021', lane: 0, msg: 'Internship at Lormauto, 5 months', body: 'A car dashboard in JavaScript and MQTT: diagnostics, multimedia, GPS and HVAC screens, and a Node-RED sensor simulator.' },
-  { word: 'B.Sc', when: '2022', lane: 0, msg: 'Computer Science, Université de Bordeaux', body: 'Theory under the practice: algorithms, systems, languages.' },
-  { word: 'Clients', when: '2023', lane: 1, msg: 'branch freelance', body: 'My own clients: websites for businesses, designed and built by hand. Still open.' },
-  { word: 'Enseirb', when: '2024', lane: 0, msg: 'Software engineering, Bordeaux INP', body: "ENSEIRB-MATMECA. Where Mobilit'Eirb started, with a team of five I led." },
-  { word: 'CIO', when: '2024', lane: 2, msg: 'branch cio: Aquitaine Électronique Informatique', body: 'Running a Debian and Docker server fleet, secrets, and mail for 30+ members, and the company site in Vue 3.' },
-  { word: 'Now', when: '2026', lane: 0, msg: 'HEAD', body: 'Looking for a 4th-year internship (June to September 2027) and my end-of-studies internship (February to September 2028).' },
+const { t, L } = useLang()
+const commits: { word: Txt, when: Txt, lane: Lane, msg: Txt, body: Txt }[] = [
+  { word: { en: 'Scratch', fr: 'Scratch' }, when: { en: 'age 13', fr: '13 ans' }, lane: 0, msg: { en: 'init: Scratch', fr: 'init: Scratch' },
+    body: { en: 'Algorithms and logic for the first time. Dragging blocks around until a cat did what I meant.', fr: "L'algorithmique et la logique pour la première fois. Déplacer des blocs jusqu'à ce qu'un chat fasse ce que je voulais." } },
+  { word: { en: 'Calc', fr: 'Calc' }, when: { en: 'high school', fr: 'lycée' }, lane: 0, msg: { en: 'feat: games on a calculator', fr: 'feat: des jeux sur calculatrice' },
+    body: { en: 'Coding small games while my classmates were still learning what its functions did.', fr: 'Coder des petits jeux pendant que mes camarades apprenaient encore à se servir de ses fonctions.' } },
+  { word: { en: 'Web', fr: 'Web' }, when: { en: 'age 17', fr: '17 ans' }, lane: 0, msg: { en: 'feat: first website', fr: 'feat: premier site web' },
+    body: { en: 'For a high-school environmental project. The moment I saw you could build anything with simple tools.', fr: "Pour un projet environnemental au lycée. Le moment où j'ai compris qu'on pouvait tout construire avec des outils simples." } },
+  { word: { en: 'Epitech', fr: 'Epitech' }, when: { en: '2020', fr: '2020' }, lane: 0, msg: { en: 'Epitech', fr: 'Epitech' },
+    body: { en: 'Two years of project-based IT: learning by shipping, in C and everything after.', fr: "Deux ans d'informatique par projets : apprendre en livrant, en C et tout ce qui a suivi." } },
+  { word: { en: 'Car', fr: 'Auto' }, when: { en: '2021', fr: '2021' }, lane: 0, msg: { en: 'Internship at Lormauto, 5 months', fr: 'Stage chez Lormauto, 5 mois' },
+    body: { en: 'A car dashboard in JavaScript and MQTT: diagnostics, multimedia, GPS and HVAC screens, and a Node-RED sensor simulator.', fr: 'Un tableau de bord de voiture en JavaScript et MQTT : écrans diagnostic, multimédia, GPS et climatisation, et un simulateur de capteurs sous Node-RED.' } },
+  { word: { en: 'B.Sc', fr: 'Licence' }, when: { en: '2022', fr: '2022' }, lane: 0, msg: { en: 'Computer Science, Université de Bordeaux', fr: 'Licence informatique, Université de Bordeaux' },
+    body: { en: 'Theory under the practice: algorithms, systems, languages.', fr: 'La théorie sous la pratique : algorithmes, systèmes, langages.' } },
+  { word: { en: 'Clients', fr: 'Clients' }, when: { en: '2023', fr: '2023' }, lane: 1, msg: { en: 'branch freelance', fr: 'branch freelance' },
+    body: { en: 'My own clients: websites for businesses, designed and built by hand. Still open.', fr: 'Mes propres clients : des sites pour des commerces, dessinés et codés à la main. Toujours ouverte.' } },
+  { word: { en: 'Enseirb', fr: 'Enseirb' }, when: { en: '2024', fr: '2024' }, lane: 0, msg: { en: 'Software engineering, Bordeaux INP', fr: 'École d’ingénieurs, Bordeaux INP' },
+    body: { en: "ENSEIRB-MATMECA. Where Mobilit'Eirb started, with a team of five I led.", fr: "ENSEIRB-MATMECA. Là où Mobilit'Eirb a commencé, avec une équipe de cinq que j'ai menée." } },
+  { word: { en: 'CIO', fr: 'DSI' }, when: { en: '2024', fr: '2024' }, lane: 2, msg: { en: 'branch cio: Aquitaine Électronique Informatique', fr: 'branch dsi: Aquitaine Électronique Informatique' },
+    body: { en: 'Running a Debian and Docker server fleet, secrets, and mail for 30+ members, and the company site in Vue 3.', fr: 'Gérer un parc de serveurs Debian et Docker, les secrets et la messagerie de plus de 30 membres, et le site de la structure en Vue 3.' } },
+  { word: { en: 'Now', fr: 'Présent' }, when: { en: '2026', fr: '2026' }, lane: 0, msg: { en: 'HEAD', fr: 'HEAD' },
+    body: { en: 'Looking for a 4th-year internship (June to September 2027) and my end-of-studies internship (February to September 2028).', fr: 'Je cherche un stage de 4e année (juin à septembre 2027) et mon stage de fin d’études (février à septembre 2028).' } },
 ]
 const N = commits.length
 const ROW = 64, X = [18, 54, 90] // graph geometry (px): row height, lane x
@@ -55,14 +67,14 @@ onBeforeUnmount(() => st?.kill())
     <div ref="wrap" class="wrap" :style="{ '--n': N }">
       <div class="stage">
         <div class="left">
-          <p class="mono eyebrow">How I got here <b>{{ commits[active]!.when }}</b></p>
+          <p class="mono eyebrow">{{ t('How I got here', 'Mon parcours') }} <b>{{ L(commits[active]!.when) }}</b></p>
           <div class="word-box">
-            <p v-if="!last" :key="commits[active]!.word" class="display word" data-field="name"><span class="line">{{ commits[active]!.word }}</span></p>
+            <p v-if="!last" :key="L(commits[active]!.word)" class="display word" data-field="name"><span class="line">{{ L(commits[active]!.word) }}</span></p>
             <div v-else class="portrait" data-field="image" data-src="/img/tim-field.webp">
               <img src="/img/tim-field.webp" alt="Tim Lacault" width="900" height="854">
             </div>
           </div>
-          <p class="quote" :class="{ on: last }">I always thought the way you can create and solve problems with simple tools was beautiful.</p>
+          <p class="quote" :class="{ on: last }">{{ t('I always thought the way you can create and solve problems with simple tools was beautiful.', 'J’ai toujours trouvé beau qu’on puisse créer et résoudre des problèmes avec des outils simples.') }}</p>
         </div>
 
         <div class="log" :style="{ '--shift': `${-Math.min(N - 6, Math.max(0, active - 3)) * ROW}px` }">
@@ -81,12 +93,12 @@ onBeforeUnmount(() => st?.kill())
             </svg>
             <ol class="rows">
               <li v-for="(c, i) in commits" :key="i" :class="{ on: i === active, past: i < active }" :style="{ height: `${ROW}px`, paddingLeft: `${X[c.lane]! + 26}px` }">
-                <span class="mono when">{{ c.when }}</span>
-                <span class="msg">{{ c.msg }}</span>
+                <span class="mono when">{{ L(c.when) }}</span>
+                <span class="msg">{{ L(c.msg) }}</span>
               </li>
             </ol>
           </div>
-          <p :key="active" class="body">{{ commits[active]!.body }}</p>
+          <p :key="active" class="body">{{ L(commits[active]!.body) }}</p>
         </div>
       </div>
     </div>
