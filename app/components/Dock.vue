@@ -77,8 +77,8 @@ onBeforeUnmount(() => clearInterval(timer))
 
 .sound { display: flex; align-items: center; justify-content: center; gap: 2px; width: 30px; height: 30px; border: 0; border-radius: 50%; background: none; cursor: pointer; }
 .sound:hover { background: var(--line); }
-.sound i { width: 2px; height: 4px; border-radius: 1px; background: var(--fg-2); transition: height .3s var(--ease-out); }
+.sound i { width: 2px; height: 14px; border-radius: 1px; background: var(--fg-2); scale: 1 .28; transition: scale .3s var(--ease-out); }
 .sound[aria-pressed="true"] i { background: var(--accent); animation: eq 1.1s var(--ease-io) infinite alternate; animation-delay: calc(var(--k) * -.27s); }
-@keyframes eq { from { height: 3px; } to { height: 14px; } }
+@keyframes eq { from { scale: 1 .22; } to { scale: 1 1; } }
 @media (max-width: 767px) { .ticker, .sep { display: none; } .dock { padding-left: 18px; } }
 </style>
