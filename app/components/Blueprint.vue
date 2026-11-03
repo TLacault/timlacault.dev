@@ -34,10 +34,10 @@ onBeforeUnmount(() => { stage.blueprints.delete(root.value!); ro?.disconnect() }
 
 <template>
   <component :is="props.tag" ref="root" class="bp">
-    <div class="bp-surface"><slot /></div>
+    <div class="bp-surface"><BpScope><slot /></BpScope></div>
     <div class="bp-xray" aria-hidden="true" inert>
       <pre v-if="source" class="bp-src">{{ source }}</pre>
-      <div ref="copy" class="bp-copy"><slot /></div>
+      <div ref="copy" class="bp-copy"><BpScope xray><slot /></BpScope></div>
     </div>
   </component>
 </template>
@@ -65,6 +65,7 @@ onBeforeUnmount(() => { stage.blueprints.delete(root.value!); ro?.disconnect() }
 }
 :global(html.lens-held .bp-src) { color: color-mix(in oklab, var(--fg) 58%, transparent); }
 .bp-copy { position: relative; color: color-mix(in oklab, var(--fg) 82%, transparent); }
+.bp-copy :deep(*) { view-transition-name: none !important; } /* names must be unique on the page */
 .bp-copy :deep(*) { outline: 1px solid color-mix(in oklab, var(--accent) 42%, transparent); outline-offset: -1px; }
 .bp-copy :deep([data-bp]) { position: relative; }
 .bp-copy :deep([data-bp])::before {

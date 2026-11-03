@@ -1,7 +1,8 @@
 <!--
-Loading screen. The counter is a Field shape (data-field-priority), so it's drawn in glyphs once the
-Field is up; the log prints the real loading steps. When everything is in, the counter's glyphs fly
-off to form the name and the page fades in underneath.
+Loading screen, first load only. A DOM counter runs 000 → 100, never faster than ~2 s and never ahead
+of real loading (fonts, the 3D chunk, the renderer, the source glyphs). Meanwhile the Field's glyphs
+orbit it as a ring (data-field="ring", priority). At 100 the number lifts away, the loader lets go of
+the Field so the glyphs fly into the page's first shape, and elements marked [data-enter] stagger in.
 -->
 <script setup lang="ts">
 import gsap from 'gsap'
@@ -11,23 +12,28 @@ const show = ref(true)
 const leaving = ref(false)
 const shown = ref(0)
 const lines = ref<string[]>([])
-const pad = (n: number) => String(n).padStart(3, '0')
+const MIN = 2.2 // seconds: the count is a moment, not a flicker
 
 onMounted(() => {
   const lenis = useNuxtApp().$lenis as Lenis | null
   lenis?.stop()
+  scrollTo(0, 0)
   const t0 = performance.now()
   let fonts = false
   document.fonts.ready.then(() => { fonts = true; stage.log.unshift('fonts     Archivo, Departure Mono') })
 
+  let n = 0
   const tick = () => {
-    const elapsed = (performance.now() - t0) / 1000
-    // Real progress, but never faster than a short beat per step, and creeping while the 3D chunk downloads.
-    const target = Math.min(100, Math.max(stage.progress * 100, Math.min(elapsed * 14, 40)) * (fonts ? 1 : 0.6))
-    const next = Math.min(target, shown.value + Math.ceil(Math.random() * 9))
-    if (next > shown.value && Math.random() < 0.25) shown.value = Math.round(next)
+    const t = (performance.now() - t0) / 1000
+    // Time cap eases out, so the last stretch slows down and lands instead of slamming into 100.
+    const cap = 100 * (1 - Math.pow(1 - Math.min(t / MIN, 1), 2.2))
+    const real = (fonts ? 30 : 0) + stage.progress * 70
+    const target = t > 9 ? 100 : Math.min(cap, real)
+    n += Math.max(0, target - n) * 0.12
+    if (target >= 100 && n > 99.4) n = 100
+    shown.value = Math.floor(n)
     if (stage.log.length !== lines.value.length) lines.value = [...stage.log]
-    if ((shown.value >= 100 && elapsed > 1.4) || elapsed > 8) finish()
+    if (n >= 100) finish()
   }
   gsap.ticker.add(tick)
 
@@ -35,39 +41,53 @@ onMounted(() => {
   function finish() {
     if (done) return
     done = true
-    shown.value = 100
     gsap.ticker.remove(tick)
     setTimeout(() => {
-      leaving.value = true
-      document.documentElement.classList.remove('loading')
-      lenis?.start()
-      setTimeout(() => { show.value = false }, 250) // counter leaves the Field → glyphs fly to the next shape
-    }, 450)
+      leaving.value = true // number lifts away, log fades
+      setTimeout(() => {
+        show.value = false // the Field is free: glyphs fly from the ring into the page
+        document.documentElement.classList.remove('loading')
+        lenis?.start()
+      }, 420)
+    }, 250)
   }
 })
 </script>
 
 <template>
   <div v-if="show" class="loader" :class="{ leaving }" aria-hidden="true">
-    <p class="count display" data-field="name" data-field-priority><span class="line">{{ pad(shown) }}</span></p>
+    <div class="center" data-field="ring" data-field-priority>
+      <p class="count display"><span>{{ String(shown).padStart(3, '0') }}</span></p>
+    </div>
     <ol class="log mono">
       <li v-for="l in lines" :key="l">{{ l }}</li>
     </ol>
-    <p class="who mono">Tim Lacault / portfolio 2026</p>
+    <p class="who mono">Tim Lacault <span>/</span> portfolio 2026</p>
   </div>
 </template>
 
 <style scoped>
 .loader { position: fixed; inset: 0; z-index: 60; pointer-events: none; }
-.count {
+.center {
   position: absolute; left: 50%; top: 50%; translate: -50% -50%;
-  font-size: min(26vw, 34vh); font-variant-numeric: tabular-nums;
+  width: min(54vw, 60vh); aspect-ratio: 1; display: grid; place-items: center;
 }
-:global(html.field-live .loader .count) { color: transparent; }
-.log, .who { position: absolute; bottom: 32px; margin: 0; padding: 0; list-style: none; color: var(--fg-2); }
+.count { font-size: min(13vw, 17vh); font-variant-numeric: tabular-nums; overflow: clip; line-height: 1; padding-block: .06em; }
+.count span { display: block; transition: translate .5s var(--ease-io), opacity .4s var(--ease-out); }
+.leaving .count span { translate: 0 -110%; opacity: 0; }
+.log, .who { position: absolute; bottom: 32px; margin: 0; padding: 0; list-style: none; color: var(--fg-2); transition: opacity .35s; }
 .log { left: var(--margin); white-space: pre; }
 .who { right: var(--margin); }
-.log li { animation: in .3s var(--ease-out) both; }
+.who span { color: var(--accent); }
+.log li { animation: in .35s var(--ease-out) both; }
 @keyframes in { from { opacity: 0; translate: 0 6px; } }
-.leaving .log, .leaving .who { opacity: 0; transition: opacity .3s; }
+.leaving .log, .leaving .who { opacity: 0; }
+@media (max-width: 767px) { .who { display: none; } }
+</style>
+
+<style>
+/* Page under the loader: hidden, then [data-enter] elements rise in one after another (--d = delay). */
+html.loading main { visibility: hidden; }
+[data-enter] { transition: opacity .9s var(--ease-out) var(--d, 0s), translate 1.1s var(--ease-out) var(--d, 0s); }
+html.loading [data-enter] { opacity: 0; translate: 0 22px; }
 </style>

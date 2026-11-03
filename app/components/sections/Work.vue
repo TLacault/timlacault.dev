@@ -9,7 +9,7 @@ import { projects, clients } from '~/data/projects'
     <div class="local" id="local">
       <div class="local-head">
         <h3 class="display">{{ clients.length }} sites for local businesses</h3>
-        <p>Hair salons, bakeries, a boxing club, a plumber. Each one designed and built by hand, around the business's real photos, prices and reviews.</p>
+        <p>Hair salons, bakeries, a boxing club, a plumber. Each one designed and built by hand, around the business's real photos, prices and reviews. They're live: open any of them.</p>
       </div>
       <ClientWall />
     </div>

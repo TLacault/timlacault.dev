@@ -58,12 +58,6 @@ async function send() {
     <div class="contact-inner">
       <h2 class="display title" data-field="name"><span class="line">Work</span> <span class="line">with me</span></h2>
 
-      <div class="avail">
-        <p><span class="mono">Internship</span> 4th year, 3 to 4 months, June to September 2027</p>
-        <p><span class="mono">Internship</span> End of studies, 5 to 6 months, February to September 2028</p>
-        <p><span class="mono">Freelance</span> Websites for businesses, open now</p>
-      </div>
-
       <div class="cols">
         <section class="faq" aria-labelledby="faq-title">
           <h3 id="faq-title">Ask me something</h3>
@@ -72,7 +66,7 @@ async function send() {
           <ul v-if="answers.length" class="answers">
             <li v-for="f in answers" :key="f.q" :class="{ open: open === f.q }">
               <button type="button" :aria-expanded="open === f.q" @click="open = open === f.q ? null : f.q">{{ f.q }}</button>
-              <p v-show="open === f.q">{{ f.a }}</p>
+              <div class="answer" :inert="open !== f.q"><p>{{ f.a }}</p></div>
             </li>
           </ul>
           <div v-else class="none">
@@ -99,7 +93,7 @@ async function send() {
             <p v-if="errors.message" class="err">Your message is empty.</p>
           </div>
           <div class="send">
-            <button class="btn" type="submit" :disabled="status === 'sending'">{{ status === 'sending' ? 'Sending' : 'Send' }}</button>
+            <Magnetic class="btn" type="submit" :aria-disabled="status === 'sending'">{{ status === 'sending' ? 'Sending' : 'Send' }}</Magnetic>
             <p v-if="status === 'sent'" class="ok" role="status">Sent. I'll answer within a couple of days.</p>
             <p v-if="status === 'error'" class="err" role="alert">That didn't go through. Write to lacault.tim@gmail.com instead.</p>
           </div>
@@ -123,16 +117,15 @@ async function send() {
 .title { font-size: min(11vw, 22vh); }
 .line { display: inline-block; }
 :global(html.field-live .contact .title) { color: transparent; }
-.avail { display: grid; gap: 10px; font-size: 18px; }
-.avail .mono { display: inline-block; width: 120px; color: var(--accent); }
 .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 6vw; align-items: start; }
 h3 { font-size: 15px; font-weight: 700; font-stretch: 112.5%; text-transform: uppercase; letter-spacing: .02em; margin-bottom: 20px; }
 
 .ask, .field input, .field textarea {
   width: 100%; padding: 14px 16px; border: 1px solid var(--line); border-radius: 10px;
-  background: var(--ink-2); color: var(--fg); font: inherit; resize: vertical;
+  background: var(--ink-2); color: var(--fg); font: inherit; resize: none;
   transition: border-color .2s;
 }
+.field textarea { resize: vertical; min-height: 140px; max-height: 360px; }
 .ask:focus, .field input:focus, .field textarea:focus { outline: none; border-color: var(--accent); }
 .ask::placeholder { color: var(--fg-2); }
 .answers { margin: 14px 0 0; padding: 0; list-style: none; }
@@ -143,7 +136,10 @@ h3 { font-size: 15px; font-weight: 700; font-stretch: 112.5%; text-transform: up
 }
 .answers button::after { content: '+'; color: var(--accent); transition: rotate .3s var(--ease-out); }
 .answers .open button::after { rotate: 45deg; }
-.answers p { padding: 0 0 18px; color: var(--fg-2); max-width: 56ch; }
+/* Open/close glides: the answer's row animates from 0fr to 1fr, so the list below moves with it. */
+.answer { display: grid; grid-template-rows: 0fr; opacity: 0; transition: grid-template-rows .45s var(--ease-io), opacity .35s var(--ease-out); }
+.open .answer { grid-template-rows: 1fr; opacity: 1; }
+.answer p { min-height: 0; overflow: hidden; padding: 0 0 18px; color: var(--fg-2); max-width: 56ch; }
 .none { margin-top: 18px; display: flex; gap: 14px; align-items: baseline; color: var(--fg-2); }
 .link { border: 0; padding: 0; background: none; color: var(--accent); font: inherit; border-bottom: 1px solid currentColor; cursor: pointer; }
 
@@ -156,13 +152,12 @@ h3 { font-size: 15px; font-weight: 700; font-stretch: 112.5%; text-transform: up
 .ok { color: var(--accent); font-size: 14px; }
 .send { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
 .btn { border: 0; cursor: pointer; }
-.btn:disabled { opacity: .6; }
+.btn[aria-disabled="true"] { opacity: .6; pointer-events: none; }
 
 .reach { display: flex; flex-wrap: wrap; gap: 14px 30px; }
 .reach a { text-decoration: none; color: var(--fg-2); transition: color .2s; }
 .reach a:hover { color: var(--fg); }
 @media (max-width: 767px) {
   .cols { grid-template-columns: 1fr; gap: 64px; }
-  .avail .mono { display: block; width: auto; }
 }
 </style>

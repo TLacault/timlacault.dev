@@ -6,6 +6,7 @@ import Lenis from 'lenis'
 // GSAP plugins + one Lenis instance driven by the GSAP ticker, so ScrollTrigger and Lenis share a frame.
 export default defineNuxtPlugin(() => {
   gsap.registerPlugin(ScrollTrigger, SplitText)
+  ScrollTrigger.clearScrollMemory('manual') // the router owns scroll position between pages
 
   const lenis = matchMedia('(prefers-reduced-motion: reduce)').matches ? null : new Lenis({ lerp: 0.09, anchors: true })
   if (lenis) {
@@ -36,5 +37,28 @@ export default defineNuxtPlugin(() => {
     timer = setTimeout(refresh, 200)
   }).observe(document.body)
 
-  return { provide: { lenis } }
+  // Pages: land at the top (or on the #section asked for) and re-measure every trigger.
+  const nuxt = useNuxtApp()
+  nuxt.hook('page:finish', () => {
+    const hash = location.hash
+    requestAnimationFrame(() => {
+      // Refresh first: ScrollTrigger.refresh() restores the scroll position it saw before, which would
+      // throw the new page back to the old page's offset.
+      refresh()
+      const el = hash && document.querySelector(hash)
+      if (el) lenis ? lenis.scrollTo(el as HTMLElement, { immediate: true, force: true }) : el.scrollIntoView()
+      else lenis ? lenis.scrollTo(0, { immediate: true, force: true }) : scrollTo(0, 0)
+    })
+  })
+
+  // go('/#work') from anywhere: smooth scroll when already on that page, route + jump otherwise.
+  const go = (to: string) => {
+    const [path, hash] = to.split('#')
+    if ((path || '/') === location.pathname && hash) {
+      const el = document.getElementById(hash)
+      if (el) lenis ? lenis.scrollTo(el, { duration: 1.4 }) : el.scrollIntoView({ behavior: 'smooth' })
+    } else navigateTo(to)
+  }
+
+  return { provide: { lenis, go } }
 })

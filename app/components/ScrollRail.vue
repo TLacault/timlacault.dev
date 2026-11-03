@@ -63,7 +63,7 @@ onBeforeUnmount(() => { gsap.ticker.remove(tick); ro?.disconnect() })
 </script>
 
 <template>
-  <nav class="rail-wrap" aria-label="Page sections">
+  <nav class="rail-wrap" aria-label="Page sections" data-enter style="--d: 1.05s">
     <div ref="rail" class="rail" @pointerdown.prevent="scrubFrom">
       <button
         v-for="(s, i) in sections" :key="s.id" class="tick" :style="{ top: `${(ticks[i] ?? 0) * 100}%` }"
@@ -79,7 +79,7 @@ onBeforeUnmount(() => { gsap.ticker.remove(tick); ro?.disconnect() })
 </template>
 
 <style scoped>
-.rail-wrap { position: fixed; z-index: 40; right: 22px; top: 50%; translate: 0 -50%; transition: opacity .9s var(--ease-out); }
+.rail-wrap { position: fixed; z-index: 40; right: 22px; top: 50%; transform: translateY(-50%); }
 .rail { position: relative; width: 14px; height: min(38vh, 320px); cursor: ns-resize; touch-action: none; }
 .rail::before { content: ''; position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; background: var(--line); }
 .tick {

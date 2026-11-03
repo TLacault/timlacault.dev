@@ -66,6 +66,8 @@ onMounted(async () => {
   const uSize = uniform(small ? 6 : 7)
   const uHeld = uniform(0) // 0..1 as the Lens opens to full screen
   const uSweep = uniform(-9999) // x of the light band that reads across shapes
+  const uSpin = uniform(0) // rotation (rad) of the active shape around uCenter: the loader ring orbits
+  const uCenter = uniform(new THREE.Vector2())
 
   const update = Fn(() => {
     const p = pos.element(instanceIndex)
@@ -74,7 +76,9 @@ onMounted(async () => {
     const seed = hash(instanceIndex)
     // Shapes breathe: a slow wave runs through them, so the page is never still.
     const wave = vec2(0, t.x.mul(0.012).add(uTime.mul(1.1)).sin().mul(3.5)).mul(t.w)
-    const target = t.xy.add(uOffset.mul(t.w)).add(wave)
+    const rel = t.xy.sub(uCenter), cs = uSpin.cos(), sn = uSpin.sin()
+    const spun = vec2(rel.x.mul(cs).sub(rel.y.mul(sn)), rel.x.mul(sn).add(rel.y.mul(cs))).add(uCenter)
+    const target = mix(t.xy, spun, t.w).add(uOffset.mul(t.w)).add(wave)
     const acc = target.sub(p.xy).mul(uSpring.mul(seed.mul(0.9).add(0.55))).toVar()
     // A moving pointer drags glyphs along in its wake; a resting one leaves them alone (so the Lens can magnify them).
     const near = float(1).sub(smoothstep(0.0, 150.0, length(p.xy.sub(uPointer))))
@@ -119,6 +123,15 @@ onMounted(async () => {
     const key = `${kind}:${a.dataset.src ?? a.textContent}:${Math.round(b.width)}x${Math.round(b.height)}:${lines}`
     if (cache.has(key)) return cache.get(key)!
     const s = 0.5 // sample at half resolution, plenty for glyph-sized points
+    if (kind === 'ring') { // glyphs orbiting the element (loader): an annulus, denser at the rim
+      const n = Math.floor(N * 0.7), out = new Float32Array(n * 3), R = Math.min(b.width, b.height) / 2, rr = rng(3)
+      for (let i = 0; i < n; i++) {
+        const a = rr() * Math.PI * 2, rad = R * (0.62 + 0.38 * Math.sqrt(rr()))
+        out[i * 3] = b.width / 2 + Math.cos(a) * rad; out[i * 3 + 1] = b.height / 2 + Math.sin(a) * rad; out[i * 3 + 2] = 0.35 + 0.65 * (rad / R)
+      }
+      cache.set(key, out)
+      return out
+    }
     const photo = kind === 'image'
     const img = photo
       ? await imagePixels(a.dataset.src!, Math.ceil(b.width * s), Math.ceil(b.height * s), a.dataset.fit === 'contain')
@@ -176,6 +189,9 @@ onMounted(async () => {
     if (active) {
       const b = active.getBoundingClientRect()
       uOffset.value.set(b.left, H - b.top)
+      const ring = active.dataset.field === 'ring'
+      uCenter.value.set(b.width / 2, -b.height / 2)
+      uSpin.value = ring && !reduce ? time * 0.35 : 0
     }
     uPointer.value.set(stage.px, H - stage.py)
     uPointerVel.value.set(stage.vx, -stage.vy)

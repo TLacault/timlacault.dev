@@ -9,13 +9,13 @@ import src from './Hero.vue?raw'
         <span class="line">Tim</span>
         <span class="line">Lacault</span>
       </h1>
-      <a class="cue mono" href="#work">
+      <a class="cue mono" href="#work" data-enter style="--d: .75s">
         <span class="cue-line" aria-hidden="true" />
         Scroll to see the work
       </a>
       <div class="hero-side">
-        <p class="lede">Software engineer in Bordeaux. I build websites that feel alive.</p>
-        <a class="btn" href="#contact">Work with me</a>
+        <p class="lede" data-enter style="--d: .35s">Software engineer in Bordeaux. I build websites that feel alive.</p>
+        <div data-enter style="--d: .55s"><Magnetic class="btn" href="#contact">Work with me</Magnetic></div>
       </div>
     </div>
   </Blueprint>
