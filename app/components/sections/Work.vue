@@ -1,42 +1,24 @@
 <script setup lang="ts">
 import src from './Work.vue?raw'
-import { projects } from '~/data/projects'
+import { projects, clients } from '~/data/projects'
 </script>
 
 <template>
   <Blueprint :source="src" class="work" id="work">
-    <div class="work-inner">
-      <h2 class="display">Work</h2>
-      <article v-for="p in projects" :key="p.slug" class="exhibit">
-        <div class="meta">
-          <span class="mono muted">{{ p.year }} / {{ p.role }}</span>
-          <h3 class="display">{{ p.title }}</h3>
-          <p>{{ p.tagline }}</p>
-          <p class="mono muted">{{ p.stack.join('  ') }}</p>
-          <div class="links">
-            <a v-if="p.live" :href="p.live" target="_blank" rel="noopener">Live site</a>
-            <a v-if="p.demo" :href="p.demo" target="_blank" rel="noopener">Video</a>
-          </div>
-        </div>
-        <img :src="p.images[0]" :alt="`${p.title} screenshot`" loading="lazy">
-      </article>
+    <WorkExhibit v-for="(p, i) in projects" :key="p.slug" :project="p" :index="i" />
+    <div class="local" id="local">
+      <div class="local-head">
+        <h3 class="display">{{ clients.length }} sites for local businesses</h3>
+        <p>Hair salons, bakeries, a boxing club, a plumber. Each one designed and built by hand, around the business's real photos, prices and reviews.</p>
+      </div>
+      <ClientWall />
     </div>
   </Blueprint>
 </template>
 
 <style scoped>
-.work-inner { padding: 14vh var(--margin); display: grid; gap: 18vh; }
-h2 { font-size: clamp(64px, 11vw, 180px); }
-.exhibit { display: grid; grid-template-columns: repeat(12, 1fr); column-gap: 24px; align-items: end; }
-.meta { grid-column: 1 / 5; display: grid; gap: 14px; justify-items: start; }
-.exhibit:nth-child(odd) .meta { grid-column: 9 / -1; grid-row: 1; }
-.exhibit:nth-child(odd) img { grid-column: 1 / 8; grid-row: 1; }
-h3 { font-size: clamp(36px, 4vw, 64px); }
-img { grid-column: 6 / -1; width: 100%; display: block; aspect-ratio: 16 / 10; object-fit: cover; object-position: top; }
-.links { display: flex; gap: 20px; }
-.links a { text-decoration: none; border-bottom: 1px solid var(--claret); padding-bottom: 2px; }
-@media (max-width: 767px) {
-  .exhibit .meta, .exhibit img, .exhibit:nth-child(odd) .meta, .exhibit:nth-child(odd) img { grid-column: 1 / -1; grid-row: auto; }
-  .exhibit img { margin-top: 28px; }
-}
+.local { padding: 16vh 0 18vh; display: grid; gap: 7vh; }
+.local-head { padding-inline: var(--margin); display: grid; gap: 22px; max-width: 1100px; }
+h3 { font-size: clamp(40px, 5.6vw, 96px); }
+.local-head p { font-size: 18px; max-width: 52ch; color: var(--fg-2); }
 </style>

@@ -1,8 +1,9 @@
 <!--
 The Field: every glyph of the site's own source as a particle (three.js WebGPURenderer + TSL compute,
 automatic WebGL2 fallback). Elements marked [data-field] are shapes: the one nearest the viewport centre
-pulls particles into its form ("name" = the element's text, "portrait" = data-src image by brightness);
-the rest drift as dust. A moving pointer drags glyphs in its wake, scroll speed stirs, glyphs grow and turn claret under the Lens.
+pulls particles into its form ("name" = the element's text, "image" = data-src image by brightness);
+the rest drift as dust. A moving pointer drags glyphs in its wake, scroll speed stirs, glyphs grow and turn blue under the Lens. When nobody moves, shapes breathe, a third of
+the glyphs keep re-typing, a light reads across the shape every 7 s, and an autopilot stirs the dust.
 -->
 <script setup lang="ts">
 import gsap from 'gsap'
@@ -19,15 +20,17 @@ onMounted(async () => {
   await nextTick() // .client.vue: the template (and this ref) only exists after a tick
   const el = canvas.value!
   const q = new URLSearchParams(location.search)
-  if (q.has('nofield')) return // debugging: page without the Field
+  if (q.has('nofield')) { stage.progress = 1; return } // debugging: page without the Field
   // ?gl forces the WebGL2 backend (debugging, headless tests). If neither backend starts, the DOM text stays.
   const renderer = new THREE.WebGPURenderer({ canvas: el, alpha: true, antialias: false, forceWebGL: new URLSearchParams(location.search).has('gl') })
-  try { await renderer.init() } catch (e) { console.warn('Field disabled:', e); return }
+  try { await renderer.init() } catch (e) { console.warn('Field disabled:', e); stage.progress = 1; return }
+  stage.progress = 0.45
   const gpu = (renderer.backend as { isWebGPUBackend?: boolean }).isWebGPUBackend === true
   const small = innerWidth < 768
   const N = Math.round((gpu ? (small ? 16000 : 40000) : (small ? 8000 : 20000))
     * (Number(q.get('n')) || 1)) // ?n=0.25 runs a quarter of the particles (slow test machines)
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches
+  stage.log.push(`renderer  ${gpu ? 'WebGPU' : 'WebGL2'}  ${N.toLocaleString('en')} glyphs`)
 
   let W = innerWidth, H = innerHeight
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2))
@@ -41,6 +44,8 @@ onMounted(async () => {
   const files = import.meta.glob('../**/*.{vue,ts}', { query: '?raw', import: 'default' })
   const source = (await Promise.all(Object.values(files).map((f) => f() as Promise<string>))).join('')
   const atlas = new THREE.CanvasTexture(glyphAtlas(32))
+  stage.progress = 0.7
+  stage.log.push(`source    ${Object.keys(files).length} files  ${source.length.toLocaleString('en')} characters`)
 
   // Buffers. vec4 everywhere: avoids vec3 storage padding differences between backends.
   const r = rng(42)
@@ -59,13 +64,17 @@ onMounted(async () => {
   const uLens = uniform(new THREE.Vector3(-9999, -9999, 0))
   const uSpring = uniform(reduce ? 400 : 34)
   const uSize = uniform(small ? 6 : 7)
+  const uHeld = uniform(0) // 0..1 as the Lens opens to full screen
+  const uSweep = uniform(-9999) // x of the light band that reads across shapes
 
   const update = Fn(() => {
     const p = pos.element(instanceIndex)
     const v = vel.element(instanceIndex)
     const t = tgt.element(instanceIndex)
     const seed = hash(instanceIndex)
-    const target = t.xy.add(uOffset.mul(t.w))
+    // Shapes breathe: a slow wave runs through them, so the page is never still.
+    const wave = vec2(0, t.x.mul(0.012).add(uTime.mul(1.1)).sin().mul(3.5)).mul(t.w)
+    const target = t.xy.add(uOffset.mul(t.w)).add(wave)
     const acc = target.sub(p.xy).mul(uSpring.mul(seed.mul(0.9).add(0.55))).toVar()
     // A moving pointer drags glyphs along in its wake; a resting one leaves them alone (so the Lens can magnify them).
     const near = float(1).sub(smoothstep(0.0, 150.0, length(p.xy.sub(uPointer))))
@@ -79,14 +88,21 @@ onMounted(async () => {
 
   const mat = new THREE.SpriteNodeMaterial({ transparent: true, depthWrite: false })
   const P = pos.toAttribute(), T = tgt.toAttribute()
-  const ch = instancedBufferAttribute(new THREE.InstancedBufferAttribute(glyphIndices(source, N), 1))
+  const ch0 = instancedBufferAttribute(new THREE.InstancedBufferAttribute(glyphIndices(source, N), 1))
+  // A third of the glyphs keep re-typing themselves, each at its own pace: the code is never static.
+  const seedR = hash(instanceIndex.add(7))
+  const step = floor(uTime.mul(seedR.mul(2.5).add(0.4)).add(seedR.mul(50.0)))
+  const ch = seedR.greaterThan(0.66).select(mod(ch0.add(step.mul(37.0)), float(GLYPHS.length)), ch0)
   const cell = vec2(mod(ch, ATLAS_COLS), float(ATLAS_ROWS - 1).sub(floor(ch.div(ATLAS_COLS))))
   const glyph = texture(atlas, uv().add(cell).div(vec2(ATLAS_COLS, ATLAS_ROWS))).a
-  const inLens = float(1).sub(smoothstep(uLens.z.sub(18.0), uLens.z, length(P.xy.sub(uLens.xy))))
+  // Small lens: glyphs grow and turn blue. Held open full screen: they step back so the source reads.
+  const inLens = float(1).sub(smoothstep(uLens.z.sub(18.0), uLens.z, length(P.xy.sub(uLens.xy)))).mul(uHeld.oneMinus())
+  const band = float(1).sub(smoothstep(0.0, 90.0, P.x.sub(uSweep).abs())).mul(T.w) // the reading light
   mat.positionNode = vec3(P.xy, 0)
-  mat.scaleNode = mix(uSize, uSize.mul(2.1), inLens)
-  const rest = mix(float(0.2), T.z.mul(0.85).add(0.1), T.w) // dust 0.2, shapes by their brightness
-  mat.colorNode = vec4(mix(color('#ededea'), color('#ff3d5e'), inLens), glyph.mul(mix(rest, 1.0, inLens)))
+  mat.scaleNode = mix(uSize, uSize.mul(2.1), inLens).add(band.mul(2.0))
+  const rest = mix(float(0.2), T.z.mul(0.85).add(0.1), T.w).add(band.mul(0.5)) // dust 0.2, shapes by their brightness
+  const alpha = glyph.mul(mix(rest, 1.0, inLens)).mul(mix(1.0, 0.16, uHeld))
+  mat.colorNode = vec4(mix(color('#ededea'), color('#4d7cff'), inLens.max(band.mul(0.6))), alpha)
   const sprites = new THREE.Sprite(mat)
   sprites.count = N
   sprites.frustumCulled = false
@@ -103,17 +119,18 @@ onMounted(async () => {
     const key = `${kind}:${a.dataset.src ?? a.textContent}:${Math.round(b.width)}x${Math.round(b.height)}:${lines}`
     if (cache.has(key)) return cache.get(key)!
     const s = 0.5 // sample at half resolution, plenty for glyph-sized points
-    const img = kind === 'portrait'
-      ? await imagePixels(a.dataset.src!, Math.ceil(b.width * s), Math.ceil(b.height * s))
+    const photo = kind === 'image'
+    const img = photo
+      ? await imagePixels(a.dataset.src!, Math.ceil(b.width * s), Math.ceil(b.height * s), a.dataset.fit === 'contain')
       : textPixels(a, s)
-    const n = Math.floor(N * (kind === 'portrait' ? 0.82 : 0.62))
-    const pts = sampleImage(img.data, img.w, img.h, n, kind === 'portrait' ? 1 : 0, 7)
+    const n = Math.floor(N * (photo ? 0.82 : 0.62))
+    const pts = sampleImage(img.data, img.w, img.h, n, photo ? 1 : 0, 7)
     // [x, y, brightness] per point; brightness from the image for photos, 1 for text.
     const out = new Float32Array(n * 3)
     for (let i = 0; i < n; i++) {
       const x = pts[i * 2]!, y = pts[i * 2 + 1]!, k = (Math.floor(y) * img.w + Math.floor(x)) * 4
       out[i * 3] = x / s - img.pad; out[i * 3 + 1] = y / s - img.pad
-      out[i * 3 + 2] = kind === 'portrait' ? Math.min(1, 0.15 + (0.2126 * img.data[k]! + 0.7152 * img.data[k + 1]! + 0.0722 * img.data[k + 2]!) / 255 * 1.1) : 1
+      out[i * 3 + 2] = photo ? Math.min(1, 0.15 + (0.2126 * img.data[k]! + 0.7152 * img.data[k + 1]! + 0.0722 * img.data[k + 2]!) / 255 * 1.1) : 1
     }
     cache.set(key, out)
     return out
@@ -131,6 +148,8 @@ onMounted(async () => {
     tgt.value.needsUpdate = true
   }
   function pickAnchor() {
+    const first = document.querySelector<HTMLElement>('[data-field-priority]') // the loader owns the Field while it's up
+    if (first) return first
     let best: HTMLElement | null = null, bestD = Infinity
     for (const a of document.querySelectorAll<HTMLElement>('[data-field]')) {
       if (a.closest('.bp-xray')) continue
@@ -153,7 +172,7 @@ onMounted(async () => {
   let agit = 0
   const frame = (time: number, dt: number) => {
     const a = pickAnchor()
-    if (a !== active) { active = a; setShape(a) }
+    if (a !== active) { active = a; setShape(a).then(() => { if (stage.progress < 1) stage.progress = 1 }) }
     if (active) {
       const b = active.getBoundingClientRect()
       uOffset.value.set(b.left, H - b.top)
@@ -161,6 +180,10 @@ onMounted(async () => {
     uPointer.value.set(stage.px, H - stage.py)
     uPointerVel.value.set(stage.vx, -stage.vy)
     uLens.value.set(stage.lx, H - stage.ly, stage.lr)
+    uHeld.value = Math.min(Math.max((stage.lr - 200) / (Math.hypot(W, H) - 200), 0), 1)
+    // One pass of the reading light every 7 s, left to right across whatever shape is up.
+    const cyc = (time % 7) / 2.2
+    uSweep.value = cyc < 1 && !reduce ? -100 + cyc * (W + 200) : -9999
     agit += (Math.min(Math.abs(stage.velocity) / 40, 1) - agit) * 0.08
     uAgit.value = reduce ? 0 : agit
     uTime.value = time

@@ -18,7 +18,7 @@ const commits = [
 <template>
   <Blueprint :source="src" class="path" id="path">
     <div class="path-grid">
-      <div class="portrait" data-field="portrait" data-src="/img/tim-field.webp">
+      <div class="portrait" data-field="image" data-src="/img/tim-field.webp">
         <img src="/img/tim-field.webp" alt="Tim Lacault" width="900" height="854" loading="lazy">
       </div>
       <div class="log">
@@ -54,9 +54,9 @@ li::before {
   content: ''; position: absolute; left: -33px; top: 7px;
   width: 9px; height: 9px; border-radius: 50%; background: var(--ink); border: 1px solid var(--fg-2);
 }
-li.main::before { background: var(--claret); border-color: var(--claret); }
+li.main::before { background: var(--accent); border-color: var(--accent); }
 .when { color: var(--fg-2); }
-.branch { grid-column: 1; grid-row: 2; color: var(--claret); }
+.branch { grid-column: 1; grid-row: 2; color: var(--accent); }
 strong { font-weight: 560; grid-column: 2; grid-row: 1; }
 .body { grid-column: 2; font-size: 15px; }
 @media (max-width: 767px) {

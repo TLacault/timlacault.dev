@@ -82,12 +82,14 @@ export function textPixels(el: HTMLElement, scale: number, pad = 40): { data: Ui
     const r = line.getBoundingClientRect()
     const size = parseFloat(cs.fontSize) * scale
     ctx.font = `${cs.fontWeight} ${size}px ${cs.fontFamily}`
-    ctx.fontStretch = 'semi-expanded' // = font-stretch 112.5% on .display
+    const st = parseFloat(cs.fontStretch) || 100
+    ctx.fontStretch = st >= 125 ? 'expanded' : st >= 112.5 ? 'semi-expanded' : 'normal'
     ctx.letterSpacing = `${parseFloat(cs.letterSpacing || '0') * scale}px`
     ctx.textBaseline = 'alphabetic'
     ctx.fillStyle = '#fff'
     // CSS puts the font's ascent+descent box in the middle of the line box; the baseline follows.
-    const text = (line.textContent || '').trim()
+    const raw = (line.textContent || '').trim()
+    const text = cs.textTransform === 'uppercase' ? raw.toUpperCase() : raw
     const m = ctx.measureText(text)
     const y = (r.top - box.top + pad + r.height / 2) * scale + (m.fontBoundingBoxAscent - m.fontBoundingBoxDescent) / 2
     const x = (r.left - box.left + pad + parseFloat(cs.paddingLeft)) * scale
@@ -96,15 +98,15 @@ export function textPixels(el: HTMLElement, scale: number, pad = 40): { data: Ui
   return { data: ctx.getImageData(0, 0, w, h).data, w, h, pad }
 }
 
-/** Pixels of an image fitted (cover) into w × h. */
-export async function imagePixels(src: string, w: number, h: number) {
+/** Pixels of an image fitted into w × h (cover, or contain for screenshots that must not be cropped). */
+export async function imagePixels(src: string, w: number, h: number, contain = false) {
   const img = new Image()
   img.src = src
   await img.decode()
   const c = document.createElement('canvas')
   c.width = w; c.height = h
   const ctx = c.getContext('2d', { willReadFrequently: true })!
-  const s = Math.max(w / img.width, h / img.height)
+  const s = (contain ? Math.min : Math.max)(w / img.width, h / img.height)
   ctx.drawImage(img, (w - img.width * s) / 2, (h - img.height * s) / 2, img.width * s, img.height * s)
   return { data: ctx.getImageData(0, 0, w, h).data, w, h, pad: 0 }
 }

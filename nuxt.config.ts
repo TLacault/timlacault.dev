@@ -3,8 +3,8 @@ export default defineNuxtConfig({
   devtools: { enabled: false },
   modules: ['motion-v/nuxt'],
   css: [
-    '@fontsource-variable/mona-sans/wdth.css',
-    '@fontsource-variable/mona-sans/wdth-italic.css',
+    '@fontsource-variable/archivo/wdth.css',
+    '@fontsource-variable/archivo/wdth-italic.css',
     'lenis/dist/lenis.css',
     '~/assets/css/main.css',
   ],
@@ -17,6 +17,8 @@ export default defineNuxtConfig({
         { name: 'description', content: 'Tim Lacault, software engineer in Bordeaux. I build websites that feel alive.' },
         { name: 'theme-color', content: '#0D0D0F' },
       ],
+      // Hide the page under the loader before first paint; give up after 9 s whatever happens.
+      script: [{ innerHTML: "document.documentElement.classList.add('loading');setTimeout(function(){document.documentElement.classList.remove('loading')},9000)" }],
       link: [{ rel: 'preload', href: '/fonts/DepartureMono.woff2', as: 'font', type: 'font/woff2', crossorigin: '' }],
     },
   },

@@ -7,5 +7,8 @@ export const stage = {
   lrRest: 0, // radius when not held: 64 on fine pointers, 0 on touch until a long-press
   held: false, // Space / long-press: lens opens to full screen
   velocity: 0, // Lenis velocity, px per frame
+  idle: 0, // 0..1, how much the idle autopilot is driving px/py
+  progress: 0, // Field loading, 0..1 (read by <Loader>)
+  log: [] as string[], // real loading steps, printed by <Loader>
   blueprints: new Set<HTMLElement>(),
 }

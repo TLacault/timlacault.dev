@@ -14,7 +14,9 @@ function label() {
   for (const el of copy.value?.querySelectorAll<HTMLElement>('*') ?? []) {
     const cs = getComputedStyle(el)
     const b = el.getBoundingClientRect()
-    if (cs.display === 'inline' || b.width < 48 || b.height < 18) { el.removeAttribute('data-bp'); continue }
+    // Labels need position: relative, so positioned elements (sticky stages, absolute layers) go unlabelled
+    // rather than changing layout in the copy.
+    if (cs.display === 'inline' || cs.position !== 'static' && cs.position !== 'relative' || b.width < 48 || b.height < 18) { el.removeAttribute('data-bp'); continue }
     const cls = [...el.classList].find((c) => !c.startsWith('data-v'))
     el.dataset.bp = `${el.tagName.toLowerCase()}${cls ? '.' + cls : ''}  ${Math.round(b.width)}×${Math.round(b.height)}`
   }
@@ -47,28 +49,30 @@ onBeforeUnmount(() => { stage.blueprints.delete(root.value!); ro?.disconnect() }
   mask-image: radial-gradient(circle var(--lr, 0px) at var(--cx, -999px) var(--cy, -999px), transparent 99%, #000 100%);
 }
 .bp-xray {
-  position: absolute; inset: 0; overflow: hidden; pointer-events: none;
+  position: absolute; inset: 0; overflow: clip; pointer-events: none; /* clip, not hidden: sticky children keep sticking */
   clip-path: circle(var(--lr, 0px) at var(--cx, -999px) var(--cy, -999px));
   background-image:
-    linear-gradient(color-mix(in oklab, var(--claret) 9%, transparent) 1px, transparent 1px),
-    linear-gradient(90deg, color-mix(in oklab, var(--claret) 9%, transparent) 1px, transparent 1px);
+    linear-gradient(color-mix(in oklab, var(--accent) 9%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in oklab, var(--accent) 9%, transparent) 1px, transparent 1px);
   background-size: 24px 24px;
   background-position: var(--margin) 0;
 }
 .bp-src {
   position: absolute; inset: 0; margin: 0; padding: 24px var(--margin);
-  font: 11px/1.45 var(--mono); color: color-mix(in oklab, var(--fg) 16%, transparent);
+  font: 11px/1.45 var(--mono); color: color-mix(in oklab, var(--fg) 22%, transparent);
+  transition: color .4s var(--ease-out);
   white-space: pre-wrap; word-break: break-all; overflow: hidden;
 }
+:global(html.lens-held .bp-src) { color: color-mix(in oklab, var(--fg) 58%, transparent); }
 .bp-copy { position: relative; color: color-mix(in oklab, var(--fg) 82%, transparent); }
-.bp-copy :deep(*) { outline: 1px solid color-mix(in oklab, var(--claret) 42%, transparent); outline-offset: -1px; }
+.bp-copy :deep(*) { outline: 1px solid color-mix(in oklab, var(--accent) 42%, transparent); outline-offset: -1px; }
 .bp-copy :deep([data-bp]) { position: relative; }
 .bp-copy :deep([data-bp])::before {
   content: attr(data-bp);
   position: absolute; left: 0; top: 0; transform: translateY(-100%);
-  padding: 1px 4px; background: var(--claret); color: var(--ink);
+  padding: 1px 4px; background: var(--accent); color: var(--ink);
   font: 400 10px/1.3 var(--mono); letter-spacing: 0; font-stretch: 100%; white-space: nowrap;
 }
 .bp-copy :deep(img) { opacity: .18; filter: grayscale(1); }
-.bp-copy :deep(.btn) { background: transparent; color: var(--claret); }
+.bp-copy :deep(.btn) { background: transparent; color: var(--accent); }
 </style>
