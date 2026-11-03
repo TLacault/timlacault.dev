@@ -28,6 +28,8 @@ const entries = [
     tagline:
       "Match archive for my badminton club: rally-by-rally tagging, a live scoreboard over YouTube, and an ffmpeg highlight cutter.",
     stack: ["Nuxt 4", "Supabase", "Tailwind", "ffmpeg"],
+    live: "https://badminton-records.vercel.app",
+    demo: "https://www.youtube.com/watch?v=sbGkDmcfCKE",
     component: () => import("@/projects/badminton-records/index.vue"),
   },
   {
@@ -40,6 +42,8 @@ const entries = [
     tagline:
       "School project: a carbon footprint calculator for student mobility trips, built by a team of five at ENSEIRB-MATMECA.",
     stack: ["Nuxt", "Express", "PostgreSQL", "Docker"],
+    live: "https://mobilit.eirb.fr",
+    demo: "https://www.youtube.com/watch?v=1fIJ63elEfI",
     component: () => import("@/projects/mobilit-eirb/index.vue"),
   },
   {
@@ -52,13 +56,16 @@ const entries = [
     tagline:
       "This very website — built with Vue 3, smooth scroll, and a lot of glow.",
     stack: ["Vue 3", "CSS", "Lenis"],
+    live: "https://timlacault.dev",
     component: () => import("@/projects/portfolio/index.vue"),
   },
 ];
 
 // `images` is the gallery (alphabetical, default image when the folder is
-// empty); `preview` is its first image, used on the card. `demo` is an
-// optional YouTube URL shown under the gallery.
+// empty); `preview` is its first image, used on the card. Optional `live` is
+// the deployed site's URL and `demo` a YouTube URL; both show as buttons under
+// the gallery, and `demo` is also the gallery's first slide (the card keeps
+// `preview`).
 export const projects = entries.map((p) => {
   const images = imagesFor(p.slug);
   return { ...p, images, preview: images[0] };

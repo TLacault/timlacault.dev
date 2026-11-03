@@ -4,34 +4,70 @@ export default {
   props: {
     images: { type: Array, required: true },
     alt: { type: String, default: "" },
+    // Optional YouTube embed URL, shown as the first slide.
+    video: { type: String, default: null },
   },
   data() {
     return {
       index: 0,
-      ratios: {}, // image index → natural width / height, filled on load
+      ratios: {}, // slide index → natural width / height, filled on load
       boxWidth: 0,
       viewportHeight: window.innerHeight,
     };
   },
   computed: {
+    // The video (if any) comes first; image slides follow in gallery order.
+    slides() {
+      const images = this.images.map((src) => ({ type: "image", src }));
+      return this.video
+        ? [{ type: "video", src: this.video }, ...images]
+        : images;
+    },
     hasControls() {
-      return this.images.length > 1;
+      return this.slides.length > 1;
+    },
+    isVideo() {
+      return this.slides[this.index]?.type === "video";
+    },
+    frameWidth() {
+      const ratio = this.ratios[this.index] || 16 / 9;
+      const maxHeight = this.viewportHeight * 0.65;
+      return Math.min(this.boxWidth, maxHeight * ratio);
     },
     // The frame takes the active image's own proportions. Tall images are
     // capped in height and narrowed to match, so the frame never letterboxes.
     frameStyle() {
       if (!this.boxWidth) return {};
       const ratio = this.ratios[this.index] || 16 / 9;
-      const maxHeight = this.viewportHeight * 0.65;
-      const width = Math.min(this.boxWidth, maxHeight * ratio);
+      const width = this.frameWidth;
       return { width: `${width}px`, height: `${width / ratio}px` };
+    },
+    // Click zones run from the carousel's outer edge (which never moves) to a
+    // little inside the frame, so prev/next stay put while the frame resizes.
+    // Over the video they stop at the frame edge so its controls stay usable.
+    zoneStyle() {
+      if (!this.boxWidth) return {};
+      const gutter = (this.boxWidth - this.frameWidth) / 2;
+      const inset = this.isVideo ? 0 : Math.min(96, this.frameWidth * 0.2);
+      return { width: `${Math.max(gutter + inset, 48)}px` };
     },
   },
   watch: {
-    images() {
+    slides() {
       this.index = 0;
-      this.ratios = {};
+      this.ratios = this.video ? { 0: 16 / 9 } : {};
     },
+    index(_, prev) {
+      // Leaving the video slide pauses it rather than letting it play unseen.
+      if (this.slides[prev]?.type !== "video") return;
+      this.$refs.video?.[0]?.contentWindow?.postMessage(
+        JSON.stringify({ event: "command", func: "pauseVideo", args: "" }),
+        "*"
+      );
+    },
+  },
+  created() {
+    if (this.video) this.ratios = { 0: 16 / 9 };
   },
   mounted() {
     this._onKeyDown = this.onKeyDown.bind(this);
@@ -49,8 +85,8 @@ export default {
     this._resizeObserver.observe(this.$el);
 
     // Images already in the cache can finish before Vue binds @load.
-    this.$el.querySelectorAll(".carousel-frame img").forEach((img, i) => {
-      if (img.complete) this.onImageLoad(i, img);
+    this.$el.querySelectorAll(".carousel-frame img").forEach((img) => {
+      if (img.complete) this.onImageLoad(Number(img.dataset.slide), img);
     });
   },
   beforeUnmount() {
@@ -66,7 +102,7 @@ export default {
       };
     },
     go(i) {
-      const n = this.images.length;
+      const n = this.slides.length;
       this.index = (i + n) % n;
     },
     onKeyDown(e) {
@@ -99,47 +135,72 @@ export default {
     @touchstart.passive="onTouchStart"
     @touchend.passive="onTouchEnd"
   >
-    <div class="carousel-frame" :style="frameStyle">
-      <img
-        v-for="(src, i) in images"
-        :key="src"
-        :src="src"
-        :alt="`${alt} — ${i + 1} / ${images.length}`"
-        :class="{ active: i === index }"
-        :aria-hidden="i !== index"
-        draggable="false"
-        @load="onImageLoad(i, $event.target)"
-      />
+    <div class="carousel-stage">
+      <div class="carousel-frame" :style="frameStyle">
+        <template v-for="(slide, i) in slides" :key="slide.src">
+          <iframe
+            v-if="slide.type === 'video'"
+            ref="video"
+            :src="slide.src"
+            :title="`${alt} demo`"
+            :class="{ active: i === index }"
+            :aria-hidden="i !== index"
+            :tabindex="i === index ? 0 : -1"
+            loading="lazy"
+            allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+            allowfullscreen
+          ></iframe>
+          <img
+            v-else
+            :src="slide.src"
+            :alt="`${alt} — ${i + 1} / ${slides.length}`"
+            :data-slide="i"
+            :class="{ active: i === index }"
+            :aria-hidden="i !== index"
+            draggable="false"
+            @load="onImageLoad(i, $event.target)"
+          />
+        </template>
+
+        <span v-if="hasControls" class="carousel-count"
+          >{{ index + 1 }} / {{ slides.length }}</span
+        >
+      </div>
 
       <template v-if="hasControls">
         <button
-          class="carousel-arrow prev"
+          class="carousel-zone prev"
+          :class="{ video: isVideo }"
+          :style="zoneStyle"
           @click="go(index - 1)"
-          aria-label="Previous image"
+          aria-label="Previous slide"
         >
-          <i class="ri-arrow-left-s-line"></i>
+          <span class="carousel-arrow"
+            ><i class="ri-arrow-left-s-line"></i
+          ></span>
         </button>
         <button
-          class="carousel-arrow next"
+          class="carousel-zone next"
+          :class="{ video: isVideo }"
+          :style="zoneStyle"
           @click="go(index + 1)"
-          aria-label="Next image"
+          aria-label="Next slide"
         >
-          <i class="ri-arrow-right-s-line"></i>
+          <span class="carousel-arrow"
+            ><i class="ri-arrow-right-s-line"></i
+          ></span>
         </button>
-        <span class="carousel-count"
-          >{{ index + 1 }} / {{ images.length }}</span
-        >
       </template>
     </div>
 
     <div v-if="hasControls" class="carousel-dots">
       <button
-        v-for="(src, i) in images"
-        :key="src"
+        v-for="(slide, i) in slides"
+        :key="slide.src"
         class="dot"
         :class="{ active: i === index }"
         @click="go(i)"
-        :aria-label="`Image ${i + 1}`"
+        :aria-label="slide.type === 'video' ? 'Demo video' : `Slide ${i + 1}`"
         :aria-current="i === index"
       ></button>
     </div>
@@ -151,6 +212,12 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+}
+
+/* Full-width box the frame is centred in; the click zones hang off its edges,
+   which don't move when the frame resizes. */
+.carousel-stage {
+  position: relative;
 }
 
 .carousel-frame {
@@ -170,53 +237,87 @@ export default {
 
 /* All slides are stacked; only the active one is opaque, so a change of
    index crossfades instead of jumping. */
-.carousel-frame img {
+.carousel-frame img,
+.carousel-frame iframe {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: contain;
   display: block;
+  border: 0;
   opacity: 0;
   transform: scale(1.015);
   transition: opacity 0.6s ease, transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
 }
-.carousel-frame img.active {
+.carousel-frame img.active,
+.carousel-frame iframe.active {
   opacity: 1;
   transform: scale(1);
 }
+.carousel-frame iframe {
+  background: #000;
+  pointer-events: none;
+}
+.carousel-frame iframe.active {
+  pointer-events: auto;
+}
+
+.carousel-zone {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  padding: 0 0.75rem;
+  border: none;
+  background: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.carousel-zone.prev {
+  left: 0;
+  justify-content: flex-start;
+}
+.carousel-zone.next {
+  right: 0;
+  justify-content: flex-end;
+}
+/* Clear of YouTube's title bar and control bar. */
+.carousel-zone.video {
+  top: 3.5rem;
+  bottom: 3.5rem;
+}
+.carousel-zone:focus-visible {
+  outline: none;
+}
 
 .carousel-arrow {
-  position: absolute;
-  top: 50%;
-  transform: translateY(-50%);
   width: 2.25rem;
   height: 2.25rem;
+  flex-shrink: 0;
   display: grid;
   place-items: center;
-  border: none;
   border-radius: 50%;
   background: rgba(13, 17, 23, 0.55);
   color: #fff;
   font-size: 1.35rem;
-  cursor: pointer;
   opacity: 0;
   backdrop-filter: blur(6px);
   -webkit-backdrop-filter: blur(6px);
   transition: opacity 0.25s ease, background 0.2s ease;
 }
-.carousel-arrow.prev {
-  left: 0.75rem;
-}
-.carousel-arrow.next {
-  right: 0.75rem;
-}
-.carousel-frame:hover .carousel-arrow,
-.carousel-arrow:focus-visible {
+.carousel-stage:hover .carousel-arrow,
+.carousel-zone:focus-visible .carousel-arrow {
   opacity: 1;
 }
-.carousel-arrow:hover {
+.carousel-zone:hover .carousel-arrow {
   background: rgba(13, 17, 23, 0.8);
+}
+.carousel-zone:focus-visible .carousel-arrow {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 /* No hover on touch screens: keep the arrows visible. */
 @media (hover: none) {
@@ -227,6 +328,8 @@ export default {
 
 .carousel-count {
   position: absolute;
+  z-index: 3;
+  pointer-events: none;
   bottom: 0.65rem;
   right: 0.75rem;
   padding: 0.15rem 0.55rem;

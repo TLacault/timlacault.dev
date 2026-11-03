@@ -53,7 +53,10 @@ export default {
   computed: {
     demoEmbed() {
       const id = youtubeId(this.popup?.demo);
-      return id ? `https://www.youtube-nocookie.com/embed/${id}?rel=0` : null;
+      // enablejsapi lets the carousel pause it when the slide changes.
+      return id
+        ? `https://www.youtube-nocookie.com/embed/${id}?rel=0&enablejsapi=1`
+        : null;
     },
   },
   methods: {
@@ -382,15 +385,32 @@ export default {
 
         <div class="term-body" data-lenis-prevent>
           <div class="term-preview-banner" v-if="popup">
-            <ProjectCarousel :images="popup.images" :alt="popup.title" />
-            <div v-if="demoEmbed" class="term-demo">
-              <iframe
-                :src="demoEmbed"
-                :title="`${popup.title} demo`"
-                loading="lazy"
-                allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-                allowfullscreen
-              ></iframe>
+            <ProjectCarousel
+              :images="popup.images"
+              :video="demoEmbed"
+              :alt="popup.title"
+            />
+            <div v-if="popup.live || demoEmbed" class="term-links">
+              <a
+                v-if="popup.live"
+                :href="popup.live"
+                target="_blank"
+                rel="noopener"
+                class="term-link term-link-live"
+              >
+                <i class="ri-external-link-line"></i>
+                Live Application
+              </a>
+              <a
+                v-if="demoEmbed"
+                :href="popup.demo"
+                target="_blank"
+                rel="noopener"
+                class="term-link"
+              >
+                <i class="ri-youtube-line"></i>
+                Watch on YouTube
+              </a>
             </div>
           </div>
           <component :is="popupComponent" v-if="popupComponent" />
@@ -1035,21 +1055,47 @@ export default {
   background: #eef2f7;
   border-bottom: 1px solid rgba(0, 0, 0, 0.07);
 }
-.term-demo {
-  margin-top: 1.25rem;
-  aspect-ratio: 16 / 9;
-  border-radius: 10px;
-  overflow: hidden;
-  background: #000;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+.term-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.6rem;
+  margin-top: 1rem;
 }
-.term-demo iframe {
-  width: 100%;
-  height: 100%;
-  border: 0;
-  display: block;
+.term-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.95rem;
+  border-radius: 8px;
+  border: 1px solid var(--glow-card-border);
+  background: var(--glow-card-bg);
+  color: var(--text);
+  font-family: "Poppins", sans-serif;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: border-color 0.25s ease, transform 0.2s ease,
+    box-shadow 0.25s ease;
 }
-
+.term-link:hover {
+  border-color: var(--glow-card-hover-border);
+  transform: translateY(-1px);
+}
+.term-link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.term-link-live {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #06121f;
+}
+:root[data-theme="light"] .term-link-live {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #fff;
+}
 .term-loading {
   display: flex;
   align-items: center;
@@ -1171,14 +1217,6 @@ export default {
 }
 [data-theme="dark"] .card-inner {
   box-shadow: 0 0 28px rgba(47, 102, 202, 0.14), 0 4px 20px rgba(0, 0, 0, 0.4);
-}
-
-/* Preview image inside popup */
-[data-theme="light"] .term-demo {
-  box-shadow: 0 4px 28px rgba(53, 107, 208, 0.15), 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-[data-theme="dark"] .term-demo {
-  box-shadow: 0 0 28px rgba(94, 201, 255, 0.1), 0 4px 20px rgba(0, 0, 0, 0.5);
 }
 
 /* Terminal dark theme */
