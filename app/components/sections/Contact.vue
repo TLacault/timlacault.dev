@@ -43,15 +43,15 @@ function askDirectly() {
   document.getElementById('cf-name')?.focus()
 }
 
-// ── On send, the glyphs fold into a paper crane over the form and it flies off the page.
+// ── On send, the glyphs gather into a sealed envelope over the form; it dips, then shoots off the top.
 // `fly` drives a style both renders share, so the x-ray copy flies with the surface.
-const crane = ref(false)
+const letter = ref(false)
 const fly = ref(0)
-function foldCrane() {
+function sendLetter() {
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return
-  crane.value = true
+  letter.value = true
   const o = { t: 0 }
-  gsap.to(o, { t: 1, delay: 1.3, duration: 2.4, ease: 'power2.in', onUpdate: () => { fly.value = o.t }, onComplete: () => { crane.value = false; fly.value = 0 } })
+  gsap.to(o, { t: 1, delay: 1.4, duration: 1.5, ease: 'back.in(2.2)', onUpdate: () => { fly.value = o.t }, onComplete: () => { letter.value = false; fly.value = 0 } })
 }
 
 onMounted(useCal)
@@ -71,7 +71,7 @@ async function send() {
     await emailjs.send('service_hxniaw4', 'template_nn6a8mb', { ...form, subject: `timlacault.dev: message from ${form.from_name} (${lang.value})` }, 'foVHr7K1XuV3pMbRN')
     status.value = 'sent'
     Object.assign(form, { from_name: '', reply_to: '', message: '' })
-    foldCrane()
+    sendLetter()
   } catch {
     status.value = 'error'
   }
@@ -87,7 +87,10 @@ async function send() {
         <section class="faq" aria-labelledby="faq-title">
           <h3 id="faq-title">{{ t('Ask me something', 'Posez-moi une question') }}</h3>
           <label class="sr-only" for="faq-q">{{ t('Your question', 'Votre question') }}</label>
-          <input id="faq-q" v-model="query" class="ask" type="search" :placeholder="t('When are you available?', 'Quand êtes-vous disponible ?')" autocomplete="off">
+          <div class="ask-wrap">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
+            <input id="faq-q" v-model="query" class="ask" type="search" :placeholder="t('When are you available?', 'Quand êtes-vous disponible ?')" autocomplete="off">
+          </div>
           <ul v-if="answers.length" class="answers">
             <li v-for="f in answers" :key="f.q" :class="{ open: open === f.q }">
               <button type="button" :aria-expanded="open === f.q" @click="open = open === f.q ? null : f.q">{{ f.q }}</button>
@@ -102,23 +105,23 @@ async function send() {
 
         <form class="form" novalidate @submit.prevent="send">
           <div
-            v-if="crane" class="crane" data-field="image" data-src="/img/crane.svg" data-field-priority aria-hidden="true"
-            :style="{ transform: `translate(${fly * 70}vw, ${-fly * 110}vh) rotate(${-fly * 14}deg) scale(${1 - fly * 0.35})` }"
+            v-if="letter" class="letter" data-field="image" data-src="/img/envelope.svg" data-field-priority aria-hidden="true"
+            :style="{ transform: `translate(${fly * 12}vw, ${-fly * 120}vh) rotate(${fly * 8}deg) scale(${1 - fly * 0.4})` }"
           />
           <h3>{{ t('Write to me', 'Écrivez-moi') }}</h3>
           <div class="field">
+            <input id="cf-name" v-model="form.from_name" autocomplete="name" placeholder=" " :aria-invalid="errors.from_name">
             <label for="cf-name">{{ t('Name', 'Nom') }}</label>
-            <input id="cf-name" v-model="form.from_name" autocomplete="name" :aria-invalid="errors.from_name">
             <p v-if="errors.from_name" class="err">{{ t('Tell me who you are.', 'Dites-moi qui vous êtes.') }}</p>
           </div>
           <div class="field">
+            <input id="cf-mail" v-model="form.reply_to" type="email" autocomplete="email" placeholder=" " :aria-invalid="errors.reply_to">
             <label for="cf-mail">{{ t('Email', 'E-mail') }}</label>
-            <input id="cf-mail" v-model="form.reply_to" type="email" autocomplete="email" :aria-invalid="errors.reply_to">
             <p v-if="errors.reply_to" class="err">{{ t('I need an email address to answer you.', 'Il me faut un e-mail pour vous répondre.') }}</p>
           </div>
           <div class="field">
+            <textarea id="cf-msg" v-model="form.message" rows="5" placeholder=" " :aria-invalid="errors.message" />
             <label for="cf-msg">{{ t('Message', 'Message') }}</label>
-            <textarea id="cf-msg" v-model="form.message" rows="5" :aria-invalid="errors.message" />
             <p v-if="errors.message" class="err">{{ t('Your message is empty.', 'Votre message est vide.') }}</p>
           </div>
           <div class="send">
@@ -150,13 +153,38 @@ async function send() {
 .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 6vw; align-items: start; }
 h3 { font-size: 15px; font-weight: 700; font-stretch: 112.5%; text-transform: uppercase; letter-spacing: .02em; margin-bottom: 20px; }
 
+/* Fields: a lit glass well. Hover lifts it, focus rings it in blue and draws an accent line along the
+   bottom, the label floats up out of the way once you type. An invalid field nudges sideways. */
 .ask, .field input, .field textarea {
-  width: 100%; padding: 14px 16px; border: 1px solid var(--line); border-radius: 10px;
-  background: color-mix(in oklab, var(--ink-2) 72%, transparent); color: var(--fg); font: inherit; resize: none;
-  transition: border-color .2s;
+  width: 100%; padding: 26px 18px 10px; border: 1px solid rgb(255 255 255 / .1); border-radius: 14px; color: var(--fg); font: inherit; resize: none;
+  background:
+    linear-gradient(var(--accent), var(--accent)) no-repeat 50% 100% / 0% 2px,
+    linear-gradient(180deg, rgb(255 255 255 / .05), rgb(255 255 255 / .015)),
+    color-mix(in oklab, var(--ink-2) 70%, transparent);
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / .06);
+  transition: border-color .25s, box-shadow .3s var(--ease-out), background-size .5s var(--ease-out), translate .3s var(--ease-out);
 }
-.field textarea { resize: vertical; min-height: 140px; max-height: 360px; }
-.ask:focus, .field input:focus, .field textarea:focus { outline: none; border-color: var(--accent); }
+.ask { padding: 16px 18px 16px 46px; }
+.ask::-webkit-search-cancel-button { appearance: none; }
+.ask-wrap { position: relative; }
+.ask-wrap svg { position: absolute; left: 17px; top: 50%; translate: 0 -50%; width: 17px; height: 17px; color: var(--fg-2); transition: color .25s, scale .3s var(--ease-out); pointer-events: none; }
+.ask-wrap:focus-within svg { color: var(--accent); scale: 1.1; }
+.ask:hover, .field input:hover, .field textarea:hover { border-color: rgb(255 255 255 / .2); translate: 0 -1px; }
+.ask:focus, .field input:focus, .field textarea:focus {
+  outline: none; border-color: color-mix(in oklab, var(--accent) 70%, transparent); translate: 0 -1px; background-size: 100% 2px, auto, auto;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / .08), 0 0 0 4px rgb(77 124 255 / .16), 0 14px 40px -18px rgb(77 124 255 / .5);
+}
+.field textarea { resize: vertical; min-height: 150px; max-height: 360px; padding-top: 30px; }
+.field { position: relative; }
+.field label {
+  position: absolute; left: 19px; top: 19px; font-size: 15px; color: var(--fg-2); pointer-events: none; transform-origin: 0 0;
+  transition: translate .35s var(--ease-out), scale .35s var(--ease-out), color .25s;
+}
+.field :is(input, textarea):is(:focus, :not(:placeholder-shown)) + label { translate: 0 -10px; scale: .78; }
+.field :is(input, textarea):focus + label { color: var(--accent); }
+[aria-invalid="true"] { border-color: #ff6b6b !important; animation: nudge .4s var(--ease-out); }
+@keyframes nudge { 20%, 60% { translate: -5px 0; } 40%, 80% { translate: 4px 0; } }
+@media (prefers-reduced-motion: reduce) { [aria-invalid="true"] { animation: none; } }
 .ask::placeholder { color: var(--fg-2); }
 .answers { margin: 14px 0 0; padding: 0; list-style: none; }
 .answers li { border-bottom: 1px solid var(--line); }
@@ -174,11 +202,9 @@ h3 { font-size: 15px; font-weight: 700; font-stretch: 112.5%; text-transform: up
 .link { border: 0; padding: 0; background: none; color: var(--accent); font: inherit; border-bottom: 1px solid currentColor; cursor: pointer; }
 
 .form { display: grid; gap: 18px; position: relative; }
-.crane { position: absolute; left: 30%; top: -14%; width: min(420px, 80vw); aspect-ratio: 400 / 280; translate: -50% -50%; pointer-events: none; }
+.letter { position: absolute; left: 50%; top: 30%; width: min(400px, 80vw); aspect-ratio: 400 / 280; translate: -50% -50%; pointer-events: none; }
 .form h3 { margin-bottom: 2px; }
 .field { display: grid; gap: 8px; }
-.field label { font-size: 14px; color: var(--fg-2); }
-[aria-invalid="true"] { border-color: #ff6b6b !important; }
 .err { color: #ff8a8a; font-size: 14px; }
 .ok { color: var(--accent); font-size: 14px; }
 .send { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }

@@ -3,7 +3,7 @@ Three docks along the bottom edge.
 Left: a live ticker cycling through what's true right now (Bordeaux time and what that usually means,
 the Spotify track, the last GitHub push) and the Lens hint; it opens /source.
 Centre: the sections. Right: settings (the generative score with its volume, the ghost readers).
-Phones keep the centre and a compact right dock.
+Phones: one Menu pill; it opens a glass sheet holding the same three docks, stacked.
 -->
 <script setup lang="ts">
 import gsap from 'gsap'
@@ -14,7 +14,14 @@ const settings = useSettings()
 const fine = ref(true)
 const ready = ref(false) // time-dependent text: render on the client only (no hydration mismatch)
 const { $go } = useNuxtApp()
-const go = (e: MouseEvent, to: string) => { e.preventDefault(); ($go as (t: string) => void)(to) }
+const go = (e: MouseEvent, to: string) => { e.preventDefault(); menu.value = false; ($go as (t: string) => void)(to) }
+
+// Phone menu: the docks live in a sheet behind the Menu pill. Closes on a link, Esc, a tap outside or a route change.
+const menu = ref(false)
+const phone = ref(false)
+const route = useRoute()
+watch(() => route.fullPath, () => { menu.value = false })
+const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') menu.value = false }
 
 const items = computed(() => {
   const l = lang.value
@@ -40,14 +47,20 @@ watch(() => settings.volume, (v) => score?.setVolume(v))
 let timer: ReturnType<typeof setInterval> | undefined
 onMounted(() => {
   fine.value = matchMedia('(hover: hover) and (pointer: fine)').matches
+  const mq = matchMedia('(max-width: 767px)')
+  phone.value = mq.matches
+  mq.onchange = (e) => { phone.value = e.matches; menu.value = false }
+  addEventListener('keydown', onKey)
   ready.value = true
   timer = setInterval(() => { i.value++ }, 4500)
 })
-onBeforeUnmount(() => clearInterval(timer))
+onBeforeUnmount(() => { clearInterval(timer); removeEventListener('keydown', onKey) })
 </script>
 
 <template>
-  <div class="docks">
+  <div class="docks" :class="{ open: menu }">
+    <div class="scrim" aria-hidden="true" @click="menu = false" />
+    <div id="dock-panel" class="panel" :inert="phone && !menu">
     <NuxtLink to="/source" class="dock live mono" :title="t('How this site is made', 'Comment ce site est fait')" data-enter style="--d: .95s">
       <span class="pulse" aria-hidden="true" />
       <Transition name="tick" mode="out-in"><span v-if="ready" :key="current" class="tick">{{ current }}</span></Transition>
@@ -56,7 +69,7 @@ onBeforeUnmount(() => clearInterval(timer))
     <nav class="dock nav" :aria-label="t('Site', 'Site')" data-enter style="--d: .85s">
       <a href="/#work" @click="go($event, '/#work')"><Transition name="swap" mode="out-in"><span :key="lang">{{ t('Work', 'Projets') }}</span></Transition></a>
       <a href="/#path" @click="go($event, '/#path')"><Transition name="swap" mode="out-in"><span :key="lang">{{ t('Path', 'Parcours') }}</span></Transition></a>
-      <NuxtLink to="/freelance">Freelance</NuxtLink>
+      <NuxtLink to="/freelance" @click="menu = false">Freelance</NuxtLink>
       <a href="/#contact" @click="go($event, '/#contact')">Contact</a>
     </nav>
 
@@ -77,6 +90,12 @@ onBeforeUnmount(() => clearInterval(timer))
         <button v-for="l in (['en', 'fr'] as const)" :key="l" type="button" role="radio" :aria-checked="lang === l" @click="setLang(l)">{{ l.toUpperCase() }}</button>
       </div>
     </div>
+    </div>
+
+    <button type="button" class="burger mono" :aria-expanded="menu" aria-controls="dock-panel" data-enter style="--d: .85s" @click="menu = !menu">
+      <span class="bars" aria-hidden="true"><i /><i /></span>
+      <Transition name="swap" mode="out-in"><span :key="`${menu}${lang}`">{{ menu ? t('Close', 'Fermer') : 'Menu' }}</span></Transition>
+    </button>
   </div>
 </template>
 
@@ -115,8 +134,8 @@ onBeforeUnmount(() => clearInterval(timer))
 .nav a { text-decoration: none; }
 .nav a:hover, .nav a.router-link-active { color: var(--accent); }
 
-.live { justify-self: start; max-width: min(380px, 100%); gap: 12px; color: var(--fg-2); font-size: 12px; overflow: clip; }
-.live:hover { color: var(--fg); }
+.live { justify-self: start; max-width: min(380px, 100%); gap: 12px; color: var(--fg); font-size: 12px; overflow: clip; }
+.live:hover { color: var(--accent); }
 .tick { display: block; overflow: hidden; text-overflow: ellipsis; }
 .pulse { flex: none; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); animation: pulse 2.4s var(--ease-io) infinite; }
 @keyframes pulse { 50% { opacity: .35; scale: .7; } }
@@ -125,10 +144,10 @@ onBeforeUnmount(() => clearInterval(timer))
 .tick-leave-to { opacity: 0; translate: 0 -70%; }
 
 .settings { justify-self: end; gap: 10px; padding: 0 8px; }
-.sep { width: 1px; height: 18px; background: var(--line); }
+.sep { width: 1px; height: 18px; background: rgb(255 255 255 / .16); }
 .sound { display: flex; align-items: center; justify-content: center; gap: 2px; width: 30px; height: 30px; border: 0; border-radius: 50%; background: none; cursor: pointer; }
 .sound:hover { background: var(--line); }
-.sound i { width: 2px; height: 14px; border-radius: 1px; background: var(--fg-2); scale: 1 .28; transition: scale .3s var(--ease-out); }
+.sound i { width: 2px; height: 14px; border-radius: 1px; background: var(--fg); scale: 1 .28; transition: scale .3s var(--ease-out); }
 .sound[aria-pressed="true"] i { background: var(--accent); animation: eq 1.1s var(--ease-io) infinite alternate; animation-delay: calc(var(--k) * -.27s); }
 @keyframes eq { from { scale: 1 .22; } to { scale: 1 1; } }
 
@@ -142,22 +161,76 @@ input[type=range]::-moz-range-track { height: 2px; border-radius: 1px; backgroun
 input[type=range]::-webkit-slider-thumb { appearance: none; width: 12px; height: 12px; margin-top: -5px; border-radius: 50%; background: var(--fg); }
 input[type=range]::-moz-range-thumb { width: 12px; height: 12px; border: 0; border-radius: 50%; background: var(--fg); }
 
-.toggle { display: flex; align-items: center; gap: 8px; height: 30px; padding: 0 10px; border: 0; border-radius: 999px; background: none; color: var(--fg-2); font-size: 12px; cursor: pointer; }
-.toggle:hover { background: var(--line); color: var(--fg); }
-.toggle .dot { width: 7px; height: 7px; border-radius: 50%; border: 1px solid var(--fg-2); transition: background .25s, border-color .25s; }
+.toggle { display: flex; align-items: center; gap: 8px; height: 30px; padding: 0 10px; border: 0; border-radius: 999px; background: none; color: var(--fg); font-size: 12px; cursor: pointer; }
+.toggle:hover { background: rgb(255 255 255 / .1); }
+.toggle .dot { width: 7px; height: 7px; border-radius: 50%; border: 1px solid var(--fg); transition: background .25s, border-color .25s; }
 .toggle[aria-pressed="true"] { color: var(--fg); }
 .toggle[aria-pressed="true"] .dot { background: var(--accent); border-color: var(--accent); }
 .lang { display: flex; gap: 2px; }
-.lang button { height: 28px; padding: 0 8px; border: 0; border-radius: 999px; background: none; color: var(--fg-2); font: inherit; font-size: 12px; cursor: pointer; transition: background .25s, color .25s; }
-.lang button:hover { color: var(--fg); }
+.lang button { height: 28px; padding: 0 8px; border: 0; border-radius: 999px; background: none; color: var(--fg); font: inherit; font-size: 12px; cursor: pointer; transition: background .25s, color .25s; }
+.lang button:hover { background: rgb(255 255 255 / .1); }
 .lang button[aria-checked="true"] { background: var(--accent); color: var(--ink); }
 
+/* Desktop: the panel wrapper is transparent to the grid; the Menu pill and scrim don't exist. */
+.panel { display: contents; }
+.burger, .scrim { display: none; }
+
 @media (max-width: 1100px) { .live { display: none; } .docks { grid-template-columns: 1fr auto; } .nav { justify-self: start; } }
+
+/* Phones: a Menu pill bottom-centre. It opens a glass sheet that grows out of it, holding the
+   sections as big links, the settings, then the live ticker. Only the sheet is glass. */
 @media (max-width: 767px) {
-  .docks { left: 12px; right: 12px; bottom: 12px; grid-template-columns: 1fr; justify-items: center; gap: 8px; }
-  .settings { grid-row: 1; justify-self: end; height: 38px; } /* settings sit above the nav: side by side they don't fit */
-  .nav { gap: 16px; padding: 0 18px; height: 46px; font-size: 13px; }
-  .toggle, .sep, .volume { display: none; }
-  .settings .lang { display: flex; }
+  .docks { left: 12px; right: 12px; bottom: max(12px, env(safe-area-inset-bottom)); display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .burger {
+    pointer-events: auto; display: flex; align-items: center; gap: 12px; height: 48px; padding: 0 22px 0 18px; border-radius: 999px;
+    border: 1px solid rgb(255 255 255 / .14); color: var(--fg); font-size: 13px; letter-spacing: .04em; text-transform: uppercase; cursor: pointer;
+    background: color-mix(in oklab, var(--ink-2) 55%, transparent);
+    -webkit-backdrop-filter: blur(22px) saturate(180%); backdrop-filter: blur(22px) saturate(180%);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / .16), 0 18px 50px -22px rgb(0 0 0 / .7);
+    -webkit-tap-highlight-color: transparent;
+    transition: scale .16s var(--ease-out), opacity .9s var(--ease-out) var(--d), translate 1.1s var(--ease-out) var(--d);
+  }
+  .burger:active { scale: .96; }
+  .burger > span:last-child { display: inline-block; min-width: 6ch; }
+  .bars { position: relative; width: 16px; height: 10px; }
+  .bars i { position: absolute; left: 0; right: 0; height: 1.5px; border-radius: 1px; background: currentColor; transition: translate .4s var(--ease-io), rotate .4s var(--ease-io); }
+  .bars i:first-child { top: 0; }
+  .bars i:last-child { bottom: 0; }
+  .open .bars i:first-child { translate: 0 4.25px; rotate: 45deg; }
+  .open .bars i:last-child { translate: 0 -4.25px; rotate: -45deg; }
+
+  .scrim { display: block; position: fixed; inset: 0; z-index: -1; background: rgb(3 5 12 / .55); opacity: 0; transition: opacity .4s var(--ease-out); }
+  .open .scrim { pointer-events: auto; opacity: 1; }
+
+  .panel {
+    display: flex; flex-direction: column; width: 100%; max-height: calc(100dvh - 100px); overflow: auto; padding: 10px; border-radius: 28px;
+    background: linear-gradient(160deg, rgb(255 255 255 / .1), rgb(255 255 255 / .02) 50%), color-mix(in oklab, var(--ink-2) 62%, transparent);
+    border: 1px solid rgb(255 255 255 / .12);
+    -webkit-backdrop-filter: blur(28px) saturate(180%); backdrop-filter: blur(28px) saturate(180%);
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / .16), 0 30px 80px -30px rgb(0 0 0 / .8);
+    transform-origin: 50% 100%; opacity: 0; scale: .6 .2; translate: 0 40px; filter: blur(8px);
+    transition: opacity .25s var(--ease-out), scale .35s var(--ease-io), translate .35s var(--ease-io), filter .3s;
+  }
+  .open .panel { pointer-events: auto; opacity: 1; scale: 1; translate: 0; filter: none; transition: opacity .3s var(--ease-out), scale .55s var(--ease-out), translate .55s var(--ease-out), filter .4s; }
+  @media (prefers-reduced-transparency: reduce) { .panel { background: var(--ink-2); -webkit-backdrop-filter: none; backdrop-filter: none; } }
+
+  /* Inside the sheet the docks are plain rows (only the sheet is glass), and they stagger in. */
+  .panel > .dock {
+    background: none; border: 0; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; height: auto; border-radius: 18px;
+    opacity: 0; translate: 0 14px; transition: opacity .2s, translate .2s;
+  }
+  .panel > .dock::before { display: none; }
+  .open .panel > .dock { opacity: 1; translate: 0; transition: opacity .45s var(--ease-out) var(--i), translate .55s var(--ease-out) var(--i); }
+  .nav { order: 1; --i: .08s; flex-direction: column; align-items: stretch; gap: 0; padding: 4px 6px 10px; }
+  .nav a { display: block; padding: 12px 10px; font-size: 32px; font-weight: 700; font-stretch: 112.5%; letter-spacing: -.01em; text-transform: uppercase; line-height: 1; }
+  .nav a + a { border-top: 1px solid rgb(255 255 255 / .08); }
+  .settings { order: 2; --i: .16s; gap: 6px; justify-content: space-between; padding: 10px 8px; background: rgb(255 255 255 / .05) !important; }
+  .volume input { width: 70px; }
+  .live { order: 3; --i: .22s; display: flex; max-width: none; padding: 14px 12px 6px; white-space: normal; }
+  .tick { white-space: nowrap; }
+}
+@media (max-width: 767px) and (prefers-reduced-motion: reduce) {
+  .panel, .open .panel { scale: 1; translate: 0; filter: none; }
+  .panel > .dock, .open .panel > .dock { translate: 0; }
 }
 </style>

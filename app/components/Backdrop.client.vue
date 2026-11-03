@@ -11,7 +11,7 @@ const el = ref<HTMLElement>()
 let mount: ShaderMount | undefined
 // Near-black blues, two of them lit by the accent (#4d7cff).
 const COLORS = ['#05070d', '#0b1530', '#070a14', '#16285c', '#0a1022']
-const speed = () => (matchMedia('(prefers-reduced-motion: reduce)').matches || document.hidden ? 0 : 0.22)
+const speed = () => (matchMedia('(prefers-reduced-motion: reduce)').matches || document.hidden ? 0 : 0.34)
 const onVisibility = () => mount?.setSpeed(speed())
 
 onMounted(async () => {
