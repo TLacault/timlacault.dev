@@ -24,6 +24,7 @@ const steps: { t: Txt, d: Txt }[] = [
   { t: { en: 'We adjust it together', fr: 'On ajuste ensemble' }, d: { en: 'Words, colours, sections: we change it until it feels like you.', fr: 'Textes, couleurs, sections : on corrige jusqu’à ce que ce soit vous.' } },
   { t: { en: 'It goes live', fr: 'Mise en ligne' }, d: { en: 'On your own domain, ready for your customers.', fr: 'Sur votre nom de domaine, prêt à recevoir vos clients.' } },
 ]
+onMounted(useCal)
 const sections = computed(() => [
   { id: 'top', label: t('Offer', 'Offre') },
   { id: 'how', label: t('How it goes', 'Méthode') },
