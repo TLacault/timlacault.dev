@@ -40,6 +40,6 @@ iframe, .facade { display: block; width: 100%; height: 100%; border: 0; }
   transition: scale .4s var(--ease-out), background .3s;
 }
 .facade:hover .play { scale: 1.08; background: var(--accent); }
-.play i { width: 0; height: 0; margin-left: 5px; border-left: 20px solid var(--fg); border-top: 12px solid transparent; border-bottom: 12px solid transparent; }
-.facade:hover .play i { border-left-color: var(--ink); }
+.play i { width: 18px; height: 22px; margin-left: 5px; background: var(--fg); clip-path: polygon(0 0, 100% 50%, 0 100%); }
+.facade:hover .play i { background: var(--ink); }
 </style>
