@@ -6,8 +6,9 @@ const xray = inject('xray', false)
 
 <template>
   <div class="embed">
+    <div v-if="xray" class="ph" />
     <iframe
-      v-if="!xray" :src="`https://www.youtube-nocookie.com/embed/${id}?rel=0`" :title="title" loading="lazy"
+      v-else :src="`https://www.youtube-nocookie.com/embed/${id}?rel=0`" :title="title" loading="lazy"
       allow="accelerometer; encrypted-media; gyroscope; picture-in-picture; fullscreen"
     />
   </div>
@@ -15,5 +16,5 @@ const xray = inject('xray', false)
 
 <style scoped>
 .embed { aspect-ratio: 16 / 9; }
-iframe { display: block; width: 100%; height: 100%; border: 0; }
+iframe, .ph { display: block; width: 100%; height: 100%; border: 0; }
 </style>

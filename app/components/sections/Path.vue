@@ -104,7 +104,8 @@ onBeforeUnmount(() => st?.kill())
 .eyebrow { color: var(--fg-2); }
 .eyebrow b { font-weight: 400; color: var(--accent); margin-left: 12px; }
 .word-box { height: min(40vh, 27vw); display: grid; align-items: center; }
-.word { font-size: min(11vw, 22vh); animation: rise .5s var(--ease-out); }
+/* Sized so the longest era word (7 letters, expanded) stays in its six columns, clear of the timeline. */
+.word { font-size: min(7.2vw, 20vh); white-space: nowrap; animation: rise .5s var(--ease-out); }
 @keyframes rise { from { opacity: 0; translate: 0 10px; } }
 :global(html.field-live .path .word) { color: transparent; }
 .portrait { height: min(40vh, 27vw); width: auto; aspect-ratio: 900 / 854; }
@@ -113,18 +114,26 @@ onBeforeUnmount(() => st?.kill())
 .quote { font-size: 21px; line-height: 1.4; font-style: italic; max-width: 34ch; opacity: 0; translate: 0 12px; transition: opacity .7s var(--ease-out), translate .8s var(--ease-out); }
 .quote.on { opacity: 1; translate: 0 0; }
 
-.log { grid-column: 8 / -1; display: grid; gap: 28px; align-content: center; }
+/* The timeline sits on its own dark scrim with a halo on the text, so glyphs drifting behind never wash it out. */
+.log {
+  grid-column: 8 / -1; display: grid; gap: 28px; align-content: center; position: relative; isolation: isolate;
+  text-shadow: 0 0 10px var(--ink), 0 0 3px var(--ink);
+}
+.log::before {
+  content: ''; position: absolute; inset: -12% -18% -12% -10%; z-index: -1; pointer-events: none;
+  background: radial-gradient(closest-side, color-mix(in oklab, var(--ink) 92%, transparent), color-mix(in oklab, var(--ink) 70%, transparent) 60%, transparent);
+}
 .scroller { position: relative; height: calc(64px * 6); overflow: clip; }
 .graph, .rows { position: absolute; left: 0; top: 0; translate: 0 var(--shift); transition: translate .7s var(--ease-io); }
 .rows { right: 0; margin: 0; padding: 0; list-style: none; }
-.rows li { display: flex; align-items: center; gap: 16px; color: var(--fg-2); opacity: .45; transition: opacity .4s, color .4s; }
-.rows li.past { opacity: .75; }
+.rows li { display: flex; align-items: center; gap: 16px; color: var(--fg-2); opacity: .6; transition: opacity .4s, color .4s; }
+.rows li.past { opacity: .9; }
 .rows li.on { opacity: 1; color: var(--fg); }
 .when { width: 64px; flex: none; font-size: 12px; }
 .on .when { color: var(--accent); }
 .msg { font-size: 16px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .on .msg { font-weight: 700; }
-.rail { fill: none; stroke: var(--line); stroke-width: 2; }
+.rail { fill: none; stroke: color-mix(in oklab, var(--fg) 22%, transparent); stroke-width: 2; }
 .drawn { fill: none; stroke: var(--accent); stroke-width: 2; stroke-dasharray: 1; }
 circle { fill: var(--ink); stroke: var(--fg-2); stroke-width: 1.5; transition: r .3s var(--ease-out), fill .3s, stroke .3s; }
 circle.done { fill: var(--accent); stroke: var(--accent); }
@@ -136,7 +145,7 @@ circle.head { filter: drop-shadow(0 0 8px var(--accent)); }
   .stage { align-content: start; padding-top: 10vh; row-gap: 3vh; }
   .left { grid-column: 1 / -1; gap: 2vh; }
   .word-box { height: 16vh; }
-  .word { font-size: 13vw; }
+  .word { font-size: 12vw; }
   .quote { display: none; }
   .log { grid-column: 1 / -1; }
   .scroller { height: calc(64px * 4); }

@@ -23,6 +23,7 @@ const steps = [
   { t: 'On ajuste ensemble', d: 'Textes, couleurs, sections : on corrige jusqu’à ce que ce soit vous.' },
   { t: 'Mise en ligne', d: 'Sur votre nom de domaine, prêt à recevoir vos clients.' },
 ]
+onMounted(useCal)
 const sections = [
   { id: 'top', label: 'Offre' },
   { id: 'how', label: 'Méthode' },
@@ -39,7 +40,7 @@ const sections = [
         <h1 class="display title" data-field="name"><span class="line">Votre site,</span> <span class="line">fait main</span></h1>
         <div class="hero-side" data-enter style="--d: .5s">
           <p class="lede">Je conçois et je code des sites pour les commerces et les artisans. Vos vraies photos, vos vrais prix, vos vrais avis.</p>
-          <Magnetic class="btn" href="https://cal.com/tim-lacault/30min">Réserver un appel</Magnetic>
+          <Magnetic class="btn" type="button" v-bind="calAttrs">Réserver un appel</Magnetic>
         </div>
       </div>
       <ul class="offer">
@@ -68,7 +69,7 @@ const sections = [
       <div class="start">
         <h2 class="display title" data-field="name"><span class="line">Parlons</span> <span class="line">de votre</span> <span class="line">commerce</span></h2>
         <div class="ways">
-          <a href="https://cal.com/tim-lacault/30min" target="_blank" rel="noopener" data-cursor="Réserver"><span class="mono">Appel de 30 min</span>Réserver un créneau</a>
+          <button type="button" v-bind="calAttrs" data-cursor="Réserver"><span class="mono">Appel de 30 min</span>Réserver un créneau</button>
           <a href="tel:+33652300510" data-cursor="Appeler"><span class="mono">Téléphone</span>06 52 30 05 10</a>
           <a href="mailto:lacault.tim@gmail.com" data-cursor="Écrire"><span class="mono">E-mail</span>lacault.tim@gmail.com</a>
         </div>
@@ -108,8 +109,8 @@ const sections = [
 .start { padding: 18vh var(--margin) 22vh; display: grid; gap: 9vh; }
 .start .title { font-size: min(8vw, 15vh); }
 .ways { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
-.ways a { display: grid; gap: 10px; padding: 26px; border: 1px solid var(--line); border-radius: 14px; text-decoration: none; font-size: 20px; font-weight: 600; transition: border-color .3s, translate .5s var(--ease-out); }
-.ways a:hover { border-color: var(--accent); translate: 0 -4px; }
+.ways :is(a, button) { display: grid; text-align: left; background: none; color: inherit; font-family: inherit; cursor: pointer; gap: 10px; padding: 26px; border: 1px solid var(--line); border-radius: 14px; text-decoration: none; font-size: 20px; font-weight: 600; transition: border-color .3s, translate .5s var(--ease-out); }
+.ways :is(a, button):hover { border-color: var(--accent); translate: 0 -4px; }
 .ways .mono { color: var(--fg-2); font-weight: 400; }
 @media (max-width: 767px) {
   .title, .start .title { font-size: 10.5vw; }

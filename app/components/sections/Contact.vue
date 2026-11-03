@@ -44,6 +44,8 @@ function foldCrane() {
   gsap.to(o, { t: 1, delay: 1.3, duration: 2.4, ease: 'power2.in', onUpdate: () => { fly.value = o.t }, onComplete: () => { crane.value = false; fly.value = 0 } })
 }
 
+onMounted(useCal)
+
 // ── Contact form (EmailJS, same account and template as the previous site).
 const form = reactive({ from_name: '', reply_to: '', message: '' })
 const status = ref<'idle' | 'sending' | 'sent' | 'error'>('idle')
@@ -120,7 +122,7 @@ async function send() {
       <div class="reach">
         <a href="mailto:lacault.tim@gmail.com">lacault.tim@gmail.com</a>
         <a href="tel:+33652300510">06 52 30 05 10</a>
-        <a href="https://cal.com/tim-lacault/30min" target="_blank" rel="noopener">Book a call</a>
+        <button type="button" class="cal" v-bind="calAttrs">Book a call</button>
         <a href="https://github.com/TLacault" target="_blank" rel="noopener">GitHub</a>
         <a href="https://www.linkedin.com/in/tim-lacault" target="_blank" rel="noopener">LinkedIn</a>
         <a href="/resume_tim_lacault.pdf" download>Résumé (PDF)</a>
@@ -174,7 +176,8 @@ h3 { font-size: 15px; font-weight: 700; font-stretch: 112.5%; text-transform: up
 
 .reach { display: flex; flex-wrap: wrap; gap: 14px 30px; }
 .reach a { text-decoration: none; color: var(--fg-2); transition: color .2s; }
-.reach a:hover { color: var(--fg); }
+.reach a:hover, .cal:hover { color: var(--fg); }
+.cal { border: 0; padding: 0; background: none; font: inherit; color: var(--fg-2); cursor: pointer; transition: color .2s; }
 @media (max-width: 767px) {
   .cols { grid-template-columns: 1fr; gap: 64px; }
 }

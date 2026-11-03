@@ -73,9 +73,13 @@ export function createScore() {
     setChord(section)
   }
 
+  // Volume 0..1 from the settings dock, on a perceptual curve; 0.35 (the default) is quiet background.
+  let volume = 0.35, playing = false
+  const level = () => volume * volume * 1.2
   return {
-    on() { ctx.resume(); master.gain.setTargetAtTime(0.9, ctx.currentTime, 1.2); clearTimeout(pingTimer); schedule() },
-    off() { master.gain.setTargetAtTime(0, ctx.currentTime, 0.5); clearTimeout(pingTimer) },
+    on(v = volume) { volume = v; playing = true; ctx.resume(); master.gain.setTargetAtTime(level(), ctx.currentTime, 1.5); clearTimeout(pingTimer); schedule() },
+    setVolume(v: number) { volume = v; if (playing) master.gain.setTargetAtTime(level(), ctx.currentTime, 0.1) },
+    off() { playing = false; master.gain.setTargetAtTime(0, ctx.currentTime, 0.5); clearTimeout(pingTimer) },
     update,
   }
 }
