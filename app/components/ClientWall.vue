@@ -42,7 +42,7 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="wall" @pointerenter="motion.hover = true" @pointerleave="motion.hover = false">
-    <div v-for="(row, r) in rows" :key="r" class="row">
+    <div v-for="(row, r) in rows" :key="r" v-reveal="r * 2" class="row">
       <ul :ref="(el) => { if (el) tracks[r] = el as HTMLElement }" class="track">
         <li v-for="(c, i) in [...row, ...row]" :key="i" :aria-hidden="i >= row.length">
           <a class="site" :href="c.url" target="_blank" rel="noopener" :data-cursor="t('Visit', 'Visiter')" :tabindex="i >= row.length ? -1 : undefined">

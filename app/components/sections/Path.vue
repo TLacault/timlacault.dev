@@ -67,7 +67,7 @@ onBeforeUnmount(() => st?.kill())
     <div ref="wrap" class="wrap" :style="{ '--n': N }">
       <div class="stage">
         <div class="left">
-          <p class="mono eyebrow">{{ t('How I got here', 'Mon parcours') }} <b>{{ L(commits[active]!.when) }}</b></p>
+          <p v-reveal class="mono eyebrow">{{ t('How I got here', 'Mon parcours') }} <b>{{ L(commits[active]!.when) }}</b></p>
           <div class="word-box">
             <p v-if="!last" :key="L(commits[active]!.word)" class="display word" data-field="name"><span class="line">{{ L(commits[active]!.word) }}</span></p>
             <div v-else class="portrait" data-field="image" data-src="/img/tim-field.webp">
@@ -77,8 +77,8 @@ onBeforeUnmount(() => st?.kill())
           <p class="quote" :class="{ on: last }">{{ t('I always thought the way you can create and solve problems with simple tools was beautiful.', 'J’ai toujours trouvé beau qu’on puisse créer et résoudre des problèmes avec des outils simples.') }}</p>
         </div>
 
-        <div class="log" :style="{ '--shift': `${-Math.min(N - 6, Math.max(0, active - 3)) * ROW}px` }">
-          <div class="scroller">
+        <div class="log" :style="{ '--a': active, '--n': N }">
+          <div v-reveal="1" class="scroller">
             <svg class="graph" :viewBox="`0 0 108 ${height}`" width="108" :height="height" aria-hidden="true">
               <path class="rail" :d="`M${X[0]} ${ROW / 2} L${X[0]} ${height - ROW / 2}`" />
               <path class="rail" :d="branch(1)" />
@@ -135,8 +135,9 @@ onBeforeUnmount(() => st?.kill())
   content: ''; position: absolute; inset: -12% -18% -12% -10%; z-index: -1; pointer-events: none;
   background: radial-gradient(closest-side, color-mix(in oklab, var(--ink) 92%, transparent), color-mix(in oklab, var(--ink) 70%, transparent) 60%, transparent);
 }
-.scroller { position: relative; height: calc(64px * 6); overflow: clip; }
-.graph, .rows { position: absolute; left: 0; top: 0; translate: 0 var(--shift); transition: translate .7s var(--ease-io); }
+/* --v rows visible; HEAD stays in the middle row until the list runs out. */
+.scroller { --v: 6; position: relative; height: calc(64px * var(--v)); overflow: clip; }
+.graph, .rows { position: absolute; left: 0; top: 0; translate: 0 calc(-64px * clamp(0, var(--a) - round(down, var(--v) / 2, 1), var(--n) - var(--v))); transition: translate .7s var(--ease-io); }
 .rows { right: 0; margin: 0; padding: 0; list-style: none; }
 .rows li { display: flex; align-items: center; gap: 16px; color: var(--fg-2); opacity: .6; transition: opacity .4s, color .4s; }
 .rows li.past { opacity: .9; }
@@ -160,7 +161,7 @@ circle.head { filter: drop-shadow(0 0 8px var(--accent)); }
   .word { font-size: 12vw; }
   .quote { display: none; }
   .log { grid-column: 1 / -1; }
-  .scroller { height: calc(64px * 4); }
+  .scroller { --v: 4; }
   .msg { font-size: 14px; }
 }
 </style>

@@ -45,23 +45,23 @@ const sections = computed(() => [
         </div>
       </div>
       <ul class="offer">
-        <li v-for="(o, k) in offer" :key="o.t.en"><span class="mono">{{ String(k + 1).padStart(2, '0') }}</span><h2>{{ L(o.t) }}</h2><p>{{ L(o.d) }}</p></li>
+        <li v-for="(o, k) in offer" :key="o.t.en" v-reveal="k"><span class="mono">{{ String(k + 1).padStart(2, '0') }}</span><h2>{{ L(o.t) }}</h2><p>{{ L(o.d) }}</p></li>
       </ul>
     </Blueprint>
 
     <Blueprint :source="src" id="how">
       <div class="how">
-        <h2 class="display h">{{ t('How it goes', 'Comment ça se passe') }}</h2>
+        <h2 v-reveal class="display h">{{ t('How it goes', 'Comment ça se passe') }}</h2>
         <ol>
-          <li v-for="s in steps" :key="s.t.en"><h3>{{ L(s.t) }}</h3><p>{{ L(s.d) }}</p></li>
+          <li v-for="(s, k) in steps" :key="s.t.en" v-reveal="k + 1"><h3>{{ L(s.t) }}</h3><p>{{ L(s.d) }}</p></li>
         </ol>
       </div>
     </Blueprint>
 
     <Blueprint :source="src" id="sites">
       <div class="sites">
-        <h2 class="display h">{{ clients.length }} {{ t('sites already live', 'sites déjà en ligne') }}</h2>
-        <p class="sub">{{ t('Hair salons, bakeries, restaurants, a boxing club, a plumber. Open them: they are live.', 'Coiffeurs, boulangeries, restaurants, un club de boxe, un plombier. Ouvrez-les : ils sont en ligne.') }}</p>
+        <h2 v-reveal class="display h">{{ clients.length }} {{ t('sites already live', 'sites déjà en ligne') }}</h2>
+        <p v-reveal="1" class="sub">{{ t('Hair salons, bakeries, restaurants, a boxing club, a plumber. Open them: they are live.', 'Coiffeurs, boulangeries, restaurants, un club de boxe, un plombier. Ouvrez-les : ils sont en ligne.') }}</p>
       </div>
       <ClientWall />
     </Blueprint>
@@ -69,7 +69,7 @@ const sections = computed(() => [
     <Blueprint :source="src" id="start">
       <div class="start">
         <h2 class="display title" data-field="name"><span class="line">{{ t('Let’s talk', 'Parlons') }}</span> <span class="line">{{ t('about your', 'de votre') }}</span> <span class="line">{{ t('business', 'commerce') }}</span></h2>
-        <div class="ways">
+        <div v-reveal class="ways">
           <button type="button" v-bind="calAttrs" :data-cursor="t('Book', 'Réserver')"><span class="mono">{{ t('30-minute call', 'Appel de 30 min') }}</span>{{ t('Pick a time', 'Réserver un créneau') }}</button>
           <a href="tel:+33652300510" :data-cursor="t('Call', 'Appeler')"><span class="mono">{{ t('Phone', 'Téléphone') }}</span>06 52 30 05 10</a>
           <a href="mailto:lacault.tim@gmail.com" :data-cursor="t('Write', 'Écrire')"><span class="mono">E-mail</span>lacault.tim@gmail.com</a>

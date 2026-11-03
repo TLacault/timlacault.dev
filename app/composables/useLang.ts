@@ -15,12 +15,15 @@ export function useLang() {
    */
   async function setLang(l: Lang) {
     if (l === lang.value) return
-    const d = document as Document & { startViewTransition?: (cb: () => Promise<void>) => { finished: Promise<void> } }
+    const d = document as Document & { startViewTransition?: (cb: () => Promise<void>) => { ready: Promise<void>, finished: Promise<void> } }
     if (!d.startViewTransition || matchMedia('(prefers-reduced-motion: reduce)').matches) { lang.value = l; return }
     const html = document.documentElement
     html.classList.add('lang-vt')
     const vt = d.startViewTransition(async () => { lang.value = l; await nextTick() })
-    vt.finished.finally(() => html.classList.remove('lang-vt'))
+    // Aborted when the viewport resizes mid-way (phone URL bar, keyboard): the language still switches,
+    // only the animation is skipped, but `ready` rejects and must be caught.
+    vt.ready.catch(() => {})
+    vt.finished.catch(() => {}).finally(() => html.classList.remove('lang-vt'))
   }
   return { lang, t, L, setLang }
 }

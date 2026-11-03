@@ -1,4 +1,4 @@
-// Contact form → crane, with EmailJS intercepted (no real email is sent).
+// Contact form → envelope, with EmailJS intercepted (no real email is sent).
 import puppeteer from 'puppeteer-core'
 const out = process.argv[2] ?? '/tmp'
 const b = await puppeteer.launch({ executablePath: '/usr/bin/google-chrome-stable', headless: true, args: ['--use-gl=angle', '--use-angle=gl-egl', '--ignore-gpu-blocklist'] })
@@ -10,7 +10,7 @@ await p.goto('http://localhost:3300/?gl', { waitUntil: 'load' }); await wait(500
 await p.evaluate(() => document.querySelector('.bp-surface .form').scrollIntoView({ block: 'center' })); await wait(2500)
 await p.type('#cf-name', 'Test'); await p.type('#cf-mail', 'test@example.com'); await p.type('#cf-msg', 'Hello')
 await p.click('.bp-surface .form button[type=submit]')
-await wait(1200); await p.screenshot({ path: `${out}/crane-1.png` })
-await wait(1400); await p.screenshot({ path: `${out}/crane-2.png` })
+await wait(1200); await p.screenshot({ path: `${out}/envelope-1.png` })
+await wait(1400); await p.screenshot({ path: `${out}/envelope-2.png` })
 console.log(await p.evaluate(() => document.querySelector('.bp-surface .ok')?.textContent))
 await b.close()

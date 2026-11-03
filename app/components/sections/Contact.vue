@@ -85,14 +85,14 @@ async function send() {
 
       <div class="cols">
         <section class="faq" aria-labelledby="faq-title">
-          <h3 id="faq-title">{{ t('Ask me something', 'Posez-moi une question') }}</h3>
+          <h3 id="faq-title" v-reveal>{{ t('Ask me something', 'Posez-moi une question') }}</h3>
           <label class="sr-only" for="faq-q">{{ t('Your question', 'Votre question') }}</label>
-          <div class="ask-wrap">
+          <div v-reveal="1" class="ask-wrap">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
             <input id="faq-q" v-model="query" class="ask" type="search" :placeholder="t('When are you available?', 'Quand êtes-vous disponible ?')" autocomplete="off">
           </div>
           <ul v-if="answers.length" class="answers">
-            <li v-for="f in answers" :key="f.q" :class="{ open: open === f.q }">
+            <li v-for="(f, i) in answers" :key="f.q" v-reveal="i" :class="{ open: open === f.q }">
               <button type="button" :aria-expanded="open === f.q" @click="open = open === f.q ? null : f.q">{{ f.q }}</button>
               <div class="answer" :inert="open !== f.q"><p>{{ f.a }}</p></div>
             </li>
@@ -108,23 +108,23 @@ async function send() {
             v-if="letter" class="letter" data-field="image" data-src="/img/envelope.svg" data-field-priority aria-hidden="true"
             :style="{ transform: `translate(${fly * 12}vw, ${-fly * 120}vh) rotate(${fly * 8}deg) scale(${1 - fly * 0.4})` }"
           />
-          <h3>{{ t('Write to me', 'Écrivez-moi') }}</h3>
-          <div class="field">
+          <h3 v-reveal>{{ t('Write to me', 'Écrivez-moi') }}</h3>
+          <div v-reveal="1" class="field">
             <input id="cf-name" v-model="form.from_name" autocomplete="name" placeholder=" " :aria-invalid="errors.from_name">
             <label for="cf-name">{{ t('Name', 'Nom') }}</label>
             <p v-if="errors.from_name" class="err">{{ t('Tell me who you are.', 'Dites-moi qui vous êtes.') }}</p>
           </div>
-          <div class="field">
+          <div v-reveal="2" class="field">
             <input id="cf-mail" v-model="form.reply_to" type="email" autocomplete="email" placeholder=" " :aria-invalid="errors.reply_to">
             <label for="cf-mail">{{ t('Email', 'E-mail') }}</label>
             <p v-if="errors.reply_to" class="err">{{ t('I need an email address to answer you.', 'Il me faut un e-mail pour vous répondre.') }}</p>
           </div>
-          <div class="field">
+          <div v-reveal="3" class="field">
             <textarea id="cf-msg" v-model="form.message" rows="5" placeholder=" " :aria-invalid="errors.message" />
             <label for="cf-msg">{{ t('Message', 'Message') }}</label>
             <p v-if="errors.message" class="err">{{ t('Your message is empty.', 'Votre message est vide.') }}</p>
           </div>
-          <div class="send">
+          <div v-reveal="4" class="send">
             <Magnetic class="btn" type="submit" :aria-disabled="status === 'sending'">{{ status === 'sending' ? t('Sending', 'Envoi') : t('Send', 'Envoyer') }}</Magnetic>
             <p v-if="status === 'sent'" class="ok" role="status">{{ t("Sent. I'll answer within a couple of days.", 'Envoyé. Je réponds sous quelques jours.') }}</p>
             <p v-if="status === 'error'" class="err" role="alert">{{ t("That didn't go through. Write to lacault.tim@gmail.com instead.", "Ça n'est pas passé. Écrivez plutôt à lacault.tim@gmail.com.") }}</p>
@@ -132,7 +132,7 @@ async function send() {
         </form>
       </div>
 
-      <div class="reach">
+      <div v-reveal class="reach">
         <a href="mailto:lacault.tim@gmail.com">lacault.tim@gmail.com</a>
         <a href="tel:+33652300510">06 52 30 05 10</a>
         <button type="button" class="cal" v-bind="calAttrs">{{ t('Book a call', 'Réserver un appel') }}</button>

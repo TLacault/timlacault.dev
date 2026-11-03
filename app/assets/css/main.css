@@ -83,3 +83,6 @@ html.lang-vt::view-transition-new(tl-main) { animation: lang-in .62s var(--ease-
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
 }
+
+/* v-reveal (plugins/reveal.ts): hidden until it first enters the viewport. */
+html.reveal [data-reveal]:not([data-shown]) { opacity: 0; }

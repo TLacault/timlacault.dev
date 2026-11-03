@@ -15,17 +15,17 @@ const host = props.project.live?.replace(/^https?:\/\//, '') ?? ''
 <template>
   <article class="exhibit" :class="{ flip: index % 2 }">
     <header class="head">
-      <p class="mono kicker"><span>{{ String(index + 1).padStart(2, '0') }}</span> {{ L(project.kind) }} / {{ L(project.role) }} / {{ project.year }}</p>
+      <p v-reveal class="mono kicker"><span>{{ String(index + 1).padStart(2, '0') }}</span> {{ L(project.kind) }} / {{ L(project.role) }} / {{ project.year }}</p>
       <h3 class="display title" data-field="name">
         <span v-for="w in project.title.split(' ')" :key="w" class="line">{{ w }}</span>
       </h3>
     </header>
     <div class="meta">
-      <p class="tagline">{{ L(project.tagline) }}</p>
-      <ul class="stack mono"><li v-for="s in project.stack" :key="s">{{ s }}</li></ul>
-      <Magnetic class="btn" :href="to">{{ t('See the project', 'Voir le projet') }}</Magnetic>
+      <p v-reveal class="tagline">{{ L(project.tagline) }}</p>
+      <ul v-reveal="1" class="stack mono"><li v-for="s in project.stack" :key="s">{{ s }}</li></ul>
+      <div v-reveal="2"><Magnetic class="btn" :href="to">{{ t('See the project', 'Voir le projet') }}</Magnetic></div>
     </div>
-    <NuxtLink :to="to" class="frame" :data-cursor="t('Open', 'Ouvrir')" :aria-label="`${t('Open', 'Ouvrir')} ${project.title}`">
+    <NuxtLink v-reveal="1" :to="to" class="frame" :data-cursor="t('Open', 'Ouvrir')" :aria-label="`${t('Open', 'Ouvrir')} ${project.title}`">
       <div class="bar mono"><span class="dot" /><span>{{ host }}</span></div>
       <img :src="project.images[0]" :alt="`${project.title}, ${t('home screen', 'accueil')}`" :style="{ viewTransitionName: `shot-${project.slug}` }" loading="lazy" decoding="async">
     </NuxtLink>
