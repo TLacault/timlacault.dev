@@ -53,7 +53,7 @@ a { color: inherit; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 
 .btn {
-  display: inline-flex; align-items: center; gap: .6em;
+  display: inline-flex; align-items: center; gap: .6em; border: 0; cursor: pointer; /* <button> CTAs too: no UA border */
   height: 48px; padding: 0 24px; border-radius: 999px;
   background: var(--accent); color: var(--ink);
   font: 700 15px/1 var(--sans); font-stretch: 112.5%; text-decoration: none; white-space: nowrap;
@@ -64,6 +64,22 @@ a { color: inherit; }
 /* <Cursor> replaces the native pointer on fine pointers; fields keep their caret. */
 .has-cursor, .has-cursor * { cursor: none !important; }
 .has-cursor :is(input, textarea, select) { cursor: auto !important; }
+
+/* Language switch (useLang().setLang): only the content (main + docks) blurs up and away and settles
+   back in the other language. The root (background, blue backdrop) holds still, and the glyph canvas
+   is its own live layer, so the glyphs visibly re-form into the new words during the switch. */
+::view-transition-group(tl-field) { animation: none; }
+::view-transition-old(tl-field) { display: none; }
+::view-transition-new(tl-field) { animation: none; }
+html.lang-vt main { view-transition-name: tl-main; }
+html.lang-vt .docks { view-transition-name: tl-docks; }
+html.lang-vt::view-transition-group(root), html.lang-vt::view-transition-new(root) { animation: none; }
+html.lang-vt::view-transition-old(root) { display: none; }
+html.lang-vt::view-transition-group(tl-main), html.lang-vt::view-transition-group(tl-docks) { animation: none; }
+html.lang-vt::view-transition-old(tl-main), html.lang-vt::view-transition-old(tl-docks) { animation: lang-out .38s var(--ease-io) both; }
+html.lang-vt::view-transition-new(tl-main), html.lang-vt::view-transition-new(tl-docks) { animation: lang-in .62s var(--ease-out) .14s both; }
+@keyframes lang-out { to { opacity: 0; filter: blur(10px); translate: 0 -8px; } }
+@keyframes lang-in { from { opacity: 0; filter: blur(10px); translate: 0 10px; } }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }

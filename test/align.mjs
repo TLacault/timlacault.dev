@@ -6,7 +6,7 @@ const b = await puppeteer.launch({ executablePath: '/usr/bin/google-chrome-stabl
 const p = await b.newPage(); if (process.env.LANG_FR) await p.evaluateOnNewDocument(() => localStorage.setItem('tl-lang', 'fr')); await p.setViewport({ width: 1440, height: 900 })
 let bad = 0
 for (const path of paths) {
-  await p.goto(`http://localhost:3300${path}?nofield`, { waitUntil: 'networkidle2' }); await new Promise((r) => setTimeout(r, 2500))
+  await p.goto(`http://localhost:3300${path}?nofield`, { waitUntil: 'load' }); await new Promise((r) => setTimeout(r, 2500))
   await p.mouse.move(700, 400); await p.mouse.move(720, 420, { steps: 4 })
   const res = await p.evaluate(() => [...document.querySelectorAll('.bp')].map((bp) => {
     const a = [...bp.querySelectorAll(':scope > .bp-surface *')], c = [...bp.querySelectorAll(':scope > .bp-xray .bp-copy *')]

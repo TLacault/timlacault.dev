@@ -72,7 +72,8 @@ onMounted(() => {
   position: absolute; left: 50%; top: 50%; translate: -50% -50%;
   width: min(54vw, 60vh); aspect-ratio: 1; display: grid; place-items: center;
 }
-.count { font-size: min(13vw, 17vh); font-variant-numeric: tabular-nums; overflow: clip; line-height: 1; padding-block: .06em; }
+.count { font-size: min(13vw, 17vh); font-variant-numeric: tabular-nums; overflow: clip; line-height: 1; padding-block: .06em; opacity: 0; transition: opacity .5s var(--ease-out); }
+:global(html.fonts .loader .count) { opacity: 1; }
 .count span { display: block; transition: translate .5s var(--ease-io), opacity .4s var(--ease-out); }
 .leaving .count span { translate: 0 -110%; opacity: 0; }
 .log, .who { position: absolute; bottom: 32px; margin: 0; padding: 0; list-style: none; color: var(--fg-2); transition: opacity .35s; }

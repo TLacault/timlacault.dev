@@ -9,7 +9,7 @@ Phones keep the centre and a compact right dock.
 import gsap from 'gsap'
 
 const p = usePresence()
-const { t, lang } = useLang()
+const { t, lang, setLang } = useLang()
 const settings = useSettings()
 const fine = ref(true)
 const ready = ref(false) // time-dependent text: render on the client only (no hydration mismatch)
@@ -74,7 +74,7 @@ onBeforeUnmount(() => clearInterval(timer))
       </button>
       <span class="sep" aria-hidden="true" />
       <div class="lang mono" role="radiogroup" :aria-label="t('Language', 'Langue')">
-        <button v-for="l in (['en', 'fr'] as const)" :key="l" type="button" role="radio" :aria-checked="lang === l" @click="lang = l">{{ l.toUpperCase() }}</button>
+        <button v-for="l in (['en', 'fr'] as const)" :key="l" type="button" role="radio" :aria-checked="lang === l" @click="setLang(l)">{{ l.toUpperCase() }}</button>
       </div>
     </div>
   </div>

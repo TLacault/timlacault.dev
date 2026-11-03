@@ -115,6 +115,7 @@ onMounted(async () => {
   // Shapes: which [data-field] element is active, and its points (cached per size).
   const cache = new Map<string, Float32Array>()
   let active: HTMLElement | null = null
+  let activeSig = ''
   let building = 0
   async function pointsFor(a: HTMLElement): Promise<Float32Array> {
     const b = a.getBoundingClientRect()
@@ -186,7 +187,9 @@ onMounted(async () => {
   let agit = 0
   const frame = (time: number, dt: number) => {
     const a = pickAnchor()
-    if (a !== active) { active = a; setShape(a).then(() => { if (stage.progress < 1) stage.progress = 1 }) }
+    // Same element, new text (language switch) or new size: re-form the shape too.
+    const sig = a ? `${a.textContent}|${a.dataset.src ?? ''}|${Math.round(a.offsetWidth)}x${Math.round(a.offsetHeight)}` : ''
+    if (a !== active || sig !== activeSig) { active = a; activeSig = sig; setShape(a).then(() => { if (stage.progress < 1) stage.progress = 1 }) }
     if (active) {
       const b = active.getBoundingClientRect()
       uOffset.value.set(b.left, H - b.top)
@@ -227,7 +230,7 @@ onBeforeUnmount(() => dispose())
 
 <style scoped>
 .field {
-  position: fixed; inset: 0; z-index: 0;
+  position: fixed; inset: 0; z-index: 0; view-transition-name: tl-field;
   width: 100vw; height: 100dvh;
   pointer-events: none;
 }

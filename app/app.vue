@@ -8,6 +8,7 @@ useHead(() => ({
 </script>
 
 <template>
+  <Backdrop />
   <LazyField />
   <Loader />
   <main>

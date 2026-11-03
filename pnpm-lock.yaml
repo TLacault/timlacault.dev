@@ -14,6 +14,9 @@ importers:
       '@fontsource-variable/archivo':
         specifier: ^5.3.0
         version: 5.3.0
+      '@paper-design/shaders':
+        specifier: 0.0.72
+        version: 0.0.72
       gsap:
         specifier: ^3.15.0
         version: 3.15.0
@@ -559,6 +562,9 @@ packages:
 
   '@oxc-project/types@0.156.0':
     resolution: {integrity: sha512-1Duyg48TdJNdyhEB8Xn1L36bT9Pv6GUtlKjHxOys8xkaF/rQq3XJE+bAurSK/AgIz5mGFsb77cn9Pb20+WCScw==}
+
+  '@paper-design/shaders@0.0.72':
+    resolution: {integrity: sha512-rk2BFuV5ood2DaivbxJC2jQMzaB434isDUzdUQ85Cy0OWnUMuxl8kyGMR74TDPyjo3EvcHIyreNLkJdRG+GfSA==}
 
   '@parcel/watcher-wasm@2.6.0':
     resolution: {integrity: sha512-dtjbDxKSDPQ8AmA+pS4OFaHE1FKrjtGpLGBxw85uKFkRorjNbvDM/aFPgqosu40wprbp1xw2ZSxIKqghCUHe2w==}
@@ -3967,6 +3973,8 @@ snapshots:
       - unplugin
 
   '@oxc-project/types@0.156.0': {}
+
+  '@paper-design/shaders@0.0.72': {}
 
   '@parcel/watcher-wasm@2.6.0':
     dependencies:
