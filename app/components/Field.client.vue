@@ -161,7 +161,8 @@ onMounted(async () => {
     tgt.value.needsUpdate = true
   }
   function pickAnchor() {
-    const first = document.querySelector<HTMLElement>('[data-field-priority]') // the loader owns the Field while it's up
+    // The loader (and the contact crane) own the Field while they're up. The x-ray copy never does.
+    const first = [...document.querySelectorAll<HTMLElement>('[data-field-priority]')].find((a) => !a.closest('.bp-xray'))
     if (first) return first
     let best: HTMLElement | null = null, bestD = Infinity
     for (const a of document.querySelectorAll<HTMLElement>('[data-field]')) {

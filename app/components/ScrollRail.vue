@@ -49,6 +49,7 @@ const tick = () => {
   let label = props.sections[0]?.label ?? ''
   ticks.value.forEach((t, i) => { if (p >= t - 0.02) label = props.sections[i]!.label })
   current.value = label
+  stage.section = label
 }
 
 let ro: ResizeObserver | undefined

@@ -40,5 +40,9 @@ await page.screenshot({ path: `${out}/8-case.png` })
 await shot('9-case-story', () => document.querySelector('#story').scrollIntoView())
 await shot('9b-case-gallery', () => document.querySelector('#gallery').scrollIntoView())
 await shot('9c-case-next', () => document.querySelector('#next').scrollIntoView())
+for (const [name, path] of [['10-freelance', '/freelance'], ['11-source', '/source']]) {
+  await page.goto(url.replace(/\/(\?|$)/, path + '$1'), { waitUntil: 'load' }); await wait(6000)
+  await page.screenshot({ path: `${out}/${name}.png` })
+}
 console.log('classes', await page.evaluate(() => document.documentElement.className), 'scrollW', await page.evaluate(() => document.documentElement.scrollWidth))
 await browser.close()

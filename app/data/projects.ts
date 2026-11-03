@@ -12,7 +12,7 @@ export interface Project {
   sections: { title: string, body?: string, points?: string[] }[]
 }
 
-const shots = (slug: string, n: number) => Array.from({ length: n }, (_, i) => `/work/${slug}/${String(i + 1).padStart(2, '0')}.webp`)
+const shots = (slug: string, n: number) => Array.from({ length: n }, (_, i) => `/shots/${slug}/${String(i + 1).padStart(2, '0')}.webp`)
 
 export const projects: Project[] = [
   {

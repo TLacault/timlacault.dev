@@ -10,6 +10,7 @@ import { projects, clients } from '~/data/projects'
       <div class="local-head">
         <h3 class="display">{{ clients.length }} sites for local businesses</h3>
         <p>Hair salons, bakeries, a boxing club, a plumber. Each one designed and built by hand, around the business's real photos, prices and reviews. They're live: open any of them.</p>
+        <NuxtLink to="/freelance" class="more">Need one for your business?</NuxtLink>
       </div>
       <ClientWall />
     </div>
@@ -21,4 +22,6 @@ import { projects, clients } from '~/data/projects'
 .local-head { padding-inline: var(--margin); display: grid; gap: 22px; max-width: 1100px; }
 h3 { font-size: clamp(40px, 5.6vw, 96px); }
 .local-head p { font-size: 18px; max-width: 52ch; color: var(--fg-2); }
+.more { justify-self: start; text-decoration: none; border-bottom: 1px solid var(--accent); padding-bottom: 2px; }
+.more:hover { color: var(--accent); }
 </style>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import emailjs from '@emailjs/browser'
+import gsap from 'gsap'
 import src from './Contact.vue?raw'
 
 // ── FAQ: type a question, the closest answers surface. Nothing found → it becomes the message below.
@@ -32,6 +33,17 @@ function askDirectly() {
   document.getElementById('cf-name')?.focus()
 }
 
+// ── On send, the glyphs fold into a paper crane over the form and it flies off the page.
+// `fly` drives a style both renders share, so the x-ray copy flies with the surface.
+const crane = ref(false)
+const fly = ref(0)
+function foldCrane() {
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return
+  crane.value = true
+  const o = { t: 0 }
+  gsap.to(o, { t: 1, delay: 1.3, duration: 2.4, ease: 'power2.in', onUpdate: () => { fly.value = o.t }, onComplete: () => { crane.value = false; fly.value = 0 } })
+}
+
 // ── Contact form (EmailJS, same account and template as the previous site).
 const form = reactive({ from_name: '', reply_to: '', message: '' })
 const status = ref<'idle' | 'sending' | 'sent' | 'error'>('idle')
@@ -47,6 +59,7 @@ async function send() {
     await emailjs.send('service_hxniaw4', 'template_nn6a8mb', { ...form, subject: `timlacault.dev: message from ${form.from_name}` }, 'foVHr7K1XuV3pMbRN')
     status.value = 'sent'
     Object.assign(form, { from_name: '', reply_to: '', message: '' })
+    foldCrane()
   } catch {
     status.value = 'error'
   }
@@ -76,6 +89,10 @@ async function send() {
         </section>
 
         <form class="form" novalidate @submit.prevent="send">
+          <div
+            v-if="crane" class="crane" data-field="image" data-src="/img/crane.svg" data-field-priority aria-hidden="true"
+            :style="{ transform: `translate(${fly * 70}vw, ${-fly * 110}vh) rotate(${-fly * 14}deg) scale(${1 - fly * 0.35})` }"
+          />
           <h3>Write to me</h3>
           <div class="field">
             <label for="cf-name">Name</label>
@@ -122,7 +139,7 @@ h3 { font-size: 15px; font-weight: 700; font-stretch: 112.5%; text-transform: up
 
 .ask, .field input, .field textarea {
   width: 100%; padding: 14px 16px; border: 1px solid var(--line); border-radius: 10px;
-  background: var(--ink-2); color: var(--fg); font: inherit; resize: none;
+  background: color-mix(in oklab, var(--ink-2) 72%, transparent); color: var(--fg); font: inherit; resize: none;
   transition: border-color .2s;
 }
 .field textarea { resize: vertical; min-height: 140px; max-height: 360px; }
@@ -143,7 +160,8 @@ h3 { font-size: 15px; font-weight: 700; font-stretch: 112.5%; text-transform: up
 .none { margin-top: 18px; display: flex; gap: 14px; align-items: baseline; color: var(--fg-2); }
 .link { border: 0; padding: 0; background: none; color: var(--accent); font: inherit; border-bottom: 1px solid currentColor; cursor: pointer; }
 
-.form { display: grid; gap: 18px; }
+.form { display: grid; gap: 18px; position: relative; }
+.crane { position: absolute; left: 30%; top: -14%; width: min(420px, 80vw); aspect-ratio: 400 / 280; translate: -50% -50%; pointer-events: none; }
 .form h3 { margin-bottom: 2px; }
 .field { display: grid; gap: 8px; }
 .field label { font-size: 14px; color: var(--fg-2); }
