@@ -54,8 +54,8 @@ onBeforeUnmount(() => clearInterval(timer))
     </NuxtLink>
 
     <nav class="dock nav" :aria-label="t('Site', 'Site')" data-enter style="--d: .85s">
-      <a href="/#work" @click="go($event, '/#work')">{{ t('Work', 'Projets') }}</a>
-      <a href="/#path" @click="go($event, '/#path')">{{ t('Path', 'Parcours') }}</a>
+      <a href="/#work" @click="go($event, '/#work')"><Transition name="swap" mode="out-in"><span :key="lang">{{ t('Work', 'Projets') }}</span></Transition></a>
+      <a href="/#path" @click="go($event, '/#path')"><Transition name="swap" mode="out-in"><span :key="lang">{{ t('Path', 'Parcours') }}</span></Transition></a>
       <NuxtLink to="/freelance">Freelance</NuxtLink>
       <a href="/#contact" @click="go($event, '/#contact')">Contact</a>
     </nav>
@@ -70,7 +70,7 @@ onBeforeUnmount(() => clearInterval(timer))
       </label>
       <span class="sep" aria-hidden="true" />
       <button type="button" class="toggle mono" :aria-pressed="settings.ghosts" :title="t('Other readers', 'Autres lecteurs')" @click="settings.ghosts = !settings.ghosts">
-        <span class="dot" />{{ t('Ghosts', 'Fantômes') }}
+        <span class="dot" /><Transition name="swap" mode="out-in"><span :key="lang">{{ t('Ghosts', 'Fantômes') }}</span></Transition>
       </button>
       <span class="sep" aria-hidden="true" />
       <div class="lang mono" role="radiogroup" :aria-label="t('Language', 'Langue')">
@@ -85,11 +85,33 @@ onBeforeUnmount(() => clearInterval(timer))
   position: fixed; z-index: 40; left: 20px; right: 20px; bottom: 20px; pointer-events: none;
   display: grid; grid-template-columns: 1fr auto 1fr; align-items: end; gap: 12px;
 }
+/* Liquid glass (a web approximation, not Apple's material): tinted translucent fill, strong blur and
+   saturation of whatever passes behind, a light top edge and a faint inner rim. Solid under
+   prefers-reduced-transparency. Glass rule: fade these elements themselves, never an ancestor. */
 .dock {
-  pointer-events: auto; display: flex; align-items: center; gap: 18px; height: 44px; padding: 0 18px; border-radius: 999px;
-  background: color-mix(in oklab, var(--ink-2) 88%, transparent); border: 1px solid var(--line);
-  font-size: 14px; white-space: nowrap; text-decoration: none;
+  pointer-events: auto; position: relative; display: flex; align-items: center; gap: 18px; height: 48px; padding: 0 20px; border-radius: 999px;
+  font-size: 14px; white-space: nowrap; text-decoration: none; isolation: isolate;
+  background:
+    linear-gradient(135deg, rgb(255 255 255 / .1), rgb(255 255 255 / .02) 45%, rgb(255 255 255 / .06)),
+    color-mix(in oklab, var(--ink-2) 42%, transparent);
+  border: 1px solid rgb(255 255 255 / .12);
+  -webkit-backdrop-filter: blur(22px) saturate(180%); backdrop-filter: blur(22px) saturate(180%);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / .16), inset 0 -1px 0 rgb(255 255 255 / .04),
+    0 18px 50px -22px rgb(0 0 0 / .7), 0 0 0 .5px rgb(0 0 0 / .4);
 }
+.dock::before { /* the specular sweep across the top of the glass */
+  content: ''; position: absolute; inset: 1px; border-radius: inherit; pointer-events: none; z-index: -1;
+  background: radial-gradient(120% 90% at 20% -30%, rgb(255 255 255 / .14), transparent 55%);
+}
+@media (prefers-reduced-transparency: reduce) {
+  .dock { background: var(--ink-2); -webkit-backdrop-filter: none; backdrop-filter: none; }
+}
+.nav { gap: 30px; padding: 0 30px; height: 52px; font-size: 15px; }
+.nav span { display: inline-block; }
+.swap-enter-active, .swap-leave-active { transition: opacity .25s var(--ease-out), translate .3s var(--ease-out), filter .3s; }
+.swap-enter-from { opacity: 0; translate: 0 6px; filter: blur(4px); }
+.swap-leave-to { opacity: 0; translate: 0 -6px; filter: blur(4px); }
 .nav a { text-decoration: none; }
 .nav a:hover, .nav a.router-link-active { color: var(--accent); }
 
@@ -134,7 +156,7 @@ input[type=range]::-moz-range-thumb { width: 12px; height: 12px; border: 0; bord
 @media (max-width: 767px) {
   .docks { left: 12px; right: 12px; bottom: 12px; grid-template-columns: 1fr; justify-items: center; gap: 8px; }
   .settings { grid-row: 1; justify-self: end; height: 38px; } /* settings sit above the nav: side by side they don't fit */
-  .nav { gap: 14px; padding: 0 14px; font-size: 13px; }
+  .nav { gap: 16px; padding: 0 18px; height: 46px; font-size: 13px; }
   .toggle, .sep, .volume { display: none; }
   .settings .lang { display: flex; }
 }

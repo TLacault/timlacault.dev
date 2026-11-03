@@ -27,19 +27,27 @@ onMounted(() => {
   const x = gsap.quickTo(el, 'x', { duration: 0.4, ease: 'power3' })
   const y = gsap.quickTo(el, 'y', { duration: 0.4, ease: 'power3' })
 
+  let hidden = false
   const move = (e: PointerEvent) => {
+    if (hidden) enter()
     x(e.clientX)
     y(e.clientY)
     const t = (e.target as Element).closest?.('[data-cursor], a, button')
     label.value = t?.getAttribute('data-cursor') ?? ''
     state.value = !t ? '' : label.value ? 'label' : 'link'
   }
-  const leave = () => gsap.to(el, { autoAlpha: 0, duration: 0.2 })
-  const enter = () => gsap.to(el, { autoAlpha: 1, duration: 0.2 })
+  function leave() { hidden = true; gsap.to(el, { autoAlpha: 0, duration: 0.2 }) }
+  function enter() { hidden = false; gsap.to(el, { autoAlpha: 1, duration: 0.2 }) }
+  // An iframe (a YouTube player, a map) swallows pointer events: the page sees a mouseout with no
+  // relatedTarget and nothing after it. Hide the cursor there instead of leaving it stuck on the edge;
+  // the next pointermove back in the page brings it back.
+  const out = (e: MouseEvent) => { if (!e.relatedTarget) leave() }
   addEventListener('pointermove', move)
   document.addEventListener('pointerleave', leave)
   document.addEventListener('pointerenter', enter)
+  document.addEventListener('mouseout', out)
   cleanup = () => {
+    document.removeEventListener('mouseout', out)
     removeEventListener('pointermove', move)
     document.removeEventListener('pointerleave', leave)
     document.removeEventListener('pointerenter', enter)

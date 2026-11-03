@@ -1,0 +1,27 @@
+// Project page: the video cover shows "Play" on the cursor; a screenshot opens near-fullscreen,
+// ←/→ step, Esc closes and gives focus back.
+import puppeteer from 'puppeteer-core'
+const out = process.argv[2]
+const b = await puppeteer.launch({ executablePath: '/usr/bin/google-chrome-stable', headless: true, args: ['--use-gl=angle', '--use-angle=gl-egl', '--ignore-gpu-blocklist'] })
+const p = await b.newPage(); await p.setViewport({ width: 1440, height: 900 })
+await p.evaluateOnNewDocument(() => { const real = window.matchMedia.bind(window); window.matchMedia = (q) => q.includes('pointer: fine') ? { matches: true, media: q, addEventListener() {}, removeEventListener() {} } : real(q) })
+const errs = []; p.on('pageerror', (e) => errs.push(e.message))
+const wait = (ms) => new Promise((r) => setTimeout(r, ms))
+await p.goto('http://localhost:3300/work/badminton-records?gl', { waitUntil: 'load' }); await wait(5000)
+await p.evaluate(() => document.querySelector('#demo').scrollIntoView()); await wait(1500)
+const f = await p.$('.bp-surface .facade'); const bb = await f.boundingBox()
+await p.mouse.move(bb.x + bb.width / 2, bb.y + bb.height / 2, { steps: 6 }); await wait(800)
+await p.screenshot({ path: `${out}/g1-facade.png` })
+console.log('cursor label', await p.evaluate(() => document.querySelector('.fx-cursor span')?.textContent))
+await p.evaluate(() => document.querySelector('#gallery').scrollIntoView()); await wait(1500)
+await p.click('.bp-surface .shot'); await wait(400)
+await p.screenshot({ path: `${out}/g2-opening.png` }); await wait(800)
+await p.screenshot({ path: `${out}/g3-open.png` })
+await p.keyboard.press('ArrowRight'); await wait(700)
+console.log('open', await p.evaluate(() => [!!document.querySelector('.lb'), document.querySelector('.lb .count')?.textContent, document.activeElement?.className]))
+await p.keyboard.press('Escape'); await wait(900)
+console.log('closed', await p.evaluate(() => [!!document.querySelector('.lb'), document.activeElement?.className]))
+await p.goto('http://localhost:3300/?gl', { waitUntil: 'load' }); await wait(6000)
+await p.evaluate(() => document.querySelector('#local').scrollIntoView()); await wait(2500)
+await p.screenshot({ path: `${out}/g4-docks.png`, clip: { x: 0, y: 760, width: 1440, height: 140 } })
+console.log('errors', errs); await b.close()

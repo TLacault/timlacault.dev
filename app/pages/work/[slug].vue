@@ -14,6 +14,8 @@ const p = computed(() => projects[i.value])
 if (!p.value) throw createError({ statusCode: 404, statusMessage: 'No project here' })
 const next = computed(() => projects[(i.value + 1) % projects.length]!)
 const ytId = computed(() => p.value?.demo?.match(/v=([\w-]+)/)?.[1])
+const lightbox = ref<{ open: (i: number, from: Element | null) => void } | null>(null)
+const shown = ref<number | null>(null)
 const host = computed(() => p.value?.live?.replace(/^https?:\/\//, '') ?? '')
 useHead(() => ({ title: `${p.value?.title} · Tim Lacault`, meta: [{ name: 'description', content: p.value ? L(p.value.tagline) : '' }] }))
 
@@ -70,9 +72,13 @@ const sections = computed(() => [
     <Blueprint :source="src" id="gallery" class="gallery">
       <h2 class="display g-title">{{ t('Screens', 'Écrans') }}</h2>
       <div class="shots">
-        <figure v-for="(img, k) in p.images.slice(1)" :key="img" class="frame">
+        <button
+          v-for="(img, k) in p.images.slice(1)" :key="img" type="button" class="frame shot"
+          :data-cursor="t('Enlarge', 'Agrandir')" :aria-label="`${t('Enlarge screenshot', 'Agrandir la capture')} ${k + 2}`"
+          @click="lightbox?.open(k + 1, $event.currentTarget as Element)"
+        >
           <img :src="img" :alt="`${p.title}, ${t('screenshot', 'capture')} ${k + 2}`" loading="lazy" decoding="async">
-        </figure>
+        </button>
       </div>
     </Blueprint>
 
@@ -83,6 +89,7 @@ const sections = computed(() => [
       </NuxtLink>
     </Blueprint>
     <ScrollRail :key="p.slug" :sections="sections" />
+    <Lightbox ref="lightbox" v-model:index="shown" :images="p.images" :title="p.title" />
   </div>
 </template>
 
@@ -131,6 +138,8 @@ const sections = computed(() => [
 .g-title { font-size: min(8vw, 14vh); margin-bottom: 6vh; }
 .shots { columns: 2; column-gap: 24px; }
 .shots .frame { break-inside: avoid; margin-bottom: 24px; }
+.shot { display: block; width: 100%; padding: 0; cursor: zoom-in; transition: border-color .3s, translate .5s var(--ease-out); }
+.shot:hover { border-color: color-mix(in oklab, var(--accent) 60%, var(--line)); translate: 0 -4px; }
 
 .next { padding: 6vh var(--margin) 24vh; }
 .next-link { display: grid; gap: 18px; text-decoration: none; color: var(--fg-2); }

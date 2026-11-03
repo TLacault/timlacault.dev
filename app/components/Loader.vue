@@ -57,7 +57,8 @@ onMounted(() => {
 <template>
   <div v-if="show" class="loader" :class="{ leaving }" aria-hidden="true">
     <div class="center" data-field="ring" data-field-priority>
-      <p class="count display"><span>{{ String(shown).padStart(3, '0') }}</span></p>
+      <!-- Width and weight inline: in dev, Vite swaps stylesheets on hydration and the class styles drop for a frame. -->
+      <p class="count display" style="font-weight: 800; font-stretch: 125%"><span>{{ String(shown).padStart(3, '0') }}</span></p>
     </div>
     <ol class="log mono">
       <li v-for="l in lines" :key="l">{{ l }}</li>
